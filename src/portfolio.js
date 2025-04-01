@@ -21,9 +21,9 @@ const illustration = {
 
 const greeting = {
   username: "Berkant Kubat",
-  title: "Merhaba, Ben Berkant",
+  title: "Hi, I'm Berkant",
   subTitle: emoji(
-    "Tutkulu bir Backend Software Developer 🚀 Java, Spring Boot ve mikroservis mimarileri konusunda deneyimli, Kubernetes, Docker, ArgoCD ve CI/CD süreçlerinde tecrübeli."
+    "A passionate Backend Software Developer 🚀 experienced in Java, Spring Boot and microservices architecture, with expertise in Kubernetes, Docker, ArgoCD and CI/CD processes."
   ),
   resumeLink: "https://drive.google.com/file/d/1zDHYpIAFdFzZSr_Ltv_T9mvYHOE1I0qf/view?usp=drive_link",
   displayGreeting: true
@@ -45,19 +45,19 @@ const socialMediaLinks = {
 // Skills Section
 
 const skillsSection = {
-  title: "Neler Yapıyorum",
-  subTitle: "BACKEND GELİŞTİRME VE DEVOPS TEKNOLOJİLERİNDE UZMANLAŞMIŞ YAZILIM MÜHENDİSİ",
+  title: "What I Do",
+  subTitle: "SOFTWARE ENGINEER SPECIALIZED IN BACKEND DEVELOPMENT AND DEVOPS TECHNOLOGIES",
   skills: [
-    emoji("⚡ Mikroservis mimarileri ile ölçeklenebilir backend sistemleri geliştirme"),
-    emoji("⚡ Kubernetes ve Docker ile konteynerize uygulamalar ve orkestrasyon"),
-    emoji("⚡ CI/CD süreçleri ve DevOps pratikleri ile sürekli entegrasyon ve dağıtım"),
-    emoji("⚡ Redis ve Caffeine Cache ile yüksek performanslı sistemler"),
-    emoji("⚡ PostgreSQL, MySQL, MongoDB, Microsoft SQL Server ve Cassandra veritabanı yönetimi"),
-    emoji("⚡ RESTful API geliştirme ve entegrasyon"),
-    emoji("⚡ Agile/Scrum metodolojileri ile çevik proje yönetimi"),
-    emoji("⚡ Prometheus, Grafana ve Logback ile sistem izleme ve loglama"),
-    emoji("⚡ Event-driven sistemler ve Kafka ile mesajlaşma mimarileri"),
-    emoji("⚡ Python ve C# ile uygulama geliştirme deneyimi")
+    emoji("⚡ Developing scalable backend systems with microservices architecture"),
+    emoji("⚡ Containerized applications and orchestration with Kubernetes and Docker"),
+    emoji("⚡ Continuous integration and deployment with CI/CD processes and DevOps practices"),
+    emoji("⚡ High-performance systems with Redis and Caffeine Cache"),
+    emoji("⚡ Database management with PostgreSQL, MySQL, MongoDB, Microsoft SQL Server, and Cassandra"),
+    emoji("⚡ RESTful API development and integration"),
+    emoji("⚡ Agile project management with Agile/Scrum methodologies"),
+    emoji("⚡ System monitoring and logging with Prometheus, Grafana, and Logback"),
+    emoji("⚡ Event-driven systems and messaging architectures with Kafka"),
+    emoji("⚡ Application development experience with Python and C#")
   ],
 
   /* Make Sure to include correct Font Awesome Classname to view your icon
@@ -114,19 +114,19 @@ const educationInfo = {
   display: true,
   schools: [
     {
-      schoolName: "Karadeniz Teknik Üniversitesi",
-      logo: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/ktu.png"),
-      subHeader: "İstatistik Ve Bilgisayar Bilimleri",
+      schoolName: "Karadeniz Technical University",
+      logo: require("./assets/images/ktu.png"),
+      subHeader: "Statistics and Computer Science",
       duration: "2019 - 2023",
-      desc: "Lisans Derecesi",
+      desc: "Bachelor's Degree",
       descBullets: []
     },
     {
-      schoolName: "İstiklal Mesleki Ve Teknik Anadolu Lisesi",
-      logo: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/lise_logo.jpeg"),
-      subHeader: "Veri Tabanı Alanı",
+      schoolName: "Istiklal Vocational and Technical High School",
+      logo: require("./assets/images/lise_logo.jpeg"),
+      subHeader: "Database Management",
       duration: "2014 - 2018",
-      desc: "Lise Eğitimi",
+      desc: "High School Education",
       descBullets: []
     }
   ]
@@ -161,28 +161,28 @@ const workExperiences = {
     {
       role: "Software Engineer",
       company: "Comodif",
-      companylogo: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/comodif.jpg"),
+      companylogo: require("./assets/images/comodif.jpg"),
       date: "10/2023 - Present",
-      desc: "Java ve Spring Boot ile mikroservis mimarileri geliştirme, Kubernetes ve Docker ile konteynerizasyon, CI/CD süreçleri yönetimi.",
+      desc: "Developing microservices architectures with Java and Spring Boot, containerization with Kubernetes and Docker, managing CI/CD processes.",
       descBullets: [
-        "Mikroservis mimarilerinin geliştirilmesi ve bakımı",
-        "CI/CD pipeline'larının yönetimi ve Helm-based güncellemeler",
-        "Lens ile Kubernetes izleme ve log analizi",
-        "Docker ile test ortamlarının kurulumu"
+        "Development and maintenance of microservices architectures",
+        "Management of CI/CD pipelines and Helm-based updates",
+        "Kubernetes monitoring and log analysis with Lens",
+        "Setting up test environments with Docker"
       ]
     },
     {
       role: "Python Developer",
-      company: "Otoparçasan",
-      companylogo: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/otoparcasan.png"),
+      company: "Otoparcasan",
+      companylogo: require("./assets/images/otoparcasan.png"),
       date: "01/2021 - 05/2021",
-      desc: "E-ticaret sitesi için ürün ve sipariş entegrasyon sistemlerinin geliştirilmesi ve veri analizi çalışmaları.",
+      desc: "Development of product and order integration systems for e-commerce site and data analysis work.",
       descBullets: [
-        "Excel ve Python ile veri analizi ve raporlama",
-        "XML tabanlı veri entegrasyonları ve dönüşümleri",
-        "Ürün ve stok verilerinin Excel üzerinden yönetimi",
-        "SQL sorguları ile veri analizi ve raporlama",
-        "E-ticaret platformları için otomatik veri aktarım sistemleri"
+        "Data analysis and reporting with Excel and Python",
+        "XML-based data integrations and transformations",
+        "Product and inventory data management through Excel",
+        "Data analysis and reporting with SQL queries",
+        "Automated data transfer systems for e-commerce platforms"
       ]
     }
   ]
