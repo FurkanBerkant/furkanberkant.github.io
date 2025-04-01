@@ -94,13 +94,11 @@ https://fontawesome.com/icons?d=gallery */
     },
     {
       skillName: "kafka",
-      fontAwesomeClassname: "custom-icon",
-      imgPath: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/kafka.jpeg")
+      fontAwesomeClassname: "devicon-apachekafka-original"
     },
     {
       skillName: "redis",
-      fontAwesomeClassname: "custom-icon",
-      imgPath: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/redis.png")
+      fontAwesomeClassname: "devicon-redis-plain"
     },
     {
       skillName: "C#",
