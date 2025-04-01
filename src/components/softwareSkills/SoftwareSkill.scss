@@ -22,10 +22,26 @@
 .software-skill-inline > i:hover {
   color: $skillsColor;
 }
+
+.software-skill-inline > .skill-image {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  opacity: 0.7;
+  transition: opacity 0.3s ease-in-out;
+  vertical-align: middle;
+}
+
+.software-skill-inline > .skill-image:hover {
+  opacity: 1;
+}
+
 .software-skill-inline > p {
   color: $subTitle;
   font-size: 10px;
 }
-.software-skill-inline > i:hover ~ p {
+
+.software-skill-inline > i:hover ~ p,
+.software-skill-inline > .skill-image:hover ~ p {
   color: $skillsColor;
 }

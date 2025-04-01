@@ -21,9 +21,9 @@ const illustration = {
 
 const greeting = {
   username: "Berkant Kubat",
-  title: "Hi, I'm Berkant",
+  title: "Merhaba, Ben Berkant",
   subTitle: emoji(
-    "A passionate Backend Software Developer 🚀 experienced in Java, Spring Boot, and microservices architectures, with expertise in Kubernetes, Docker, ArgoCD, and CI/CD processes."
+    "Tutkulu bir Backend Software Developer 🚀 Java, Spring Boot ve mikroservis mimarileri konusunda deneyimli, Kubernetes, Docker, ArgoCD ve CI/CD süreçlerinde tecrübeli."
   ),
   resumeLink: "https://drive.google.com/file/d/1zDHYpIAFdFzZSr_Ltv_T9mvYHOE1I0qf/view?usp=drive_link",
   displayGreeting: true
@@ -45,19 +45,19 @@ const socialMediaLinks = {
 // Skills Section
 
 const skillsSection = {
-  title: "What I do",
-  subTitle: "SOFTWARE ENGINEER SPECIALIZED IN BACKEND DEVELOPMENT AND DEVOPS TECHNOLOGIES",
+  title: "Neler Yapıyorum",
+  subTitle: "BACKEND GELİŞTİRME VE DEVOPS TEKNOLOJİLERİNDE UZMANLAŞMIŞ YAZILIM MÜHENDİSİ",
   skills: [
-    emoji("⚡ Building scalable backend systems with microservices architecture"),
-    emoji("⚡ Containerization and orchestration with Kubernetes and Docker"),
-    emoji("⚡ Continuous integration and deployment with CI/CD practices"),
-    emoji("⚡ High-performance systems with Redis and Caffeine Cache"),
-    emoji("⚡ Database management with PostgreSQL, MySQL, MongoDB, Microsoft SQL Server, and Cassandra"),
-    emoji("⚡ RESTful API development and integration"),
-    emoji("⚡ Agile project management with Scrum methodology"),
-    emoji("⚡ System monitoring and logging with Prometheus, Grafana, and Logback"),
-    emoji("⚡ Event-driven systems and messaging with Kafka"),
-    emoji("⚡ Application development with Python and C#")
+    emoji("⚡ Mikroservis mimarileri ile ölçeklenebilir backend sistemleri geliştirme"),
+    emoji("⚡ Kubernetes ve Docker ile konteynerize uygulamalar ve orkestrasyon"),
+    emoji("⚡ CI/CD süreçleri ve DevOps pratikleri ile sürekli entegrasyon ve dağıtım"),
+    emoji("⚡ Redis ve Caffeine Cache ile yüksek performanslı sistemler"),
+    emoji("⚡ PostgreSQL, MySQL, MongoDB, Microsoft SQL Server ve Cassandra veritabanı yönetimi"),
+    emoji("⚡ RESTful API geliştirme ve entegrasyon"),
+    emoji("⚡ Agile/Scrum metodolojileri ile çevik proje yönetimi"),
+    emoji("⚡ Prometheus, Grafana ve Logback ile sistem izleme ve loglama"),
+    emoji("⚡ Event-driven sistemler ve Kafka ile mesajlaşma mimarileri"),
+    emoji("⚡ Python ve C# ile uygulama geliştirme deneyimi")
   ],
 
   /* Make Sure to include correct Font Awesome Classname to view your icon
@@ -94,11 +94,13 @@ https://fontawesome.com/icons?d=gallery */
     },
     {
       skillName: "kafka",
-      fontAwesomeClassname: "fas fa-stream"
+      fontAwesomeClassname: "custom-icon",
+      imgPath: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/kafka.jpeg")
     },
     {
       skillName: "redis",
-      fontAwesomeClassname: "fas fa-server"
+      fontAwesomeClassname: "custom-icon",
+      imgPath: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/redis.png")
     },
     {
       skillName: "C#",
@@ -114,19 +116,19 @@ const educationInfo = {
   display: true,
   schools: [
     {
-      schoolName: "Karadeniz Technical University",
+      schoolName: "Karadeniz Teknik Üniversitesi",
       logo: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/ktu.png"),
-      subHeader: "Statistics and Computer Science",
+      subHeader: "İstatistik Ve Bilgisayar Bilimleri",
       duration: "2019 - 2023",
-      desc: "Bachelor's Degree",
+      desc: "Lisans Derecesi",
       descBullets: []
     },
     {
-      schoolName: "Istiklal Technical High School",
+      schoolName: "İstiklal Mesleki Ve Teknik Anadolu Lisesi",
       logo: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/lise_logo.jpeg"),
-      subHeader: "Database Management",
+      subHeader: "Veri Tabanı Alanı",
       duration: "2014 - 2018",
-      desc: "High School Education",
+      desc: "Lise Eğitimi",
       descBullets: []
     }
   ]
@@ -163,26 +165,26 @@ const workExperiences = {
       company: "Comodif",
       companylogo: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/comodif.jpg"),
       date: "10/2023 - Present",
-      desc: "Developing microservices architectures with Java and Spring Boot, containerization with Kubernetes and Docker, managing CI/CD processes.",
+      desc: "Java ve Spring Boot ile mikroservis mimarileri geliştirme, Kubernetes ve Docker ile konteynerizasyon, CI/CD süreçleri yönetimi.",
       descBullets: [
-        "Development and maintenance of microservices architectures",
-        "Management of CI/CD pipelines and Helm-based updates",
-        "Kubernetes monitoring with Lens and log analysis",
-        "Setting up test environments with Docker"
+        "Mikroservis mimarilerinin geliştirilmesi ve bakımı",
+        "CI/CD pipeline'larının yönetimi ve Helm-based güncellemeler",
+        "Lens ile Kubernetes izleme ve log analizi",
+        "Docker ile test ortamlarının kurulumu"
       ]
     },
     {
       role: "Python Developer",
-      company: "Otoparcasan",
+      company: "Otoparçasan",
       companylogo: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/otoparcasan.png"),
       date: "01/2021 - 05/2021",
-      desc: "Data analysis and system development for e-commerce product and order management.",
+      desc: "E-ticaret sitesi için ürün ve sipariş entegrasyon sistemlerinin geliştirilmesi ve veri analizi çalışmaları.",
       descBullets: [
-        "Data analysis and reporting with Excel and Python",
-        "XML-based data integrations and transformations",
-        "Product and inventory management through Excel",
-        "Data analysis and reporting with SQL queries",
-        "Automated data transfer systems for e-commerce platforms"
+        "Excel ve Python ile veri analizi ve raporlama",
+        "XML tabanlı veri entegrasyonları ve dönüşümleri",
+        "Ürün ve stok verilerinin Excel üzerinden yönetimi",
+        "SQL sorguları ile veri analizi ve raporlama",
+        "E-ticaret platformları için otomatik veri aktarım sistemleri"
       ]
     }
   ]
@@ -205,18 +207,18 @@ const bigProjects = {
 // Include certificates, talks etc
 
 const achievementSection = {
-  title: emoji("Achievements & Certifications 🏆"),
-  subtitle: "Certifications and Training Programs I've Completed",
+  title: emoji("Sertifikalar 🏆"),
+  subtitle: "Aldığım Eğitimler ve Sertifikalar",
 
   achievementsCards: [
     {
-      title: "Backend Web Development with Java",
+      title: "Başlangıç Seviye Java ile Backend Web Development Patikası",
       subtitle: "Patika.dev",
       image: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/ibm_logo.jpeg"),
       imageAlt: "Java Logo",
       footerLink: [
         {
-          name: "Certificate",
+          name: "Sertifika",
           url: "https://academy.patika.dev/certificates/bmkn4Pb"
         }
       ]
@@ -228,7 +230,7 @@ const achievementSection = {
       imageAlt: "Professional Skills Logo",
       footerLink: [
         {
-          name: "Certificate",
+          name: "Sertifika",
           url: "https://www.credly.com/badges/cf360c47-3c70-4656-accf-b0c6910b1c40/linked_in_profile"
         }
       ]
@@ -240,7 +242,7 @@ const achievementSection = {
       imageAlt: "IBM Logo",
       footerLink: [
         {
-          name: "Certificate",
+          name: "Sertifika",
           url: "https://www.credly.com/badges/e5c28e80-9d6b-4906-984c-5270247e5583/linked_in?t=sddiuv"
         }
       ]
@@ -252,19 +254,19 @@ const achievementSection = {
       imageAlt: "IBM Logo",
       footerLink: [
         {
-          name: "Certificate",
+          name: "Sertifika",
           url: "https://www.credly.com/badges/8ab9e3e3-4e03-41d3-ad55-ede572d652d7/linked_in_profile"
         }
       ]
     },
     {
-      title: "Remote Education Participation Certificate",
-      subtitle: "TUBITAK BILGEM - OOP (Object-Oriented Programming) and Java",
+      title: "Uzaktan eğitim kapısı katılım sertifikası",
+      subtitle: "TÜBİTAK BİLGEM - OOP (Nesne Yönelimli Programlama) ve Java",
       image: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/tübitak.png"),
-      imageAlt: "TUBITAK Logo",
+      imageAlt: "TÜBİTAK Logo",
       footerLink: [
         {
-          name: "Certificate",
+          name: "Sertifika",
           url: "https://www.linkedin.com/in/berkantkubat/details/certifications/1635544377463/single-media-viewer/?type=DOCUMENT&profileId=ACoAAC-_98MB8o1zPmksjqm1QEQ_mNRch5IRWzA"
         }
       ]
@@ -293,15 +295,15 @@ const podcastSection = {
 
 // Resume Section
 const resumeSection = {
-  title: "Resume",
-  subtitle: "Click to download my resume",
+  title: "CV",
+  subtitle: "Özgeçmişimi indirmek için tıklayın",
   link: "https://drive.google.com/file/d/1zDHYpIAFdFzZSr_Ltv_T9mvYHOE1I0qf/view?usp=drive_link",
   display: true
 };
 
 const contactInfo = {
-  title: emoji("Contact Me ☎️"),
-  subtitle: "Would you like to get in touch with me?",
+  title: emoji("İletişim ☎️"),
+  subtitle: "Benimle iletişime geçmek ister misiniz?",
   number: "",
   email_address: "kubatb35@gmail.com"
 };
