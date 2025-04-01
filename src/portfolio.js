@@ -205,18 +205,18 @@ const bigProjects = {
 // Include certificates, talks etc
 
 const achievementSection = {
-  title: emoji("Sertifikalar 🏆"),
-  subtitle: "Aldığım Eğitimler ve Sertifikalar",
+  title: emoji("Certificates 🏆"),
+  subtitle: "Trainings and Certificates I Have Received",
 
   achievementsCards: [
     {
-      title: "Başlangıç Seviye Java ile Backend Web Development Patikası",
+      title: "Beginner Level Java with Backend Web Development Path",
       subtitle: "Patika.dev",
-      image: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/ibm_logo.jpeg"),
+      image: require("./assets/images/ibm_logo.jpeg"),
       imageAlt: "Java Logo",
       footerLink: [
         {
-          name: "Sertifika",
+          name: "Certificate",
           url: "https://academy.patika.dev/certificates/bmkn4Pb"
         }
       ]
@@ -224,11 +224,11 @@ const achievementSection = {
     {
       title: "Working in a Digital World: Professional Skills",
       subtitle: "Coursera - University of Leeds",
-      image: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/ibm_logo.jpeg"),
+      image: require("./assets/images/ibm_logo.jpeg"),
       imageAlt: "Professional Skills Logo",
       footerLink: [
         {
-          name: "Sertifika",
+          name: "Certificate",
           url: "https://www.credly.com/badges/cf360c47-3c70-4656-accf-b0c6910b1c40/linked_in_profile"
         }
       ]
@@ -236,11 +236,11 @@ const achievementSection = {
     {
       title: "Explore Emerging Tech",
       subtitle: "IBM",
-      image: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/ibm_logo.jpeg"),
+      image: require("./assets/images/ibm_logo.jpeg"),
       imageAlt: "IBM Logo",
       footerLink: [
         {
-          name: "Sertifika",
+          name: "Certificate",
           url: "https://www.credly.com/badges/e5c28e80-9d6b-4906-984c-5270247e5583/linked_in?t=sddiuv"
         }
       ]
@@ -248,23 +248,23 @@ const achievementSection = {
     {
       title: "Cybersecurity Fundamentals",
       subtitle: "IBM",
-      image: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/ibm_logo.jpeg"),
+      image: require("./assets/images/ibm_logo.jpeg"),
       imageAlt: "IBM Logo",
       footerLink: [
         {
-          name: "Sertifika",
+          name: "Certificate",
           url: "https://www.credly.com/badges/8ab9e3e3-4e03-41d3-ad55-ede572d652d7/linked_in_profile"
         }
       ]
     },
     {
-      title: "Uzaktan eğitim kapısı katılım sertifikası",
-      subtitle: "TÜBİTAK BİLGEM - OOP (Nesne Yönelimli Programlama) ve Java",
-      image: require("/Users/berkantkubat/Desktop/developerFolio/src/assets/images/tübitak.png"),
+      title: "Remote Education Gateway Participation Certificate",
+      subtitle: "TÜBİTAK BİLGEM - OOP (Object-Oriented Programming) and Java",
+      image: require("./assets/images/tübitak.png"),
       imageAlt: "TÜBİTAK Logo",
       footerLink: [
         {
-          name: "Sertifika",
+          name: "Certificate",
           url: "https://www.linkedin.com/in/berkantkubat/details/certifications/1635544377463/single-media-viewer/?type=DOCUMENT&profileId=ACoAAC-_98MB8o1zPmksjqm1QEQ_mNRch5IRWzA"
         }
       ]
@@ -300,8 +300,8 @@ const resumeSection = {
 };
 
 const contactInfo = {
-  title: emoji("İletişim ☎️"),
-  subtitle: "Benimle iletişime geçmek ister misiniz?",
+  title: emoji("Contact ☎️"),
+  subtitle: "Would you like to get in touch with me?",
   number: "",
   email_address: "kubatb35@gmail.com"
 };
