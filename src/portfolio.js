@@ -25,7 +25,8 @@ const greeting = {
   subTitle: emoji(
     "A passionate Backend Software Developer 🚀 experienced in Java, Spring Boot and microservices architecture, with expertise in Kubernetes, Docker, ArgoCD and CI/CD processes."
   ),
-  resumeLink: "https://drive.google.com/file/d/1zDHYpIAFdFzZSr_Ltv_T9mvYHOE1I0qf/view?usp=drive_link",
+  resumeLink:
+    "https://drive.google.com/file/d/1q2Z9AtCkUs6OvT5OQrfYir7dA5BAS31B/view?usp=drive_link",
   displayGreeting: true
 };
 
@@ -46,18 +47,30 @@ const socialMediaLinks = {
 
 const skillsSection = {
   title: "What I Do",
-  subTitle: "SOFTWARE ENGINEER SPECIALIZED IN BACKEND DEVELOPMENT AND DEVOPS TECHNOLOGIES",
+  subTitle:
+    "BACKEND ENGINEER FOCUSED ON HIGH-PERFORMANCE MICROSERVICES AND EVENT-DRIVEN SYSTEMS",
   skills: [
-    emoji("⚡ Developing scalable backend systems with microservices architecture"),
-    emoji("⚡ Containerized applications and orchestration with Kubernetes and Docker"),
-    emoji("⚡ Continuous integration and deployment with CI/CD processes and DevOps practices"),
-    emoji("⚡ High-performance systems with Redis and Caffeine Cache"),
-    emoji("⚡ Database management with PostgreSQL, MySQL, MongoDB, Microsoft SQL Server, and Cassandra"),
-    emoji("⚡ RESTful API development and integration"),
-    emoji("⚡ Agile project management with Agile/Scrum methodologies"),
-    emoji("⚡ System monitoring and logging with Prometheus, Grafana, and Logback"),
-    emoji("⚡ Event-driven systems and messaging architectures with Kafka"),
-    emoji("⚡ Application development experience with Python and C#")
+    emoji(
+      "⚡ Designing high-performance backend services with Java, Spring Boot and microservices architecture"
+    ),
+    emoji(
+      "⚡ Building event-driven and real-time data pipelines with Apache Kafka for tens of thousands of devices"
+    ),
+    emoji(
+      "⚡ Improving latency with asynchronous processing, Redis/Caffeine caching and database query optimization"
+    ),
+    emoji(
+      "⚡ Modeling data with PostgreSQL for transactional workloads and Cassandra for high-volume telemetry"
+    ),
+    emoji(
+      "⚡ Deploying and operating cloud-native services with Docker, Kubernetes, Helm, GitHub Actions and ArgoCD"
+    ),
+    emoji(
+      "⚡ Implementing observability with Prometheus, Grafana and Slack-based alerting"
+    ),
+    emoji(
+      "⚡ Developing production-ready APIs and backend services for IoT and data-intensive platforms"
+    )
   ],
 
   /* Make Sure to include correct Font Awesome Classname to view your icon
@@ -162,13 +175,15 @@ const workExperiences = {
       role: "Software Engineer",
       company: "Comodif",
       companylogo: require("./assets/images/comodif.jpg"),
-      date: "10/2023 - Present",
-      desc: "Developing microservices architectures with Java and Spring Boot, containerization with Kubernetes and Docker, managing CI/CD processes.",
+      date: "10/2023 - 02/2026",
+      desc:
+        "Built high-performance backend microservices for IoT and data-intensive platforms using Java, Spring Boot and Kafka.",
       descBullets: [
-        "Development and maintenance of microservices architectures",
-        "Management of CI/CD pipelines and Helm-based updates",
-        "Kubernetes monitoring and log analysis with Lens",
-        "Setting up test environments with Docker"
+        "Reduced critical API latency by 50%+ using asynchronous processing, Redis/Caffeine caching and query optimization",
+        "Developed Kafka-based telemetry pipelines and Cassandra/PostgreSQL services for storing and querying device data",
+        "Deployed and operated microservices with Docker, Kubernetes, Helm, GitHub Actions and ArgoCD (GitOps)",
+        "Implemented observability with Prometheus, Grafana and Slack alerts for Kafka lag and service health across 60K+ devices",
+        "Collaborated with a 10+ person cross-functional Agile team through code reviews and pair programming"
       ]
     },
     {
@@ -176,7 +191,8 @@ const workExperiences = {
       company: "Otoparcasan",
       companylogo: require("./assets/images/otoparcasan.png"),
       date: "01/2021 - 05/2021",
-      desc: "Development of product and order integration systems for e-commerce site and data analysis work.",
+      desc:
+        "Development of product and order integration systems for e-commerce site and data analysis work.",
       descBullets: [
         "Data analysis and reporting with Excel and Python",
         "XML-based data integrations and transformations",
@@ -295,7 +311,7 @@ const podcastSection = {
 const resumeSection = {
   title: "CV",
   subtitle: "Özgeçmişimi indirmek için tıklayın",
-  link: "https://drive.google.com/file/d/1zDHYpIAFdFzZSr_Ltv_T9mvYHOE1I0qf/view?usp=drive_link",
+  link: "https://drive.google.com/file/d/1q2Z9AtCkUs6OvT5OQrfYir7dA5BAS31B/view?usp=drive_link",
   display: true
 };
 
