@@ -176,8 +176,7 @@ const workExperiences = {
       company: "Comodif",
       companylogo: require("./assets/images/comodif.jpg"),
       date: "10/2023 - 02/2026",
-      desc:
-        "Built high-performance backend microservices for IoT and data-intensive platforms using Java, Spring Boot and Kafka.",
+      desc: "Built high-performance backend microservices for IoT and data-intensive platforms using Java, Spring Boot and Kafka.",
       descBullets: [
         "Reduced critical API latency by 50%+ using asynchronous processing, Redis/Caffeine caching and query optimization",
         "Developed Kafka-based telemetry pipelines and Cassandra/PostgreSQL services for storing and querying device data",
@@ -191,8 +190,7 @@ const workExperiences = {
       company: "Otoparcasan",
       companylogo: require("./assets/images/otoparcasan.png"),
       date: "01/2021 - 05/2021",
-      desc:
-        "Development of product and order integration systems for e-commerce site and data analysis work.",
+      desc: "Development of product and order integration systems for e-commerce site and data analysis work.",
       descBullets: [
         "Data analysis and reporting with Excel and Python",
         "XML-based data integrations and transformations",
