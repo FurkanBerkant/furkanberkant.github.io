@@ -1,25 +1,14 @@
 {
   "files": {
-    "main.css": "/static/css/main.59fb906b.css",
-    "main.js": "/static/js/main.3244ab41.js",
-    "static/css/769.b3cbb36b.chunk.css": "/static/css/769.b3cbb36b.chunk.css",
-    "static/js/769.bda0d7b7.chunk.js": "/static/js/769.bda0d7b7.chunk.js",
+    "main.css": "/static/css/main.9d1cc22c.css",
+    "main.js": "/static/js/main.9f5f7619.js",
     "static/media/Montserrat-Regular.ttf": "/static/media/Montserrat-Regular.3cd786652b8a2e9d41f2.ttf",
-    "static/media/Agustina.woff": "/static/media/Agustina.eb0c59dda4cc308cba96.woff",
-    "static/media/manOnTable.svg": "/static/media/manOnTable.8f117eb207e57ed8f89d67d595aceb45.svg",
-    "static/media/contactMailDark.svg": "/static/media/contactMailDark.1db650d351729a0f17b4e3104e6a7b7a.svg",
-    "static/media/developerActivity.svg": "/static/media/developerActivity.2c0445cae86f4243433a2f5a22b2c031.svg",
-    "static/media/lise_logo.jpeg": "/static/media/lise_logo.b950b0bf669bf8874d2b.jpeg",
-    "static/media/ktu.png": "/static/media/ktu.37d058047b883ffa0abf.png",
-    "static/media/skill.svg": "/static/media/skill.35a147662ab0a1d15e579690446e0258.svg",
     "index.html": "/index.html",
-    "main.59fb906b.css.map": "/static/css/main.59fb906b.css.map",
-    "main.3244ab41.js.map": "/static/js/main.3244ab41.js.map",
-    "769.b3cbb36b.chunk.css.map": "/static/css/769.b3cbb36b.chunk.css.map",
-    "769.bda0d7b7.chunk.js.map": "/static/js/769.bda0d7b7.chunk.js.map"
+    "main.9d1cc22c.css.map": "/static/css/main.9d1cc22c.css.map",
+    "main.9f5f7619.js.map": "/static/js/main.9f5f7619.js.map"
   },
   "entrypoints": [
-    "static/css/main.59fb906b.css",
-    "static/js/main.3244ab41.js"
+    "static/css/main.9d1cc22c.css",
+    "static/js/main.9f5f7619.js"
   ]
 }
