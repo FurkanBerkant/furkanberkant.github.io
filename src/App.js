@@ -1,13 +1,8 @@
 import React from "react";
-import "./App.scss";
-import Main from "./containers/Main";
+import Portfolio2026 from "./Portfolio2026";
 
 function App() {
-  return (
-    <div>
-      <Main />
-    </div>
-  );
+  return <Portfolio2026 />;
 }
 
 export default App;

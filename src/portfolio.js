@@ -25,8 +25,7 @@ const greeting = {
   subTitle: emoji(
     "A passionate Backend Software Developer 🚀 experienced in Java, Spring Boot and microservices architecture, with expertise in Kubernetes, Docker, ArgoCD and CI/CD processes."
   ),
-  resumeLink:
-    "https://drive.google.com/file/d/1q2Z9AtCkUs6OvT5OQrfYir7dA5BAS31B/view?usp=drive_link",
+  resumeLink: "/Berkant_KUBAT.pdf",
   displayGreeting: true
 };
 
@@ -35,7 +34,7 @@ const greeting = {
 const socialMediaLinks = {
   github: "https://github.com/FurkanBerkant",
   linkedin: "https://www.linkedin.com/in/berkantkubat/",
-  gmail: "kubatb35@gmail.com",
+  gmail: "berkantkubat.dev@gmail.com",
   // gitlab: "",
   // facebook: "",
   // medium: "",
@@ -309,7 +308,7 @@ const podcastSection = {
 const resumeSection = {
   title: "CV",
   subtitle: "Özgeçmişimi indirmek için tıklayın",
-  link: "https://drive.google.com/file/d/1q2Z9AtCkUs6OvT5OQrfYir7dA5BAS31B/view?usp=drive_link",
+  link: "/Berkant_KUBAT.pdf",
   display: true
 };
 
@@ -317,7 +316,7 @@ const contactInfo = {
   title: emoji("Contact ☎️"),
   subtitle: "Would you like to get in touch with me?",
   number: "",
-  email_address: "kubatb35@gmail.com"
+  email_address: "berkantkubat.dev@gmail.com"
 };
 
 // Twitter Section

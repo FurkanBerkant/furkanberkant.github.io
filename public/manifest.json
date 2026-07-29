@@ -1,6 +1,12 @@
 {
-  "short_name": "DeveloperFolio",
-  "name": "DeveloperFolio",
+  "short_name": "Berkant",
+  "name": "Berkant Kubat — Software Engineer",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#0a0b0c",
+  "background_color": "#0a0b0c",
   "icons": [
     {
       "src": "/favicon.ico",
@@ -8,18 +14,19 @@
       "type": "image/x-icon"
     },
     {
-      "src": "/android-chrome-192x192.png?v8=qAJ44G5Bm7",
+      "src": "/android-chrome-192x192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/android-chrome-384x384.png?v8=qAJ44G5Bm7",
+      "src": "/android-chrome-384x384.png",
       "type": "image/png",
       "sizes": "384x384"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#6c63ff",
-  "background_color": "#ffffff"
+  ]
 }

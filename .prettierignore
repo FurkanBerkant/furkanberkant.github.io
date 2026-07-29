@@ -1,4 +1,6 @@
+build
+dist
+node_modules
 src/serviceWorker.js
 package-lock.json
 src/assets/lottie
-

@@ -22,8 +22,10 @@
   },
   "scripts": {
     "predeploy": "npm run build",
-    "start": "node fetch.js && react-scripts start",
-    "build": "node fetch.js && react-scripts build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "build:sites": "npm run build && node scripts/prepare-sites-build.mjs",
+    "generate:favicons": "node scripts/generate-favicons.mjs",
     "deploy": "gh-pages -d build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -53,6 +55,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "dotenv": "^8.2.0",
+    "pngjs": "^3.4.0",
     "prettier": "^2.3.1"
   }
 }

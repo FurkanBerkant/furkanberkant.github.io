@@ -8,6 +8,8 @@
 # testing
 /coverage
 /build
+/dist
+/.openai/*.tgz
 
 
 # misc
