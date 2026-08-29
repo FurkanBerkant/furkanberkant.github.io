@@ -963,7 +963,10 @@ body {
   --scene-light-y: 30%;
   --scene-tilt-x: 0deg;
   --scene-tilt-y: 0deg;
-  --node-radius: clamp(9.5rem, 18vw, 16rem);
+  --node-radius: min(
+    clamp(9.5rem, 18vw, 16rem),
+    calc((clamp(38rem, 68vh, 46rem) - 7.25rem) / 2 - 2.75rem)
+  );
   position: relative;
   min-width: 0;
   overflow: hidden;
@@ -1277,6 +1280,7 @@ body {
   border-top: 1px solid var(--line-strong);
   background: rgba(var(--page-rgb), 0.8);
   backdrop-filter: blur(14px);
+  pointer-events: none;
 }
 
 .technology-scene__status span,
@@ -2963,6 +2967,18 @@ body {
 
   .identity-sequence__handle {
     font-size: clamp(2.35rem, 12.2vw, 4rem);
+  }
+
+  .site-route {
+    max-width: calc(100vw - 15.5rem);
+    overflow: hidden;
+  }
+
+  .site-route strong {
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .technology-explorer__header span {
