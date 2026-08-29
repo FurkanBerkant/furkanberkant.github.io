@@ -30,31 +30,43 @@ const findPart = (objects, patterns) =>
   });
 
 const discoverPresenterRig = app => {
-  const objects = typeof app.getAllObjects === "function" ? app.getAllObjects() : [];
+  const objects =
+    typeof app.getAllObjects === "function" ? app.getAllObjects() : [];
   const head = findPart(objects, [/^head$/, /head/, /neck/]);
-  const upperArm = findPart(objects, [
-    /left.*upper.*arm/,
-    /upper.*arm.*left/,
-    /left.*arm/,
-    /arm.*left/,
-    /upperarm/
-  ]);
-  const forearm = findPart(objects, [
-    /left.*forearm/,
-    /forearm.*left/,
-    /left.*lower.*arm/,
-    /lower.*arm.*left/,
-    /forearm/
-  ]);
-  const hand = findPart(objects, [/left.*hand/, /hand.*left/, /^hand$/, /hand/]);
-  const finger = findPart(objects, [
-    /left.*index/,
-    /index.*left/,
-    /index.*finger/,
-    /finger.*index/,
-    /finger/
-  ]);
 
+  const right = {
+    upperArm: findPart(objects, [
+      /right.*upper.*arm/,
+      /upper.*arm.*right/,
+      /right.*arm/,
+      /arm.*right/
+    ]),
+    forearm: findPart(objects, [
+      /right.*forearm/,
+      /forearm.*right/,
+      /right.*lower.*arm/,
+      /lower.*arm.*right/
+    ]),
+    hand: findPart(objects, [/right.*hand/, /hand.*right/]),
+    finger: findPart(objects, [
+      /right.*index/,
+      /index.*right/,
+      /right.*finger/,
+      /finger.*right/
+    ])
+  };
+
+  const fallback = {
+    upperArm: findPart(objects, [/upperarm/, /upper.*arm/, /arm/]),
+    forearm: findPart(objects, [/forearm/, /lower.*arm/]),
+    hand: findPart(objects, [/^hand$/, /hand/]),
+    finger: findPart(objects, [/index.*finger/, /finger.*index/, /finger/])
+  };
+
+  const upperArm = right.upperArm || fallback.upperArm;
+  const forearm = right.forearm || fallback.forearm;
+  const hand = right.hand || fallback.hand;
+  const finger = right.finger || fallback.finger;
   const parts = {head, upperArm, forearm, hand, finger};
   const base = Object.fromEntries(
     Object.entries(parts)
@@ -65,7 +77,7 @@ const discoverPresenterRig = app => {
   return {
     ...parts,
     base,
-    available: Boolean(upperArm || forearm || hand || finger)
+    available: Boolean(upperArm || forearm || hand)
   };
 };
 
@@ -79,36 +91,35 @@ const setRotation = (object, base, delta) => {
 const applyPresenterGesture = (rig, state, reducedMotion) => {
   if (!rig || reducedMotion) return;
 
-  const groupProgress =
-    state.groupCount > 1 ? state.groupIndex / (state.groupCount - 1) : 0.5;
-  const toolProgress =
-    state.technologyCount > 1
-      ? state.technologyIndex / (state.technologyCount - 1)
-      : 0.5;
-  const vertical = (groupProgress * 0.8 + toolProgress * 0.2 - 0.5) * 2;
+  const targetY = Math.min(Math.max(Number(state.targetY ?? 0.5), 0.08), 0.92);
+  const vertical = (targetY - 0.5) * 2;
 
+  // The robot faces the viewer, so its right arm is the natural arm for
+  // presenting the technology list on the viewer's left.
   setRotation(rig.head, rig.base.head, {
-    x: vertical * 0.055,
-    y: -0.08
+    x: vertical * 0.12,
+    y: -0.18,
+    z: vertical * 0.025
   });
   setRotation(rig.upperArm, rig.base.upperArm, {
-    x: -0.05,
-    y: -0.08,
-    z: 0.16 + vertical * 0.1
+    x: -0.1 + vertical * 0.08,
+    y: -0.14,
+    z: 0.42 + vertical * 0.22
   });
   setRotation(rig.forearm, rig.base.forearm, {
-    x: -0.08,
-    y: -0.04,
-    z: 0.18 + vertical * 0.08
+    x: -0.14 + vertical * 0.08,
+    y: -0.08,
+    z: 0.32 + vertical * 0.18
   });
   setRotation(rig.hand, rig.base.hand, {
-    x: 0.02,
-    y: -0.06,
-    z: 0.08 + vertical * 0.04
+    x: -0.04 + vertical * 0.05,
+    y: -0.08,
+    z: 0.14 + vertical * 0.08
   });
   setRotation(rig.finger, rig.base.finger, {
-    x: -0.08,
-    z: 0.04
+    x: -0.22,
+    y: -0.02,
+    z: 0.03
   });
 };
 

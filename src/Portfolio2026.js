@@ -601,10 +601,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     capability => capability.id === active.id
   );
   const technologyIndex = active.technologyIds.indexOf(resolvedTechnologyId);
-  const targetY =
-    18 +
-    (groupIndex / Math.max(capabilitiesData.length - 1, 1)) * 52 +
-    (technologyIndex / Math.max(active.technologyIds.length - 1, 1) - 0.5) * 8;
 
   const sceneStateRef = React.useRef({
     activeId: active.id,
@@ -612,10 +608,12 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     groupIndex,
     technologyIndex,
     groupCount: capabilitiesData.length,
-    technologyCount: active.technologyIds.length
+    technologyCount: active.technologyIds.length,
+    targetY: 0.5
   });
 
   sceneStateRef.current = {
+    ...sceneStateRef.current,
     activeId: active.id,
     technologyId: resolvedTechnologyId,
     groupIndex,
@@ -669,7 +667,25 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     };
   }, [reducedMotion]);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
+    const stage = stageRef.current;
+    const target = document.querySelector(
+      `[data-technology-id="${resolvedTechnologyId}"]`
+    );
+
+    if (stage && target) {
+      const stageRect = stage.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const normalizedTargetY =
+        (targetRect.top + targetRect.height / 2 - stageRect.top) /
+        Math.max(stageRect.height, 1);
+
+      sceneStateRef.current.targetY = Math.max(
+        0.08,
+        Math.min(0.92, normalizedTargetY)
+      );
+    }
+
     sceneRef.current?.refresh();
   }, [activeId, resolvedTechnologyId]);
 
@@ -751,6 +767,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
                 <li key={technologyId} className={selected ? "is-selected" : ""}>
                   <button
                     type="button"
+                    data-technology-id={technologyId}
                     aria-pressed={selected}
                     onClick={() => setActiveTechnologyId(technologyId)}
                     onMouseEnter={() => setActiveTechnologyId(technologyId)}
@@ -771,7 +788,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
           data-reduced-motion={reducedMotion ? "true" : "false"}
           data-scene-ready={sceneReady ? "true" : "false"}
           data-gesture-ready={gestureAvailable ? "true" : "false"}
-          style={{"--technology-target-y": `${targetY}%`}}
         >
           <div className="technology-stage__spotlight" aria-hidden="true" />
           <canvas
@@ -781,9 +797,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
           />
           <div className="technology-stage__loader" aria-hidden="true">
             <span />
-          </div>
-          <div className="technology-stage__pointer-line" aria-hidden="true">
-            <i />
           </div>
 
           <div
