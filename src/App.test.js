@@ -407,37 +407,36 @@ it("explores technology groups and tools with accessible controls", () => {
   const {div, cleanup} = renderAt("/technologies");
   const tabs = div.querySelectorAll(".technology-explorer [role='tab']");
   const panel = div.querySelector("#technology-scene");
+  const nodeButtons = () =>
+    Array.from(div.querySelectorAll(".technology-panel__nodes button"));
 
   expect(tabs[0].getAttribute("aria-selected")).toBe("true");
+  expect(div.querySelector(".technology-stage__canvas")).not.toBeNull();
+  expect(div.querySelector(".technology-stage__fallback")).not.toBeNull();
   expect(panel.textContent).toContain("Java");
-  expect(
-    panel.querySelectorAll(".technology-space__nodes button")
-  ).toHaveLength(4);
+  expect(nodeButtons()).toHaveLength(4);
+
   click(tabs[1]);
   expect(tabs[0].getAttribute("aria-selected")).toBe("false");
   expect(tabs[1].getAttribute("aria-selected")).toBe("true");
   expect(panel.textContent).toContain("Apache Kafka");
-  expect(panel.textContent).toContain("PostgreSQL");
-  expect(
-    panel.querySelectorAll(".technology-space__nodes button")
-  ).toHaveLength(6);
+  expect(nodeButtons()).toHaveLength(6);
+  expect(nodeButtons().map(button => button.textContent)).toContain("PostgreSQL");
   expect(tabs[0].getAttribute("tabindex")).toBe("-1");
   expect(tabs[1].getAttribute("tabindex")).toBe("0");
 
-  const redisButton = Array.from(
-    panel.querySelectorAll(".technology-space__nodes button")
-  ).find(button => button.textContent === "Redis");
+  const redisButton = nodeButtons().find(button => button.textContent === "Redis");
   click(redisButton);
   expect(redisButton.getAttribute("aria-pressed")).toBe("true");
   expect(
-    panel.querySelector(".technology-space__focus strong").textContent
+    panel.querySelector(".technology-stage__readout-row strong").textContent
   ).toBe("Redis");
 
   keyDown(tabs[1], "ArrowRight");
   expect(tabs[2].getAttribute("aria-selected")).toBe("true");
   expect(tabs[2].getAttribute("tabindex")).toBe("0");
   expect(document.activeElement).toBe(tabs[2]);
-  expect(panel.textContent).toContain("Docker");
+  expect(nodeButtons().map(button => button.textContent)).toContain("Docker");
 
   cleanup();
 });
@@ -636,19 +635,14 @@ it("honors reduced motion for the intro, technology scene and project media", ()
   rendered.cleanup();
 
   rendered = renderAt("/technologies");
-  const technologyScene = rendered.div.querySelector(".technology-scene");
-  expect(technologyScene.dataset.reducedMotion).toBe("true");
-  act(() => {
-    technologyScene.dispatchEvent(
-      new MouseEvent("pointermove", {
-        bubbles: true,
-        clientX: 400,
-        clientY: 200
-      })
-    );
-  });
-  expect(technologyScene.style.getPropertyValue("--scene-tilt-x")).toBe("");
-  expect(technologyScene.style.getPropertyValue("--scene-tilt-y")).toBe("");
+  const technologyStage = rendered.div.querySelector(".technology-stage");
+  expect(technologyStage.dataset.reducedMotion).toBe("true");
+  expect(
+    rendered.div.querySelector(".technology-stage__canvas")
+  ).not.toBeNull();
+  expect(
+    rendered.div.querySelector(".technology-stage__fallback")
+  ).not.toBeNull();
   rendered.cleanup();
 
   rendered = renderAt("/projects");

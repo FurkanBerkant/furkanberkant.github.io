@@ -581,7 +581,7 @@ const HomePage = ({copy, profileData, playIntro, theme, reducedMotion}) => {
   );
 };
 
-const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
+const TechnologyStage = ({copy, capabilitiesData, reducedMotion, theme}) => {
   const [activeId, setActiveId] = React.useState(capabilitiesData[0].id);
   const [activeTechnologyId, setActiveTechnologyId] = React.useState(
     capabilitiesData[0].technologyIds[0]
@@ -617,6 +617,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
       return undefined;
     }
 
+    setSceneReady(false);
     let cancelled = false;
     let controller = null;
 
@@ -649,7 +650,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
       controller?.dispose();
       sceneRef.current = null;
     };
-  }, [capabilitiesData, reducedMotion]);
+  }, [capabilitiesData, reducedMotion, theme]);
 
   React.useEffect(() => {
     sceneRef.current?.refresh();
@@ -803,7 +804,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
   );
 };
 
-const TechnologiesPage = ({copy, capabilitiesData, reducedMotion}) => (
+const TechnologiesPage = ({copy, capabilitiesData, reducedMotion, theme}) => (
   <div className="technologies-page route-page">
     <header className="technologies-intro" data-reveal>
       <div>
@@ -817,6 +818,7 @@ const TechnologiesPage = ({copy, capabilitiesData, reducedMotion}) => (
       copy={copy.technologies}
       capabilitiesData={capabilitiesData}
       reducedMotion={reducedMotion}
+      theme={theme}
     />
   </div>
 );
@@ -1688,6 +1690,7 @@ function Portfolio2026() {
               copy={copy}
               capabilitiesData={capabilitiesData}
               reducedMotion={reducedMotion}
+              theme={theme}
             />
           </Route>
           <Route exact path="/projects">

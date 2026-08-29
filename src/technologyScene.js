@@ -350,6 +350,10 @@ export async function createTechnologyScene({
     dragging = null;
   };
 
+  const onPointerCancel = () => {
+    dragging = null;
+  };
+
   const onPointerLeave = () => {
     pointer.x = 0;
     pointer.y = 0;
@@ -365,6 +369,7 @@ export async function createTechnologyScene({
   container.addEventListener("pointermove", onPointerMove);
   container.addEventListener("pointerdown", onPointerDown);
   window.addEventListener("pointerup", onPointerUp);
+  window.addEventListener("pointercancel", onPointerCancel);
   container.addEventListener("pointerleave", onPointerLeave);
   window.addEventListener("resize", onResize);
 
@@ -392,6 +397,7 @@ export async function createTechnologyScene({
       container.removeEventListener("pointermove", onPointerMove);
       container.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerCancel);
       container.removeEventListener("pointerleave", onPointerLeave);
       window.removeEventListener("resize", onResize);
       disposables.forEach(resource => resource.dispose?.());
