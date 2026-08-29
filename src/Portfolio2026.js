@@ -30,8 +30,7 @@ import {
   uiCopy
 } from "./portfolioI18n";
 import {trackEvent} from "./analytics";
-import {createTechnologyScene} from "./technologyScene";
-import "./Portfolio2026.scss";
+const Spline = process.env.NODE_ENV === "test"\n  ? () => <div className="technology-stage__spline-test" aria-hidden="true" />\n  : React.lazy(() => import("@splinetool/react-spline"));\n\nimport "./Portfolio2026.scss";
 
 const navigationItems = [
   {id: "home", href: "/", symbol: "~"},
@@ -581,15 +580,11 @@ const HomePage = ({copy, profileData, playIntro, theme, reducedMotion}) => {
   );
 };
 
-const TechnologyStage = ({copy, capabilitiesData, reducedMotion, theme}) => {
+const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
   const [activeId, setActiveId] = React.useState(capabilitiesData[0].id);
   const [activeTechnologyId, setActiveTechnologyId] = React.useState(
     capabilitiesData[0].technologyIds[0]
   );
-  const [sceneReady, setSceneReady] = React.useState(false);
-  const stageRef = React.useRef(null);
-  const canvasRef = React.useRef(null);
-  const sceneRef = React.useRef(null);
   const active =
     capabilitiesData.find(capability => capability.id === activeId) ||
     capabilitiesData[0];
@@ -597,64 +592,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion, theme}) => {
     ? activeTechnologyId
     : active.technologyIds[0];
   const activeTechnology = technologies[resolvedTechnologyId];
-  const sceneStateRef = React.useRef({
-    activeId: active.id,
-    technologyId: resolvedTechnologyId
-  });
-  sceneStateRef.current = {
-    activeId: active.id,
-    technologyId: resolvedTechnologyId
-  };
-
-  React.useEffect(() => {
-    if (process.env.NODE_ENV === "test") {
-      return undefined;
-    }
-
-    const stage = stageRef.current;
-    const canvas = canvasRef.current;
-    if (!stage || !canvas) {
-      return undefined;
-    }
-
-    setSceneReady(false);
-    let cancelled = false;
-    let controller = null;
-
-    createTechnologyScene({
-      canvas,
-      container: stage,
-      capabilitiesData,
-      stateRef: sceneStateRef,
-      reducedMotion,
-      onReady: () => {
-        if (!cancelled) {
-          setSceneReady(true);
-        }
-      }
-    })
-      .then(instance => {
-        if (cancelled) {
-          instance?.dispose();
-          return;
-        }
-        controller = instance;
-        sceneRef.current = instance;
-      })
-      .catch(() => {
-        // WebGL unavailable: the DOM fallback stays visible.
-      });
-
-    return () => {
-      cancelled = true;
-      controller?.dispose();
-      sceneRef.current = null;
-    };
-  }, [capabilitiesData, reducedMotion, theme]);
-
-  React.useEffect(() => {
-    sceneRef.current?.refresh();
-  }, [activeId, resolvedTechnologyId]);
 
   const selectGroup = capability => {
     setActiveId(capability.id);
@@ -662,7 +599,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion, theme}) => {
   };
 
   const moveTabFocus = (event, currentIndex) => {
-    const lastIndex = capabilitiesData.length - 1;
     const destinations = {
       ArrowRight: (currentIndex + 1) % capabilitiesData.length,
       ArrowDown: (currentIndex + 1) % capabilitiesData.length,
@@ -671,14 +607,10 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion, theme}) => {
       ArrowUp:
         (currentIndex - 1 + capabilitiesData.length) % capabilitiesData.length,
       Home: 0,
-      End: lastIndex
+      End: capabilitiesData.length - 1
     };
     const nextIndex = destinations[event.key];
-
-    if (nextIndex === undefined) {
-      return;
-    }
-
+    if (nextIndex === undefined) return;
     event.preventDefault();
     const nextCapability = capabilitiesData[nextIndex];
     selectGroup(nextCapability);
@@ -688,7 +620,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion, theme}) => {
   return (
     <section className="technology-explorer" aria-label={copy.explorerLabel}>
       <header className="technology-explorer__header">
-        <code>stack.render</code>
+        <code>stack.spline</code>
         <span>
           {String(capabilitiesData.length).padStart(2, "0")} {copy.groupsLabel}
           <i aria-hidden="true"> / </i>
@@ -699,29 +631,23 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion, theme}) => {
 
       <div className="technology-explorer__body">
         <div
-          className="technology-stage"
-          ref={stageRef}
+          className="technology-stage technology-stage--spline"
           data-reduced-motion={reducedMotion ? "true" : "false"}
-          data-scene-ready={sceneReady ? "true" : "false"}
         >
-          <canvas
-            className="technology-stage__canvas"
-            ref={canvasRef}
-            aria-hidden="true"
-          />
-          <div className="technology-stage__fallback" aria-hidden="true">
-            {[...capabilitiesData].reverse().map(capability => (
-              <div
-                key={capability.id}
-                className={`technology-stage__slab ${
-                  capability.id === active.id ? "is-active" : ""
-                }`}
-              >
-                <span>{copy.groups[capability.id]}</span>
+          <div className="technology-stage__spotlight" aria-hidden="true" />
+          <React.Suspense
+            fallback={
+              <div className="technology-stage__loader" aria-hidden="true">
+                <span />
               </div>
-            ))}
-          </div>
-          <p className="technology-stage__hint">{copy.sceneHint}</p>
+            }
+          >
+            <Spline
+              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              className="technology-stage__spline"
+            />
+          </React.Suspense>
+
           <div
             className="technology-stage__readout"
             id="technology-scene"
@@ -745,11 +671,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion, theme}) => {
 
         <div className="technology-panel">
           <p className="technology-panel__label">{copy.chooseGroup}</p>
-          <div
-            className="technology-panel__groups"
-            role="tablist"
-            aria-label={copy.chooseGroup}
-          >
+          <div className="technology-panel__groups" role="tablist" aria-label={copy.chooseGroup}>
             {capabilitiesData.map((capability, index) => (
               <button
                 type="button"
@@ -765,32 +687,17 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion, theme}) => {
               >
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <strong>{copy.groups[capability.id]}</strong>
-                <small>
-                  {String(capability.technologyIds.length).padStart(2, "0")}{" "}
-                  {copy.toolsLabel}
-                </small>
+                <small>{String(capability.technologyIds.length).padStart(2, "0")} {copy.toolsLabel}</small>
               </button>
             ))}
           </div>
-
-          <ul
-            className="technology-panel__nodes"
-            aria-label={copy.groupTechnologies}
-          >
+          <ul className="technology-panel__nodes" aria-label={copy.groupTechnologies}>
             {active.technologyIds.map(technologyId => {
               const technology = technologies[technologyId];
               const selected = technologyId === resolvedTechnologyId;
-
               return (
-                <li
-                  key={technologyId}
-                  className={selected ? "is-selected" : ""}
-                >
-                  <button
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => setActiveTechnologyId(technologyId)}
-                  >
+                <li key={technologyId} className={selected ? "is-selected" : ""}>
+                  <button type="button" aria-pressed={selected} onClick={() => setActiveTechnologyId(technologyId)}>
                     <img src={technology.icon} alt="" aria-hidden="true" />
                     <span>{technology.name}</span>
                   </button>
@@ -804,7 +711,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion, theme}) => {
   );
 };
 
-const TechnologiesPage = ({copy, capabilitiesData, reducedMotion, theme}) => (
+const TechnologiesPage = ({copy, capabilitiesData, reducedMotion}) => (
   <div className="technologies-page route-page">
     <header className="technologies-intro" data-reveal>
       <div>
@@ -818,7 +725,6 @@ const TechnologiesPage = ({copy, capabilitiesData, reducedMotion, theme}) => (
       copy={copy.technologies}
       capabilitiesData={capabilitiesData}
       reducedMotion={reducedMotion}
-      theme={theme}
     />
   </div>
 );
@@ -1690,7 +1596,6 @@ function Portfolio2026() {
               copy={copy}
               capabilitiesData={capabilitiesData}
               reducedMotion={reducedMotion}
-              theme={theme}
             />
           </Route>
           <Route exact path="/projects">

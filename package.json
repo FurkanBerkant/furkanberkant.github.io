@@ -20,7 +20,9 @@
     "react-test-renderer": "^16.10.2",
     "react-twitter-embed": "3.0.3",
     "sass": "^1.32.8",
-    "three": "^0.160.1"
+    "three": "^0.160.1",
+    "@splinetool/react-spline": "^4.1.0",
+    "@splinetool/runtime": "^1.12.98"
   },
   "scripts": {
     "predeploy": "npm run build",
