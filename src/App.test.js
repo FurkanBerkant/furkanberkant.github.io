@@ -411,7 +411,7 @@ it("explores technology groups and tools with accessible controls", () => {
     Array.from(div.querySelectorAll(".technology-panel__nodes button"));
 
   expect(tabs[0].getAttribute("aria-selected")).toBe("true");
-  expect(div.querySelector(".technology-stage__spline-test")).not.toBeNull();
+  expect(div.querySelector(".technology-stage__canvas--spline")).not.toBeNull();
   expect(panel.textContent).toContain("Java");
   expect(nodeButtons()).toHaveLength(4);
 
@@ -636,7 +636,7 @@ it("honors reduced motion for the intro, technology scene and project media", ()
   rendered = renderAt("/technologies");
   const technologyStage = rendered.div.querySelector(".technology-stage");
   expect(technologyStage.dataset.reducedMotion).toBe("true");
-  expect(rendered.div.querySelector(".technology-stage__spline-test")).not.toBeNull();
+  expect(rendered.div.querySelector(".technology-stage__canvas--spline")).not.toBeNull();
   rendered.cleanup();
 
   rendered = renderAt("/projects");

@@ -1,407 +1,149 @@
-const STACK_ORDER = ["ship", "move", "build", "see"];
+const SPLINE_RUNTIME_URL =
+  "https://unpkg.com/@splinetool/runtime@1.12.98/build/runtime.js";
+const SPLINE_SCENE_URL =
+  "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode";
 
-const LAYER_GEOMETRY = {
-  ship: {y: 0, width: 3.55},
-  move: {y: 0.82, width: 3.05},
-  build: {y: 1.64, width: 2.6},
-  see: {y: 2.46, width: 2.15}
+let runtimePromise;
+
+const loadSplineRuntime = () => {
+  if (!runtimePromise) {
+    runtimePromise = import(
+      /* webpackIgnore: true */
+      SPLINE_RUNTIME_URL
+    );
+  }
+  return runtimePromise;
 };
 
-const SLAB_HEIGHT = 0.3;
-const NODE_SIZE = 0.27;
+const normalizeName = value => String(value || "").toLowerCase();
 
-const readSceneColors = element => {
-  const style = window.getComputedStyle(element);
-  const read = (name, fallback) =>
-    style.getPropertyValue(name).trim() || fallback;
+const copyRotation = object => ({
+  x: Number(object?.rotation?.x || 0),
+  y: Number(object?.rotation?.y || 0),
+  z: Number(object?.rotation?.z || 0)
+});
+
+const findPart = (objects, patterns) =>
+  objects.find(object => {
+    const name = normalizeName(object?.name);
+    return patterns.some(pattern => pattern.test(name));
+  });
+
+const discoverPresenterRig = app => {
+  const objects = typeof app.getAllObjects === "function" ? app.getAllObjects() : [];
+  const head = findPart(objects, [/^head$/, /head/, /neck/]);
+  const upperArm = findPart(objects, [
+    /left.*upper.*arm/,
+    /upper.*arm.*left/,
+    /left.*arm/,
+    /arm.*left/,
+    /upperarm/
+  ]);
+  const forearm = findPart(objects, [
+    /left.*forearm/,
+    /forearm.*left/,
+    /left.*lower.*arm/,
+    /lower.*arm.*left/,
+    /forearm/
+  ]);
+  const hand = findPart(objects, [/left.*hand/, /hand.*left/, /^hand$/, /hand/]);
+  const finger = findPart(objects, [
+    /left.*index/,
+    /index.*left/,
+    /index.*finger/,
+    /finger.*index/,
+    /finger/
+  ]);
+
+  const parts = {head, upperArm, forearm, hand, finger};
+  const base = Object.fromEntries(
+    Object.entries(parts)
+      .filter(([, object]) => object?.rotation)
+      .map(([key, object]) => [key, copyRotation(object)])
+  );
 
   return {
-    accent: read("--accent", "#e8a94f"),
-    ink: read("--ink", "#eee5d1"),
-    inkSoft: read("--ink-soft", "#c1b7a3"),
-    inkFaint: read("--ink-faint", "#857c6d"),
-    signal: read("--signal", "#70c5d2")
+    ...parts,
+    base,
+    available: Boolean(upperArm || forearm || hand || finger)
   };
 };
 
-const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
+const setRotation = (object, base, delta) => {
+  if (!object?.rotation || !base) return;
+  object.rotation.x = base.x + (delta.x || 0);
+  object.rotation.y = base.y + (delta.y || 0);
+  object.rotation.z = base.z + (delta.z || 0);
+};
+
+const applyPresenterGesture = (rig, state, reducedMotion) => {
+  if (!rig || reducedMotion) return;
+
+  const groupProgress =
+    state.groupCount > 1 ? state.groupIndex / (state.groupCount - 1) : 0.5;
+  const toolProgress =
+    state.technologyCount > 1
+      ? state.technologyIndex / (state.technologyCount - 1)
+      : 0.5;
+  const vertical = (groupProgress * 0.8 + toolProgress * 0.2 - 0.5) * 2;
+
+  setRotation(rig.head, rig.base.head, {
+    x: vertical * 0.055,
+    y: -0.08
+  });
+  setRotation(rig.upperArm, rig.base.upperArm, {
+    x: -0.05,
+    y: -0.08,
+    z: 0.16 + vertical * 0.1
+  });
+  setRotation(rig.forearm, rig.base.forearm, {
+    x: -0.08,
+    y: -0.04,
+    z: 0.18 + vertical * 0.08
+  });
+  setRotation(rig.hand, rig.base.hand, {
+    x: 0.02,
+    y: -0.06,
+    z: 0.08 + vertical * 0.04
+  });
+  setRotation(rig.finger, rig.base.finger, {
+    x: -0.08,
+    z: 0.04
+  });
+};
 
 export async function createTechnologyScene({
   canvas,
-  container,
-  capabilitiesData,
   stateRef,
   reducedMotion,
   onReady
 }) {
-  const THREE = await import("three");
-
-  let renderer;
-  try {
-    renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true,
-      powerPreference: "low-power"
-    });
-  } catch {
-    return null;
+  const runtime = await loadSplineRuntime();
+  const Application = runtime?.Application;
+  if (!Application) {
+    throw new Error("Spline runtime could not be loaded.");
   }
 
-  if (!renderer || !renderer.getContext?.()) {
-    renderer?.dispose?.();
-    return null;
-  }
+  const app = new Application(canvas);
+  await app.load(SPLINE_SCENE_URL);
 
-  const colors = readSceneColors(container);
-  const accentColor = new THREE.Color(colors.accent);
-  const inkColor = new THREE.Color(colors.ink);
-  const inkSoftColor = new THREE.Color(colors.inkSoft);
-  const inkFaintColor = new THREE.Color(colors.inkFaint);
-  const signalColor = new THREE.Color(colors.signal);
-
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setClearColor(0x000000, 0);
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 80);
-  const cameraTarget = new THREE.Vector3(0, 1.28, 0);
-
-  const disposables = [];
-  const track = resource => {
-    disposables.push(resource);
-    return resource;
+  const rig = discoverPresenterRig(app);
+  const refresh = () => {
+    applyPresenterGesture(rig, stateRef.current, reducedMotion);
   };
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.92));
-  const keyLight = new THREE.DirectionalLight(accentColor, 1.05);
-  keyLight.position.set(4.5, 7.5, 5.5);
-  scene.add(keyLight);
-  const rimLight = new THREE.DirectionalLight(signalColor, 0.35);
-  rimLight.position.set(-5, 3, -4.5);
-  scene.add(rimLight);
-
-  const stack = new THREE.Group();
-  scene.add(stack);
-
-  const grid = new THREE.GridHelper(9.5, 19, inkFaintColor, inkFaintColor);
-  grid.material.transparent = true;
-  grid.material.opacity = 0.14;
-  grid.position.y = -0.62;
-  track(grid.geometry);
-  track(grid.material);
-  stack.add(grid);
-
-  const spineGeometry = track(new THREE.CylinderGeometry(0.035, 0.035, 4, 10));
-  const spineMaterial = track(
-    new THREE.MeshBasicMaterial({
-      color: accentColor,
-      transparent: true,
-      opacity: 0.42
-    })
-  );
-  const spine = new THREE.Mesh(spineGeometry, spineMaterial);
-  spine.position.y = 1.42;
-  stack.add(spine);
-
-  const layers = new Map();
-  const nodesById = new Map();
-
-  capabilitiesData.forEach(capability => {
-    const layout = LAYER_GEOMETRY[capability.id] || LAYER_GEOMETRY.build;
-    const group = new THREE.Group();
-    group.position.y = layout.y;
-
-    const slabGeometry = track(
-      new THREE.BoxGeometry(layout.width, SLAB_HEIGHT, layout.width)
-    );
-    const slabMaterial = track(
-      new THREE.MeshStandardMaterial({
-        color: inkFaintColor,
-        transparent: true,
-        opacity: 0.16,
-        roughness: 0.9,
-        metalness: 0.05
-      })
-    );
-    const slab = new THREE.Mesh(slabGeometry, slabMaterial);
-    group.add(slab);
-
-    const edgesGeometry = track(new THREE.EdgesGeometry(slabGeometry));
-    const edgesMaterial = track(
-      new THREE.LineBasicMaterial({
-        color: inkSoftColor,
-        transparent: true,
-        opacity: 0.5
-      })
-    );
-    group.add(new THREE.LineSegments(edgesGeometry, edgesMaterial));
-
-    const nodeGeometry = track(
-      new THREE.BoxGeometry(NODE_SIZE, NODE_SIZE, NODE_SIZE)
-    );
-    const nodeRadius = layout.width * 0.31;
-    capability.technologyIds.forEach((technologyId, index) => {
-      const angle =
-        (index / capability.technologyIds.length) * Math.PI * 2 +
-        Math.PI * 0.25;
-      const nodeMaterial = track(
-        new THREE.MeshStandardMaterial({
-          color: inkSoftColor,
-          emissive: accentColor,
-          emissiveIntensity: 0,
-          transparent: true,
-          opacity: 0.85,
-          roughness: 0.75,
-          metalness: 0.1
-        })
-      );
-      const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
-      node.position.set(
-        Math.cos(angle) * nodeRadius,
-        SLAB_HEIGHT / 2 + NODE_SIZE * 0.72,
-        Math.sin(angle) * nodeRadius
-      );
-      const nodeEdges = new THREE.LineSegments(
-        track(new THREE.EdgesGeometry(nodeGeometry)),
-        track(
-          new THREE.LineBasicMaterial({
-            color: inkColor,
-            transparent: true,
-            opacity: 0.35
-          })
-        )
-      );
-      node.add(nodeEdges);
-      group.add(node);
-      nodesById.set(technologyId, {mesh: node, material: nodeMaterial});
-    });
-
-    stack.add(group);
-    layers.set(capability.id, {
-      group,
-      baseY: layout.y,
-      lift: 0,
-      highlight: 0,
-      slabMaterial,
-      edgesMaterial
-    });
-  });
-
-  const beamGeometry = track(new THREE.CylinderGeometry(0.02, 0.05, 1.5, 8));
-  const beamMaterial = track(
-    new THREE.MeshBasicMaterial({
-      color: accentColor,
-      transparent: true,
-      opacity: 0.55
-    })
-  );
-  const beam = new THREE.Mesh(beamGeometry, beamMaterial);
-  beam.visible = false;
-  stack.add(beam);
-
-  const pointer = {x: 0, y: 0};
-  let dragOffset = 0;
-  let dragging = null;
-  let animationFrame = 0;
-  let running = true;
-  const startTime = performance.now();
-
-  const fit = () => {
-    const width = Math.max(container.clientWidth, 1);
-    const height = Math.max(container.clientHeight, 1);
-    renderer.setSize(width, height, false);
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-  };
-
-  const stackIndexOf = id => {
-    const index = STACK_ORDER.indexOf(id);
-    return index === -1 ? 1 : index;
-  };
-
-  const applyState = immediate => {
-    const {activeId, technologyId} = stateRef.current;
-    const activeIndex = stackIndexOf(activeId);
-
-    layers.forEach((layer, layerId) => {
-      const layerIndex = stackIndexOf(layerId);
-      const isActive = layerId === activeId;
-      const targetLift =
-        layerIndex > activeIndex ? 0.52 : isActive ? 0.24 : 0;
-      const targetHighlight = isActive ? 1 : 0;
-
-      if (immediate) {
-        layer.lift = targetLift;
-        layer.highlight = targetHighlight;
-      } else {
-        layer.lift += (targetLift - layer.lift) * 0.085;
-        layer.highlight += (targetHighlight - layer.highlight) * 0.11;
-      }
-
-      layer.group.position.y = layer.baseY + layer.lift;
-      layer.slabMaterial.opacity = 0.14 + layer.highlight * 0.14;
-      layer.slabMaterial.color
-        .copy(inkFaintColor)
-        .lerp(accentColor, layer.highlight * 0.55);
-      layer.edgesMaterial.opacity = 0.42 + layer.highlight * 0.5;
-      layer.edgesMaterial.color
-        .copy(inkSoftColor)
-        .lerp(accentColor, layer.highlight);
-    });
-
-    nodesById.forEach((node, nodeId) => {
-      const selected = nodeId === technologyId;
-      const targetScale = selected ? 1.5 : 1;
-      const targetGlow = selected ? 0.85 : 0;
-      const current = node.mesh.scale.x;
-      const nextScale = immediate
-        ? targetScale
-        : current + (targetScale - current) * 0.14;
-      node.mesh.scale.setScalar(nextScale);
-      node.material.emissiveIntensity = immediate
-        ? targetGlow
-        : node.material.emissiveIntensity +
-          (targetGlow - node.material.emissiveIntensity) * 0.14;
-      node.material.opacity = selected ? 1 : 0.85;
-    });
-
-    const selectedNode = nodesById.get(technologyId);
-    const selectedLayer = layers.get(activeId);
-    if (selectedNode && selectedLayer) {
-      beam.visible = true;
-      const worldY = selectedLayer.group.position.y;
-      beam.position.set(
-        selectedNode.mesh.position.x,
-        worldY + selectedNode.mesh.position.y + 0.95,
-        selectedNode.mesh.position.z
-      );
-    }
-  };
-
-  const positionCamera = elapsed => {
-    const autoYaw = reducedMotion ? 0 : elapsed * 0.00005;
-    const azimuth = -0.68 + autoYaw + dragOffset + pointer.x * 0.4;
-    const polar = clampValue(1.12 - pointer.y * 0.2, 0.74, 1.38);
-    const radius = 9.6;
-
-    camera.position.set(
-      cameraTarget.x + radius * Math.sin(polar) * Math.sin(azimuth),
-      cameraTarget.y + radius * Math.cos(polar),
-      cameraTarget.z + radius * Math.sin(polar) * Math.cos(azimuth)
-    );
-    camera.lookAt(cameraTarget);
-  };
-
-  const renderFrame = timestamp => {
-    const elapsed = (timestamp || performance.now()) - startTime;
-    applyState(false);
-
-    if (!reducedMotion) {
-      const bob = Math.sin(elapsed * 0.0011) * 0.045;
-      stack.position.y = bob;
-      const selectedNode = nodesById.get(stateRef.current.technologyId);
-      if (selectedNode) {
-        selectedNode.mesh.rotation.y = elapsed * 0.0012;
-      }
-      beamMaterial.opacity = 0.4 + Math.sin(elapsed * 0.0032) * 0.18;
-    }
-
-    positionCamera(elapsed);
-    renderer.render(scene, camera);
-  };
-
-  const loop = timestamp => {
-    if (!running) {
-      return;
-    }
-    renderFrame(timestamp);
-    animationFrame = window.requestAnimationFrame(loop);
-  };
-
-  const renderOnce = () => {
-    applyState(true);
-    positionCamera(0);
-    renderer.render(scene, camera);
-  };
-
-  const onPointerMove = event => {
-    const rect = container.getBoundingClientRect();
-    if (dragging !== null) {
-      dragOffset = dragging.offset + (event.clientX - dragging.x) * 0.008;
-      if (reducedMotion) {
-        renderOnce();
-      }
-      return;
-    }
-    if (reducedMotion || event.pointerType === "touch") {
-      return;
-    }
-    pointer.x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 2 - 1;
-    pointer.y = ((event.clientY - rect.top) / Math.max(rect.height, 1)) * 2 - 1;
-  };
-
-  const onPointerDown = event => {
-    dragging = {x: event.clientX, offset: dragOffset};
-    container.setPointerCapture?.(event.pointerId);
-  };
-
-  const onPointerUp = () => {
-    dragging = null;
-  };
-
-  const onPointerCancel = () => {
-    dragging = null;
-  };
-
-  const onPointerLeave = () => {
-    pointer.x = 0;
-    pointer.y = 0;
-  };
-
-  const onResize = () => {
-    fit();
-    if (reducedMotion) {
-      renderOnce();
-    }
-  };
-
-  container.addEventListener("pointermove", onPointerMove);
-  container.addEventListener("pointerdown", onPointerDown);
-  window.addEventListener("pointerup", onPointerUp);
-  window.addEventListener("pointercancel", onPointerCancel);
-  container.addEventListener("pointerleave", onPointerLeave);
-  window.addEventListener("resize", onResize);
-
-  fit();
+  refresh();
 
   if (reducedMotion) {
-    renderOnce();
-  } else {
-    animationFrame = window.requestAnimationFrame(loop);
+    app.stop?.();
   }
 
-  onReady?.();
+  onReady?.({gestureAvailable: rig.available});
 
   return {
-    refresh() {
-      if (reducedMotion) {
-        renderOnce();
-      }
-    },
+    refresh,
     dispose() {
-      running = false;
-      if (animationFrame) {
-        window.cancelAnimationFrame(animationFrame);
-      }
-      container.removeEventListener("pointermove", onPointerMove);
-      container.removeEventListener("pointerdown", onPointerDown);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerCancel);
-      container.removeEventListener("pointerleave", onPointerLeave);
-      window.removeEventListener("resize", onResize);
-      disposables.forEach(resource => resource.dispose?.());
-      renderer.dispose();
+      app.dispose?.();
     }
   };
 }
