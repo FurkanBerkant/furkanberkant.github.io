@@ -27,7 +27,7 @@ export const uiCopy = {
         "/about": {
           title: "About — Berkant Kubat",
           description:
-            "Background, education and current interests of software engineer Berkant Kubat."
+            "Background and education of software engineer Berkant Kubat."
         },
         "/contact": {
           title: "Contact — Berkant Kubat",
@@ -112,8 +112,7 @@ export const uiCopy = {
       route: "/experience",
       kicker: "Work log / 2021—2026",
       title: "Experience",
-      intro:
-        "Roles, systems and contributions, kept close to the chronology and the technology involved.",
+      intro: "Professional roles, systems and contributions.",
       timelineLabel: "Professional timeline",
       contributionLabel: "Contributions",
       technologyLabel: "Technologies in the work",
@@ -126,28 +125,6 @@ export const uiCopy = {
       title: "About",
       intro: "Software engineer focused on backend systems, based in Samsun.",
       storyLabel: "Background",
-      currentLabel: "Current interests",
-      educationLabel: "Education",
-      locationLabel: "Based in",
-      signatureLabel: "A note in the margin",
-      interests: [
-        {
-          title: "AI-assisted building",
-          detail: "Tools and workflows for exploring ideas with more range"
-        },
-        {
-          title: "Product design",
-          detail: "Structure, usability and the decisions around the code"
-        },
-        {
-          title: "Interfaces & motion",
-          detail: "Clear interactions with a little character"
-        },
-        {
-          title: "Learning by making",
-          detail: "Turning curiosity into something that works"
-        }
-      ],
       story: [
         "I'm Berkant. I studied Statistics and Computer Science, and today most of my professional work is on production backend systems—mainly Java, Spring and Kafka, together with the data, deployment and observability work behind them.",
         "Lately, I've also been exploring how AI is changing the way software gets made. I enjoy trying new tools, thinking about product design, interfaces and motion, and learning by turning ideas into working things."
@@ -210,7 +187,7 @@ export const uiCopy = {
         "/about": {
           title: "Hakkımda — Berkant Kubat",
           description:
-            "Yazılım mühendisi Berkant Kubat'ın geçmişi, eğitimi ve güncel ilgi alanları."
+            "Yazılım mühendisi Berkant Kubat'ın geçmişi ve eğitimi."
         },
         "/contact": {
           title: "İletişim — Berkant Kubat",
@@ -295,8 +272,7 @@ export const uiCopy = {
       route: "/experience",
       kicker: "Çalışma günlüğü / 2021—2026",
       title: "Deneyim",
-      intro:
-        "Roller, sistemler ve katkılar; kronolojiye ve kullanılan teknolojiye yakın bir anlatımla.",
+      intro: "Profesyonel roller, sistemler ve katkılar.",
       timelineLabel: "Profesyonel zaman çizelgesi",
       contributionLabel: "Katkılar",
       technologyLabel: "İşte kullanılan teknolojiler",
@@ -309,29 +285,6 @@ export const uiCopy = {
       title: "Hakkımda",
       intro: "Samsun'da yaşayan, backend sistemlerine odaklanan yazılım mühendisi.",
       storyLabel: "Geçmiş",
-      currentLabel: "Güncel ilgi alanları",
-      educationLabel: "Eğitim",
-      locationLabel: "Konum",
-      signatureLabel: "Kenar notu",
-      interests: [
-        {
-          title: "Yapay zekâ destekli üretim",
-          detail:
-            "Fikirleri daha geniş bir alanda keşfetmek için araçlar ve iş akışları"
-        },
-        {
-          title: "Ürün tasarımı",
-          detail: "Yapı, kullanılabilirlik ve kodun etrafındaki kararlar"
-        },
-        {
-          title: "Arayüzler ve hareket",
-          detail: "Karakteri olan, anlaşılır etkileşimler"
-        },
-        {
-          title: "Yaparak öğrenmek",
-          detail: "Merakı çalışan bir şeye dönüştürmek"
-        }
-      ],
       story: [
         "Ben Berkant. İstatistik ve Bilgisayar Bilimleri okudum. Son birkaç yıldır ağırlıklı olarak üretim ortamındaki backend sistemleri üzerinde çalışıyorum; Java, Spring ve Kafka'nın yanı sıra veri, dağıtım ve gözlemlenebilirlik tarafıyla da ilgileniyorum.",
         "Son zamanlarda yapay zekânın yazılım üretme biçimini nasıl değiştirdiğini araştırıyorum. Yeni araçları denemekten; ürün tasarımı, arayüzler ve hareket üzerine düşünmekten; fikirleri çalışır hâle getirerek öğrenmekten keyif alıyorum."
