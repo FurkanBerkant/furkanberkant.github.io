@@ -253,12 +253,12 @@ export const visualProjects = [
     id: "tugrul",
     number: "03",
     title: "Tuğrul Hukuk",
-    kicker: "Client web experience",
+    kicker: "Legal practice website",
     year: "2026",
     image: "/images/projects/tugrul-hukuk.jpg",
     imageAlt: "Tuğrul Hukuk and Consultancy website hero in navy and gold",
     description:
-      "A premium, compliance-conscious website for a legal practice. The experience combines a strong editorial system, responsive navigation, 3D details and structured search metadata.",
+      "A compliance-conscious website for a legal practice, combining an editorial content structure, responsive navigation, 3D details and structured search metadata.",
     proof:
       "Live in production for a Samsun-based legal practice, with responsive service content, location-aware search metadata and a compliance-conscious presentation.",
     tags: [

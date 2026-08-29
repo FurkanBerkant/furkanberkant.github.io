@@ -175,13 +175,13 @@ export const visualProjectsTr = [
     id: "tugrul",
     number: "03",
     title: "Tuğrul Hukuk",
-    kicker: "Müşteri web deneyimi",
+    kicker: "Hukuk bürosu web sitesi",
     year: "2026",
     image: "/images/projects/tugrul-hukuk.jpg",
     imageAlt:
       "Tuğrul Hukuk ve Danışmanlık sitesinin lacivert ve altın tonlarındaki açılış bölümü",
     description:
-      "Bir hukuk bürosu için ölçülü ve mevzuat hassasiyetini gözeten bir web sitesi. Güçlü bir editoryal yapı; responsive navigasyon, 3D ayrıntılar ve yapılandırılmış arama metadatasıyla bir araya geliyor.",
+      "Bir hukuk bürosu için mevzuat hassasiyetini gözeten; editoryal içerik yapısını responsive navigasyon, 3D ayrıntılar ve yapılandırılmış arama metadatasıyla bir araya getiren web sitesi.",
     proof:
       "Samsun merkezli bir hukuk bürosu için canlıda çalışıyor; responsive hizmet içerikleri, konum odaklı arama metadatası ve mevzuata duyarlı bir sunum içeriyor.",
     tags: [

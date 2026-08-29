@@ -3,100 +3,139 @@ export const LANGUAGE_STORAGE_KEY = "berkant-portfolio-language";
 export const uiCopy = {
   en: {
     meta: {
-      title: "Berkant Kubat — Software Engineer",
-      description:
-        "Berkant Kubat is a software engineer working on production backend systems, distributed data flows and product-focused software."
+      routes: {
+        "/": {
+          title: "Berkant Kubat — Software Engineer",
+          description:
+            "Berkant Kubat is a software engineer focused on backend systems, data flows and reliable software."
+        },
+        "/technologies": {
+          title: "Technologies — Berkant Kubat",
+          description:
+            "An interactive index of the technologies Berkant Kubat uses."
+        },
+        "/projects": {
+          title: "Projects — Berkant Kubat",
+          description:
+            "Selected software projects by Berkant Kubat, presented with their real media, architecture and source links."
+        },
+        "/experience": {
+          title: "Experience — Berkant Kubat",
+          description:
+            "Berkant Kubat's professional software engineering experience and factual contributions to production systems."
+        },
+        "/about": {
+          title: "About — Berkant Kubat",
+          description:
+            "Background, education and current interests of software engineer Berkant Kubat."
+        },
+        "/contact": {
+          title: "Contact — Berkant Kubat",
+          description:
+            "Email, GitHub, LinkedIn and résumé links for Berkant Kubat."
+        }
+      },
+      notFound: {
+        title: "Page not found — Berkant Kubat",
+        description: "The requested page could not be found."
+      }
     },
     language: {
       label: "Language",
       english: "Switch to English",
       turkish: "Türkçeye geç"
     },
+    theme: {
+      label: "Theme",
+      warmDark: "Warm dark",
+      warmDarkAria: "Use warm dark theme",
+      paperLight: "Paper light",
+      paperLightAria: "Use paper light theme",
+      cyber: "Cyber",
+      cyberAria: "Use cyber theme"
+    },
     skipLink: "Skip to content",
-    brandRole: "Backend systems engineer",
-    navigationLabel: "Primary navigation",
-    mobileNavigationLabel: "Mobile navigation",
-    navigationMeta: "Navigation / 05",
+    navigationLabel: "Portfolio routes",
+    routeLabel: "Current route",
     navigation: {
-      experience: "Experience",
+      home: "Home",
+      technologies: "Technologies",
       projects: "Projects",
-      capabilities: "Stack",
+      experience: "Experience",
       about: "About",
       contact: "Contact"
     },
-    menu: {
-      open: "Open navigation",
-      close: "Close navigation",
-      openLabel: "Menu",
-      closeLabel: "Close"
-    },
-    headerContact: "Let's talk",
     resume: "Résumé",
-    mobileSummary:
-      "Backend systems · Event-driven architecture · Cloud delivery",
-    systemMap: {
-      flow: "production.flow",
-      healthy: "healthy",
-      requests: "requests",
-      events: "EVENTS",
-      services: "SERVICES",
-      data: "DATA",
-      throughput: "throughput",
-      requestFlow: "request flow",
-      async: "ASYNC",
-      observable: "observable by design"
+    home: {
+      command: "$ whoami",
+      handle: "/berkant.dev_",
+      profileLinksLabel: "Public profiles"
     },
-    hero: {
-      availability: "Open to software engineering opportunities",
-      eyebrow: "Backend systems engineer",
-      title: "I build systems that stay fast",
-      titleAccent: "when traffic gets real.",
-      intro:
-        "I'm Berkant. I design production backends with Java, Spring Boot and event-driven architecture—then make them observable, deployable and calm under pressure.",
-      projectsAction: "Explore selected work",
-      rail: "JAVA · SPRING · KAFKA · KUBERNETES · POSTGRESQL",
-      focusLabel: "Engineering focus"
-    },
-    experience: {
-      eyebrow: "01 · EXPERIENCE",
-      title: "Production, not just prototypes.",
-      copy: "Backend work measured by reliability, latency and the systems people actually depend on.",
-      count: "2021—26",
-      productsLabel: "Selected employer product work"
+    technologies: {
+      route: "/technologies",
+      kicker: "Technology index / 17",
+      title: "Technologies",
+      explorerLabel: "Interactive technology explorer",
+      chooseGroup: "Technology groups",
+      groupsLabel: "groups",
+      toolsLabel: "technologies",
+      selectedTechnology: "Selected technology",
+      groupTechnologies: "Technologies in the selected group",
+      activeGroup: "Active group",
+      touchHint: "Hover, focus or select a technology",
+      groups: {
+        build: "Backend",
+        move: "Messaging / Data",
+        ship: "Infrastructure / Delivery",
+        see: "Observability"
+      }
     },
     projects: {
-      eyebrow: "02 · SELECTED WORK",
-      title: "Selected projects.",
-      count: "05 PROJECTS",
-      allProjects: "Browse all public repositories",
-      exploreCode: "Explore code",
-      fps: "24 fps · 06s"
+      route: "/projects",
+      kicker: "Project index / 05",
+      title: "Selected Projects",
+      intro:
+        "Personal and independent software projects shown through their real interfaces, architecture and source.",
+      archiveLabel: "Project index",
+      mediaLabel: "Project media",
+      detailsLabel: "Project notes",
+      technologyLabel: "Technologies used",
+      sourceLabel: "Sources",
+      proofLabel: "Implementation note",
+      architectureLabel: "Architecture flow",
+      pauseMotion: "Pause ReelShelf motion preview",
+      playMotion: "Play ReelShelf motion preview",
+      pauseLabel: "Pause",
+      playLabel: "Play",
+      allProjects: "All public repositories"
     },
-    capabilities: {
-      eyebrow: "03 · CAPABILITIES",
-      title: "From request to production signal.",
-      copy: "A backend toolkit shaped by high-volume data, cloud-native delivery and the unglamorous work of keeping services healthy.",
-      count: "04 SIGNAL LANES"
+    experience: {
+      route: "/experience",
+      kicker: "Work log / 2021—2026",
+      title: "A factual record\nof the work.",
+      intro:
+        "Roles, systems and contributions, kept close to the chronology and the technology involved.",
+      timelineLabel: "Professional timeline",
+      contributionLabel: "Contributions",
+      technologyLabel: "Technologies in the work",
+      productsLabel: "Product context",
+      externalProduct: "Official product page"
     },
     about: {
-      eyebrow: "04 · ABOUT",
-      title: "A little about me.",
-      copy: "A software engineer based in Samsun, Türkiye—curious about how systems, products and new tools come together.",
-      count: "SAMSUN · TR",
-      profileCurrent: "profile.current",
-      profileRole: "SOFTWARE ENGINEER · SAMSUN",
-      exploring: "What I'm exploring now.",
-      interestsLabel: "Current interests",
-      foundation: "Statistics & Computer Science",
-      story: [
-        "I'm Berkant. I studied Statistics and Computer Science, and today most of my professional work is on production backend systems—mainly Java, Spring and Kafka, together with the data, deployment and observability work behind them.",
-        "Lately, I've also been exploring how AI is changing the way software gets made. I enjoy trying new tools, thinking about product design, interfaces and motion, and learning by turning ideas into working things."
-      ],
-      education: "EDUCATION",
+      route: "/about",
+      kicker: "Personal notes",
+      title: "A little context\nbeyond the code.",
+      intro:
+        "A software engineer in Samsun, curious about systems, products and the changing ways software gets made.",
+      storyLabel: "Background",
+      currentLabel: "Current interests",
+      educationLabel: "Education",
+      locationLabel: "Based in",
+      signatureLabel: "A note in the margin",
       interests: [
         {
           title: "AI-assisted building",
-          detail: "Tools, workflows and faster ways to explore ideas"
+          detail: "Tools and workflows for exploring ideas with more range"
         },
         {
           title: "Product design",
@@ -110,126 +149,180 @@ export const uiCopy = {
           title: "Learning by making",
           detail: "Turning curiosity into something that works"
         }
+      ],
+      story: [
+        "I'm Berkant. I studied Statistics and Computer Science, and today most of my professional work is on production backend systems—mainly Java, Spring and Kafka, together with the data, deployment and observability work behind them.",
+        "Lately, I've also been exploring how AI is changing the way software gets made. I enjoy trying new tools, thinking about product design, interfaces and motion, and learning by turning ideas into working things."
       ]
     },
     contact: {
-      eyebrow: "05 · CONTACT",
-      title: "Let's talk.",
-      titleAccent: "Work, products, or a good idea.",
-      copy: "If you'd like to discuss a software engineering role, something you're building, or simply exchange ideas, email is the easiest way to reach me.",
-      availableFor: "AVAILABLE FOR",
-      role: "Software engineering roles",
-      emailLabel: "EMAIL · PREFERRED CONTACT",
-      linksLabel: "Contact links",
-      preferred: "Preferred contact · email"
+      route: "/contact",
+      kicker: "Personal directory",
+      title: "Ways to find me.",
+      intro:
+        "Email, public profiles, résumé and location—collected in one quiet place.",
+      directoryLabel: "Contact directory",
+      emailLabel: "Email",
+      githubLabel: "GitHub",
+      linkedinLabel: "LinkedIn",
+      resumeLabel: "Résumé",
+      locationLabel: "Location",
+      preferred: "Preferred contact: email"
+    },
+    notFound: {
+      code: "404 / route.not_found",
+      title: "This route does not exist.",
+      copy: "The address may have changed, or the page may no longer be available.",
+      action: "Return to index"
     },
     footer: {
-      role: "Software engineer",
+      note: "Personal developer notebook",
       backToTop: "Back to top ↑"
     },
     aria: {
       home: "Berkant Kubat home",
       googlePlaySuffix: " on Google Play",
-      technologiesSuffix: " technologies",
-      architectureSuffix: " architecture flow",
-      practicesSuffix: " engineering practices"
+      technologyIcon: " technology icon",
+      projectArchitecture: " architecture flow",
+      dockSymbol: "Route symbol"
     }
   },
   tr: {
     meta: {
-      title: "Berkant Kubat — Yazılım Mühendisi",
-      description:
-        "Berkant Kubat; üretim backend sistemleri, dağıtık veri akışları ve ürün odaklı yazılımlar üzerinde çalışan bir yazılım mühendisidir."
+      routes: {
+        "/": {
+          title: "Berkant Kubat — Yazılım Mühendisi",
+          description:
+            "Berkant Kubat; backend sistemleri, veri akışları ve güvenilir yazılımlar üzerinde çalışan bir yazılım mühendisidir."
+        },
+        "/technologies": {
+          title: "Teknolojiler — Berkant Kubat",
+          description:
+            "Berkant Kubat'ın kullandığı teknolojilerin etkileşimli dizini."
+        },
+        "/projects": {
+          title: "Projeler — Berkant Kubat",
+          description:
+            "Berkant Kubat'ın gerçek medya, mimari ve kaynak bağlantılarıyla sunulan seçili yazılım projeleri."
+        },
+        "/experience": {
+          title: "Deneyim — Berkant Kubat",
+          description:
+            "Berkant Kubat'ın profesyonel yazılım mühendisliği deneyimi ve üretim sistemlerine somut katkıları."
+        },
+        "/about": {
+          title: "Hakkımda — Berkant Kubat",
+          description:
+            "Yazılım mühendisi Berkant Kubat'ın geçmişi, eğitimi ve güncel ilgi alanları."
+        },
+        "/contact": {
+          title: "İletişim — Berkant Kubat",
+          description:
+            "Berkant Kubat'ın e-posta, GitHub, LinkedIn ve CV bağlantıları."
+        }
+      },
+      notFound: {
+        title: "Sayfa bulunamadı — Berkant Kubat",
+        description: "İstenen sayfa bulunamadı."
+      }
     },
     language: {
       label: "Dil",
       english: "İngilizceye geç",
       turkish: "Türkçeye geç"
     },
+    theme: {
+      label: "Tema",
+      warmDark: "Sıcak koyu",
+      warmDarkAria: "Sıcak koyu temayı kullan",
+      paperLight: "Kâğıt açık",
+      paperLightAria: "Kâğıt açık temayı kullan",
+      cyber: "Siber",
+      cyberAria: "Siber temayı kullan"
+    },
     skipLink: "İçeriğe geç",
-    brandRole: "Backend sistemleri mühendisi",
-    navigationLabel: "Ana menü",
-    mobileNavigationLabel: "Mobil menü",
-    navigationMeta: "Menü / 05",
+    navigationLabel: "Portfolyo rotaları",
+    routeLabel: "Geçerli rota",
     navigation: {
-      experience: "Deneyim",
+      home: "Ana sayfa",
+      technologies: "Teknolojiler",
       projects: "Projeler",
-      capabilities: "Teknolojiler",
+      experience: "Deneyim",
       about: "Hakkımda",
       contact: "İletişim"
     },
-    menu: {
-      open: "Menüyü aç",
-      close: "Menüyü kapat",
-      openLabel: "Menü",
-      closeLabel: "Kapat"
-    },
-    headerContact: "İletişime geç",
     resume: "CV",
-    mobileSummary: "Backend sistemleri · Olay güdümlü mimari · Bulut ortamları",
-    systemMap: {
-      flow: "uretim.akisi",
-      healthy: "sağlıklı",
-      requests: "istekler",
-      events: "OLAYLAR",
-      services: "SERVİSLER",
-      data: "VERİ",
-      throughput: "veri akışı",
-      requestFlow: "istek akışı",
-      async: "ASENKRON",
-      observable: "tasarımdan itibaren gözlemlenebilir"
+    home: {
+      command: "$ whoami",
+      handle: "/berkant.dev_",
+      profileLinksLabel: "Herkese açık profiller"
     },
-    hero: {
-      availability: "Yazılım mühendisliği fırsatlarına açığım",
-      eyebrow: "Backend sistemleri mühendisi",
-      title: "Gerçek trafik altında da",
-      titleAccent: "hızlı kalan sistemler geliştiriyorum.",
-      intro:
-        "Ben Berkant. Java, Spring Boot ve olay güdümlü mimariyle üretim backend'leri tasarlıyor; onları gözlemlenebilir, dağıtılabilir ve yük altında sakin kalacak hâle getiriyorum.",
-      projectsAction: "Seçili projeleri incele",
-      rail: "JAVA · SPRING · KAFKA · KUBERNETES · POSTGRESQL",
-      focusLabel: "Mühendislik odağı"
-    },
-    experience: {
-      eyebrow: "01 · DENEYİM",
-      title: "Prototip değil, üretim.",
-      copy: "Güvenilirlik, gecikme ve insanların gerçekten kullandığı sistemlerle ölçülen backend çalışmaları.",
-      count: "2021—26",
-      productsLabel: "İş deneyiminden seçili ürünler"
+    technologies: {
+      route: "/technologies",
+      kicker: "Teknoloji dizini / 17",
+      title: "Teknolojiler",
+      explorerLabel: "Etkileşimli teknoloji gezgini",
+      chooseGroup: "Teknoloji grupları",
+      groupsLabel: "grup",
+      toolsLabel: "teknoloji",
+      selectedTechnology: "Seçili teknoloji",
+      groupTechnologies: "Seçili gruptaki teknolojiler",
+      activeGroup: "Etkin grup",
+      touchHint: "Bir teknolojiye gel, odaklan veya dokun",
+      groups: {
+        build: "Backend",
+        move: "Mesajlaşma / Veri",
+        ship: "Altyapı / Dağıtım",
+        see: "Gözlemlenebilirlik"
+      }
     },
     projects: {
-      eyebrow: "02 · SEÇİLİ PROJELER",
-      title: "Seçili projeler.",
-      count: "05 PROJE",
-      allProjects: "Tüm açık repoları görüntüle",
-      exploreCode: "Kodu incele",
-      fps: "24 fps · 06s"
+      route: "/projects",
+      kicker: "Proje dizini / 05",
+      title: "Seçili projeler",
+      intro:
+        "Gerçek arayüzleri, mimarileri ve kaynakları üzerinden gösterilen kişisel ve bağımsız yazılım projeleri.",
+      archiveLabel: "Proje dizini",
+      mediaLabel: "Proje medyası",
+      detailsLabel: "Proje notları",
+      technologyLabel: "Kullanılan teknolojiler",
+      sourceLabel: "Kaynaklar",
+      proofLabel: "Uygulama notu",
+      architectureLabel: "Mimari akış",
+      pauseMotion: "ReelShelf hareketli önizlemesini durdur",
+      playMotion: "ReelShelf hareketli önizlemesini oynat",
+      pauseLabel: "Durdur",
+      playLabel: "Oynat",
+      allProjects: "Tüm açık repolar"
     },
-    capabilities: {
-      eyebrow: "03 · YETKİNLİKLER",
-      title: "İstekten üretim sinyaline.",
-      copy: "Yüksek hacimli veri, bulut tabanlı teslimat ve servisleri sağlıklı tutan görünmez işlerle şekillenen bir backend araç seti.",
-      count: "04 SİNYAL HATTI"
+    experience: {
+      route: "/experience",
+      kicker: "Çalışma günlüğü / 2021—2026",
+      title: "Yapılan işlerin\nsomut kaydı.",
+      intro:
+        "Roller, sistemler ve katkılar; kronolojiye ve kullanılan teknolojiye yakın bir anlatımla.",
+      timelineLabel: "Profesyonel zaman çizelgesi",
+      contributionLabel: "Katkılar",
+      technologyLabel: "İşte kullanılan teknolojiler",
+      productsLabel: "Ürün bağlamı",
+      externalProduct: "Resmî ürün sayfası"
     },
     about: {
-      eyebrow: "04 · HAKKIMDA",
-      title: "Kısaca ben.",
-      copy: "Samsun'da yaşayan; sistemlerin, ürünlerin ve yeni araçların nasıl bir araya geldiğini merak eden bir yazılım mühendisiyim.",
-      count: "SAMSUN · TR",
-      profileCurrent: "profil.guncel",
-      profileRole: "YAZILIM MÜHENDİSİ · SAMSUN",
-      exploring: "Bu aralar neleri araştırıyorum.",
-      interestsLabel: "Güncel ilgi alanlarım",
-      foundation: "İstatistik ve Bilgisayar Bilimleri",
-      story: [
-        "Ben Berkant. İstatistik ve Bilgisayar Bilimleri okudum. Son birkaç yıldır ağırlıklı olarak üretim ortamındaki backend sistemleri üzerinde çalışıyorum; Java, Spring ve Kafka'nın yanı sıra veri, dağıtım ve gözlemlenebilirlik tarafıyla da ilgileniyorum.",
-        "Son zamanlarda yapay zekânın yazılım üretme biçimini nasıl değiştirdiğini araştırıyorum. Yeni araçları denemekten; ürün tasarımı, arayüzler ve hareket üzerine düşünmekten; fikirleri çalışır hâle getirerek öğrenmekten keyif alıyorum."
-      ],
-      education: "EĞİTİM",
+      route: "/about",
+      kicker: "Kişisel notlar",
+      title: "Kodun ötesinde\nbiraz bağlam.",
+      intro:
+        "Samsun'da yaşayan; sistemleri, ürünleri ve yazılım üretmenin değişen biçimlerini merak eden bir yazılım mühendisi.",
+      storyLabel: "Geçmiş",
+      currentLabel: "Güncel ilgi alanları",
+      educationLabel: "Eğitim",
+      locationLabel: "Konum",
+      signatureLabel: "Kenar notu",
       interests: [
         {
           title: "Yapay zekâ destekli üretim",
-          detail: "Fikirleri daha hızlı keşfetmek için araçlar ve iş akışları"
+          detail:
+            "Fikirleri daha geniş bir alanda keşfetmek için araçlar ve iş akışları"
         },
         {
           title: "Ürün tasarımı",
@@ -243,29 +336,41 @@ export const uiCopy = {
           title: "Yaparak öğrenmek",
           detail: "Merakı çalışan bir şeye dönüştürmek"
         }
+      ],
+      story: [
+        "Ben Berkant. İstatistik ve Bilgisayar Bilimleri okudum. Son birkaç yıldır ağırlıklı olarak üretim ortamındaki backend sistemleri üzerinde çalışıyorum; Java, Spring ve Kafka'nın yanı sıra veri, dağıtım ve gözlemlenebilirlik tarafıyla da ilgileniyorum.",
+        "Son zamanlarda yapay zekânın yazılım üretme biçimini nasıl değiştirdiğini araştırıyorum. Yeni araçları denemekten; ürün tasarımı, arayüzler ve hareket üzerine düşünmekten; fikirleri çalışır hâle getirerek öğrenmekten keyif alıyorum."
       ]
     },
     contact: {
-      eyebrow: "05 · İLETİŞİM",
-      title: "Konuşalım.",
-      titleAccent: "İş, ürünler veya iyi bir fikir üzerine.",
-      copy: "Bir yazılım mühendisliği rolünü, üzerinde çalıştığın bir ürünü ya da aklındaki bir fikri konuşmak istersen bana yazabilirsin. Bana ulaşmanın en kolay yolu e-posta.",
-      availableFor: "AÇIK OLDUĞUM FIRSATLAR",
-      role: "Yazılım mühendisliği rolleri",
-      emailLabel: "E-POSTA · ÖNCELİKLİ İLETİŞİM",
-      linksLabel: "İletişim bağlantıları",
-      preferred: "Öncelikli iletişim · e-posta"
+      route: "/contact",
+      kicker: "Kişisel dizin",
+      title: "Bana ulaşabileceğin yerler.",
+      intro: "E-posta, herkese açık profiller, CV ve konum—sessiz bir dizinde.",
+      directoryLabel: "İletişim dizini",
+      emailLabel: "E-posta",
+      githubLabel: "GitHub",
+      linkedinLabel: "LinkedIn",
+      resumeLabel: "CV",
+      locationLabel: "Konum",
+      preferred: "Öncelikli iletişim: e-posta"
+    },
+    notFound: {
+      code: "404 / rota.bulunamadi",
+      title: "Bu rota mevcut değil.",
+      copy: "Adres değişmiş veya sayfa artık kullanılamıyor olabilir.",
+      action: "Dizine dön"
     },
     footer: {
-      role: "Yazılım mühendisi",
+      note: "Kişisel geliştirici defteri",
       backToTop: "Yukarı dön ↑"
     },
     aria: {
       home: "Berkant Kubat ana sayfa",
       googlePlaySuffix: " Google Play sayfası",
-      technologiesSuffix: " teknolojileri",
-      architectureSuffix: " mimari akışı",
-      practicesSuffix: " mühendislik pratikleri"
+      technologyIcon: " teknoloji ikonu",
+      projectArchitecture: " mimari akışı",
+      dockSymbol: "Rota sembolü"
     }
   }
 };

@@ -1,10 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0a0b0c" />
+    <meta name="theme-color" content="#0c0b09" />
     <meta name="color-scheme" content="dark" />
+    <script>
+      (function () {
+        var theme = "dark";
+        var themeColors = {
+          dark: "#0c0b09",
+          light: "#f3ecdc",
+          cyber: "#02070b"
+        };
+
+        try {
+          var storedTheme = localStorage.getItem("berkant-portfolio-theme");
+
+          if (Object.prototype.hasOwnProperty.call(themeColors, storedTheme)) {
+            theme = storedTheme;
+          }
+        } catch (error) {}
+
+        document.documentElement.setAttribute("data-theme", theme);
+
+        var themeColor = document.querySelector('meta[name="theme-color"]');
+        var colorScheme = document.querySelector('meta[name="color-scheme"]');
+
+        if (themeColor) {
+          themeColor.setAttribute("content", themeColors[theme]);
+        }
+
+        if (colorScheme) {
+          colorScheme.setAttribute(
+            "content",
+            theme === "light" ? "light" : "dark"
+          );
+        }
+      })();
+    </script>
     <meta
       name="robots"
       content="index, follow, max-image-preview:large, max-snippet:-1"
@@ -13,7 +47,7 @@
     <title>Berkant Kubat — Software Engineer</title>
     <meta
       name="description"
-      content="Backend systems engineer building high-performance, event-driven services with Java, Spring Boot, Kafka, Kubernetes, and cloud-native infrastructure."
+      content="Berkant Kubat is a software engineer focused on Java backend systems, distributed data flows and reliable software."
     />
     <meta name="author" content="Berkant Kubat (@FurkanBerkant)" />
     <link rel="canonical" href="https://furkanberkant.github.io/" />
@@ -24,13 +58,10 @@
     <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content="Berkant Kubat" />
     <meta property="og:url" content="https://furkanberkant.github.io/" />
-    <meta
-      property="og:title"
-      content="Berkant Kubat | Backend Systems Engineer"
-    />
+    <meta property="og:title" content="Berkant Kubat | Software Engineer" />
     <meta
       property="og:description"
-      content="Backend systems engineer building high-performance, event-driven services with Java, Spring Boot, Kafka, Kubernetes, and cloud-native infrastructure."
+      content="Berkant Kubat is a software engineer focused on Java backend systems, distributed data flows and reliable software."
     />
     <meta
       property="og:image"
@@ -41,22 +72,16 @@
       content="https://furkanberkant.github.io/og.png"
     />
     <meta property="og:image:type" content="image/png" />
-    <meta
-      property="og:image:alt"
-      content="Berkant Kubat — Backend Systems Engineer"
-    />
+    <meta property="og:image:alt" content="Berkant Kubat — Software Engineer" />
     <meta property="og:image:width" content="1731" />
     <meta property="og:image:height" content="909" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://furkanberkant.github.io/" />
-    <meta
-      name="twitter:title"
-      content="Berkant Kubat | Backend Systems Engineer"
-    />
+    <meta name="twitter:title" content="Berkant Kubat | Software Engineer" />
     <meta
       name="twitter:description"
-      content="Backend systems engineer building high-performance, event-driven services with Java, Spring Boot, Kafka, Kubernetes, and cloud-native infrastructure."
+      content="Berkant Kubat is a software engineer focused on Java backend systems, distributed data flows and reliable software."
     />
     <meta
       name="twitter:image"
@@ -64,7 +89,7 @@
     />
     <meta
       name="twitter:image:alt"
-      content="Berkant Kubat — Backend Systems Engineer"
+      content="Berkant Kubat — Software Engineer"
     />
 
     <link
@@ -100,15 +125,15 @@
             "@type": "WebSite",
             "@id": "https://furkanberkant.github.io/#website",
             "url": "https://furkanberkant.github.io/",
-            "name": "Berkant Kubat | Backend Systems Engineer",
-            "description": "Backend systems engineer building high-performance, event-driven services.",
+            "name": "Berkant Kubat | Software Engineer",
+            "description": "Software engineer focused on Java backend systems, distributed data flows and reliable software.",
             "inLanguage": "en"
           },
           {
             "@type": "ProfilePage",
             "@id": "https://furkanberkant.github.io/#profile",
             "url": "https://furkanberkant.github.io/",
-            "name": "Berkant Kubat — Backend Systems Engineer",
+            "name": "Berkant Kubat — Software Engineer",
             "isPartOf": {
               "@id": "https://furkanberkant.github.io/#website"
             },
@@ -122,8 +147,8 @@
             "name": "Berkant Kubat",
             "alternateName": "FurkanBerkant",
             "url": "https://furkanberkant.github.io/",
-            "jobTitle": "Backend Systems Engineer",
-            "description": "Backend systems engineer focused on event-driven architecture, performance, observability, and cloud-native delivery.",
+            "jobTitle": "Software Engineer",
+            "description": "Software engineer working with Java backend systems, event-driven architecture, data and observability.",
             "homeLocation": {
               "@type": "Place",
               "name": "Samsun, Türkiye"

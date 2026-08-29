@@ -1,9 +1,26 @@
 html {
   min-width: 320px;
   min-height: 100%;
-  background: #0a0b0c;
+  background-color: #0c0b09;
+  color-scheme: dark;
+  transition: background-color 220ms ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html[data-theme="dark"] {
+  background-color: #0c0b09;
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  background-color: #f3ecdc;
+  color-scheme: light;
+}
+
+html[data-theme="cyber"] {
+  background-color: #02070b;
+  color-scheme: dark;
 }
 
 body,
