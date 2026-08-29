@@ -455,9 +455,7 @@ it("switches language and route metadata without leaving the route", () => {
   expect(window.location.pathname).toBe("/experience");
   expect(document.documentElement.lang).toBe("tr");
   expect(document.title).toBe("Deneyim — Berkant Kubat");
-  expect(div.querySelector(".experience-page h1").textContent).toContain(
-    "Yapılan işlerin"
-  );
+  expect(div.querySelector(".experience-page h1").textContent).toBe("Deneyim");
   expect(div.textContent).toContain("Uzaktan · İstanbul ofisi");
   expect(window.localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe("tr");
   expect(window.gtag).toHaveBeenCalledWith("event", "language_change", {

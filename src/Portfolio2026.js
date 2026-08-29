@@ -1263,14 +1263,14 @@ const ExperiencePage = ({copy, experiencesData}) => (
             <span>{String(index + 1).padStart(2, "0")}</span>
             <i />
           </div>
-          <header className="chronicle-entry__identity" data-reveal>
+          <header className="chronicle-entry__identity">
             <p>{experience.type}</p>
             <h2>{experience.company}</h2>
             <strong>{experience.role}</strong>
             <time>{experience.period}</time>
             <small>{experience.workplace}</small>
           </header>
-          <div className="chronicle-entry__record" data-reveal>
+          <div className="chronicle-entry__record">
             <p className="chronicle-entry__summary">{experience.summary}</p>
             <h3>{copy.experience.contributionLabel}</h3>
             <ul className="chronicle-entry__highlights">
@@ -1286,7 +1286,7 @@ const ExperiencePage = ({copy, experiencesData}) => (
             </div>
           </div>
           {experience.products && (
-            <div className="chronicle-entry__products" data-reveal>
+            <div className="chronicle-entry__products">
               <h3>{copy.experience.productsLabel}</h3>
               <div>
                 {experience.products.map(product => (

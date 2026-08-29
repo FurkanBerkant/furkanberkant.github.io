@@ -111,7 +111,7 @@ export const uiCopy = {
     experience: {
       route: "/experience",
       kicker: "Work log / 2021—2026",
-      title: "A factual record\nof the work.",
+      title: "Experience",
       intro:
         "Roles, systems and contributions, kept close to the chronology and the technology involved.",
       timelineLabel: "Professional timeline",
@@ -296,7 +296,7 @@ export const uiCopy = {
     experience: {
       route: "/experience",
       kicker: "Çalışma günlüğü / 2021—2026",
-      title: "Yapılan işlerin\nsomut kaydı.",
+      title: "Deneyim",
       intro:
         "Roller, sistemler ve katkılar; kronolojiye ve kullanılan teknolojiye yakın bir anlatımla.",
       timelineLabel: "Profesyonel zaman çizelgesi",

@@ -1670,11 +1670,11 @@ body {
 .experience-intro {
   position: relative;
   display: grid;
-  min-height: 74vh;
-  padding: 5rem 0 6rem;
-  grid-template-columns: 1.35fr 0.65fr;
-  align-content: center;
-  gap: 2rem 5rem;
+  min-height: 0;
+  padding: clamp(1.5rem, 3vw, 3rem) 0 clamp(4rem, 7vw, 6rem);
+  grid-template-columns: minmax(0, 1.25fr) minmax(16rem, 0.75fr);
+  align-items: end;
+  gap: 1.5rem 5rem;
 }
 
 .experience-intro > span,
@@ -1684,6 +1684,7 @@ body {
 
 .experience-intro p {
   max-width: 30rem;
+  margin-bottom: 0;
   align-self: end;
   color: var(--ink-soft);
 }
@@ -1701,7 +1702,7 @@ body {
 .chronicle-entry {
   position: relative;
   display: grid;
-  padding: 6rem 0;
+  padding: clamp(4.5rem, 7vw, 6rem) 0;
   grid-template-columns: 5rem 0.52fr 1.48fr;
   gap: 2rem;
 }
@@ -3267,3 +3268,28 @@ body {
   }
 }
 
+
+/* Experience content stays legible even if observers are delayed or unavailable. */
+.experience-page .chronicle-entry [data-reveal],
+.experience-page .chronicle-entry__identity,
+.experience-page .chronicle-entry__record,
+.experience-page .chronicle-entry__products {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 820px) {
+  .experience-intro {
+    min-height: 0;
+    padding: 2rem 0 4rem;
+    justify-content: flex-start;
+  }
+
+  .chronicle-entry__identity {
+    margin-bottom: 1.5rem;
+  }
+
+  .chronicle-entry__summary {
+    margin-bottom: 2.5rem;
+  }
+}
