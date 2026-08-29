@@ -156,9 +156,8 @@ export const uiCopy = {
     contact: {
       route: "/contact",
       kicker: "Personal directory",
-      title: "Ways to find me.",
-      intro:
-        "Email, public profiles, résumé and location—collected in one quiet place.",
+      title: "Contact",
+      intro: "Email, public profiles, résumé and location.",
       directoryLabel: "Contact directory",
       emailLabel: "Email",
       githubLabel: "GitHub",
@@ -341,8 +340,8 @@ export const uiCopy = {
     contact: {
       route: "/contact",
       kicker: "Kişisel dizin",
-      title: "Bana ulaşabileceğin yerler.",
-      intro: "E-posta, herkese açık profiller, CV ve konum—sessiz bir dizinde.",
+      title: "İletişim",
+      intro: "E-posta, herkese açık profiller, CV ve konum.",
       directoryLabel: "İletişim dizini",
       emailLabel: "E-posta",
       githubLabel: "GitHub",

@@ -1971,8 +1971,9 @@ body {
 .about-fabric,
 .contact-page {
   display: grid;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: min(100vh, 58rem);
+  min-height: min(100dvh, 58rem);
+  padding-top: clamp(7rem, 11vh, 10rem);
   padding-bottom: 9rem;
   grid-template-columns: 0.8fr 1.2fr;
   align-items: center;
@@ -2003,7 +2004,7 @@ body {
 }
 
 .contact-intro h1 {
-  font-size: clamp(3.8rem, 7vw, 7.4rem);
+  font-size: clamp(3.6rem, 6.5vw, 6.8rem);
 }
 
 .contact-intro p {
@@ -3056,5 +3057,16 @@ body {
 
   .about-fabric {
     gap: 2rem;
+  }
+}
+
+@media (max-width: 820px) {
+  .contact-page {
+    min-height: auto;
+    padding-top: 8rem;
+  }
+
+  .contact-intro h1 {
+    font-size: clamp(3.2rem, 15vw, 5.5rem);
   }
 }
