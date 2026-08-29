@@ -30,6 +30,7 @@ import {
   uiCopy
 } from "./portfolioI18n";
 import {trackEvent} from "./analytics";
+import {createTechnologyScene} from "./technologyScene";
 import "./Portfolio2026.scss";
 
 const navigationItems = [
@@ -580,14 +581,15 @@ const HomePage = ({copy, profileData, playIntro, theme, reducedMotion}) => {
   );
 };
 
-const technologyNodeDepths = [18, 54, 32, 72, 42, 64];
-
-const TechnologyExplorer = ({copy, capabilitiesData, reducedMotion}) => {
+const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
   const [activeId, setActiveId] = React.useState(capabilitiesData[0].id);
   const [activeTechnologyId, setActiveTechnologyId] = React.useState(
     capabilitiesData[0].technologyIds[0]
   );
+  const [sceneReady, setSceneReady] = React.useState(false);
   const stageRef = React.useRef(null);
+  const canvasRef = React.useRef(null);
+  const sceneRef = React.useRef(null);
   const active =
     capabilitiesData.find(capability => capability.id === activeId) ||
     capabilitiesData[0];
@@ -595,8 +597,63 @@ const TechnologyExplorer = ({copy, capabilitiesData, reducedMotion}) => {
     ? activeTechnologyId
     : active.technologyIds[0];
   const activeTechnology = technologies[resolvedTechnologyId];
-  const activeTechnologyIndex =
-    active.technologyIds.indexOf(resolvedTechnologyId);
+  const sceneStateRef = React.useRef({
+    activeId: active.id,
+    technologyId: resolvedTechnologyId
+  });
+  sceneStateRef.current = {
+    activeId: active.id,
+    technologyId: resolvedTechnologyId
+  };
+
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === "test") {
+      return undefined;
+    }
+
+    const stage = stageRef.current;
+    const canvas = canvasRef.current;
+    if (!stage || !canvas) {
+      return undefined;
+    }
+
+    let cancelled = false;
+    let controller = null;
+
+    createTechnologyScene({
+      canvas,
+      container: stage,
+      capabilitiesData,
+      stateRef: sceneStateRef,
+      reducedMotion,
+      onReady: () => {
+        if (!cancelled) {
+          setSceneReady(true);
+        }
+      }
+    })
+      .then(instance => {
+        if (cancelled) {
+          instance?.dispose();
+          return;
+        }
+        controller = instance;
+        sceneRef.current = instance;
+      })
+      .catch(() => {
+        // WebGL unavailable: the DOM fallback stays visible.
+      });
+
+    return () => {
+      cancelled = true;
+      controller?.dispose();
+      sceneRef.current = null;
+    };
+  }, [capabilitiesData, reducedMotion]);
+
+  React.useEffect(() => {
+    sceneRef.current?.refresh();
+  }, [activeId, resolvedTechnologyId]);
 
   const selectGroup = capability => {
     setActiveId(capability.id);
@@ -627,38 +684,10 @@ const TechnologyExplorer = ({copy, capabilitiesData, reducedMotion}) => {
     document.getElementById(`technology-tab-${nextCapability.id}`)?.focus();
   };
 
-  const updateScene = event => {
-    const stage = stageRef.current;
-    if (!stage || reducedMotion || event.pointerType === "touch") {
-      return;
-    }
-
-    const rect = stage.getBoundingClientRect();
-    const x = Math.min(
-      Math.max((event.clientX - rect.left) / rect.width, 0),
-      1
-    );
-    const y = Math.min(
-      Math.max((event.clientY - rect.top) / rect.height, 0),
-      1
-    );
-    stage.style.setProperty("--scene-light-x", `${x * 100}%`);
-    stage.style.setProperty("--scene-light-y", `${y * 100}%`);
-    stage.style.setProperty("--scene-tilt-x", `${(0.5 - y) * 6}deg`);
-    stage.style.setProperty("--scene-tilt-y", `${(x - 0.5) * 8}deg`);
-  };
-
-  const resetScene = () => {
-    stageRef.current?.style.setProperty("--scene-light-x", "68%");
-    stageRef.current?.style.setProperty("--scene-light-y", "30%");
-    stageRef.current?.style.setProperty("--scene-tilt-x", "0deg");
-    stageRef.current?.style.setProperty("--scene-tilt-y", "0deg");
-  };
-
   return (
     <section className="technology-explorer" aria-label={copy.explorerLabel}>
       <header className="technology-explorer__header">
-        <code>stack.map</code>
+        <code>stack.render</code>
         <span>
           {String(capabilitiesData.length).padStart(2, "0")} {copy.groupsLabel}
           <i aria-hidden="true"> / </i>
@@ -668,9 +697,58 @@ const TechnologyExplorer = ({copy, capabilitiesData, reducedMotion}) => {
       </header>
 
       <div className="technology-explorer__body">
-        <div className="technology-explorer__groups">
-          <p>{copy.chooseGroup}</p>
-          <div role="tablist" aria-label={copy.chooseGroup}>
+        <div
+          className="technology-stage"
+          ref={stageRef}
+          data-reduced-motion={reducedMotion ? "true" : "false"}
+          data-scene-ready={sceneReady ? "true" : "false"}
+        >
+          <canvas
+            className="technology-stage__canvas"
+            ref={canvasRef}
+            aria-hidden="true"
+          />
+          <div className="technology-stage__fallback" aria-hidden="true">
+            {[...capabilitiesData].reverse().map(capability => (
+              <div
+                key={capability.id}
+                className={`technology-stage__slab ${
+                  capability.id === active.id ? "is-active" : ""
+                }`}
+              >
+                <span>{copy.groups[capability.id]}</span>
+              </div>
+            ))}
+          </div>
+          <p className="technology-stage__hint">{copy.sceneHint}</p>
+          <div
+            className="technology-stage__readout"
+            id="technology-scene"
+            role="tabpanel"
+            aria-labelledby={`technology-tab-${active.id}`}
+            aria-live="polite"
+          >
+            <span>{copy.selectedTechnology}</span>
+            <div className="technology-stage__readout-row">
+              <img src={activeTechnology.icon} alt="" aria-hidden="true" />
+              <strong>{activeTechnology.name}</strong>
+            </div>
+            <small>
+              {copy.groups[active.id]}
+              <i aria-hidden="true"> · </i>
+              {String(active.technologyIds.indexOf(resolvedTechnologyId) + 1).padStart(2, "0")}
+              /{String(active.technologyIds.length).padStart(2, "0")}
+            </small>
+          </div>
+        </div>
+
+        <div className="technology-panel">
+          <p className="technology-panel__label">{copy.chooseGroup}</p>
+          <div
+            className="technology-panel__groups"
+            role="tablist"
+            aria-label={copy.chooseGroup}
+          >
             {capabilitiesData.map((capability, index) => (
               <button
                 type="button"
@@ -693,87 +771,32 @@ const TechnologyExplorer = ({copy, capabilitiesData, reducedMotion}) => {
               </button>
             ))}
           </div>
-        </div>
 
-        <div
-          className="technology-scene"
-          id="technology-scene"
-          role="tabpanel"
-          aria-labelledby={`technology-tab-${active.id}`}
-          data-reduced-motion={reducedMotion ? "true" : "false"}
-          ref={stageRef}
-          onPointerMove={updateScene}
-          onPointerLeave={resetScene}
-        >
-          <div className="technology-scene__grid" aria-hidden="true" />
+          <ul
+            className="technology-panel__nodes"
+            aria-label={copy.groupTechnologies}
+          >
+            {active.technologyIds.map(technologyId => {
+              const technology = technologies[technologyId];
+              const selected = technologyId === resolvedTechnologyId;
 
-          <div className="technology-space" key={active.id}>
-            <div
-              className="technology-space__ring technology-space__ring--wide"
-              aria-hidden="true"
-            />
-            <div
-              className="technology-space__ring technology-space__ring--tall"
-              aria-hidden="true"
-            />
-            <div
-              className="technology-space__ring technology-space__ring--inner"
-              aria-hidden="true"
-            />
-
-            <div className="technology-space__focus" aria-live="polite">
-              <span>{copy.selectedTechnology}</span>
-              <img src={activeTechnology.icon} alt="" aria-hidden="true" />
-              <strong>{activeTechnology.name}</strong>
-              <small>
-                {copy.groups[active.id]}
-                <i aria-hidden="true"> · </i>
-                {String(activeTechnologyIndex + 1).padStart(2, "0")}/
-                {String(active.technologyIds.length).padStart(2, "0")}
-              </small>
-            </div>
-
-            <ul
-              className="technology-space__nodes"
-              aria-label={copy.groupTechnologies}
-            >
-              {active.technologyIds.map((technologyId, index) => {
-                const technology = technologies[technologyId];
-                const angle = (360 / active.technologyIds.length) * index - 90;
-                const selected = technologyId === resolvedTechnologyId;
-
-                return (
-                  <li
-                    key={technologyId}
-                    className={selected ? "is-selected" : ""}
-                    style={{
-                      "--node-angle": `${angle}deg`,
-                      "--node-angle-negative": `${-angle}deg`,
-                      "--node-depth": `${technologyNodeDepths[index]}px`,
-                      "--node-delay": `${index * 55}ms`
-                    }}
+              return (
+                <li
+                  key={technologyId}
+                  className={selected ? "is-selected" : ""}
+                >
+                  <button
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setActiveTechnologyId(technologyId)}
                   >
-                    <button
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => setActiveTechnologyId(technologyId)}
-                      onMouseEnter={() => setActiveTechnologyId(technologyId)}
-                      onFocus={() => setActiveTechnologyId(technologyId)}
-                    >
-                      <img src={technology.icon} alt="" aria-hidden="true" />
-                      <span>{technology.name}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          <footer className="technology-scene__status">
-            <span>{copy.activeGroup}</span>
-            <strong>{copy.groups[active.id]}</strong>
-            <small>{copy.touchHint}</small>
-          </footer>
+                    <img src={technology.icon} alt="" aria-hidden="true" />
+                    <span>{technology.name}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </div>
     </section>
@@ -790,7 +813,7 @@ const TechnologiesPage = ({copy, capabilitiesData, reducedMotion}) => (
       <h1 tabIndex="-1">{copy.technologies.title}</h1>
     </header>
 
-    <TechnologyExplorer
+    <TechnologyStage
       copy={copy.technologies}
       capabilitiesData={capabilitiesData}
       reducedMotion={reducedMotion}

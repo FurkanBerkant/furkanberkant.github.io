@@ -81,8 +81,7 @@ export const uiCopy = {
       toolsLabel: "technologies",
       selectedTechnology: "Selected technology",
       groupTechnologies: "Technologies in the selected group",
-      activeGroup: "Active group",
-      touchHint: "Hover, focus or select a technology",
+      sceneHint: "Drag to rotate the stack",
       groups: {
         build: "Backend",
         move: "Messaging / Data",
@@ -267,8 +266,7 @@ export const uiCopy = {
       toolsLabel: "teknoloji",
       selectedTechnology: "Seçili teknoloji",
       groupTechnologies: "Seçili gruptaki teknolojiler",
-      activeGroup: "Etkin grup",
-      touchHint: "Bir teknolojiye gel, odaklan veya dokun",
+      sceneHint: "Yığını döndürmek için sürükle",
       groups: {
         build: "Backend",
         move: "Mesajlaşma / Veri",
