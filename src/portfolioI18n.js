@@ -123,9 +123,8 @@ export const uiCopy = {
     about: {
       route: "/about",
       kicker: "Personal notes",
-      title: "A little context\nbeyond the code.",
-      intro:
-        "A software engineer in Samsun, curious about systems, products and the changing ways software gets made.",
+      title: "About",
+      intro: "Software engineer focused on backend systems, based in Samsun.",
       storyLabel: "Background",
       currentLabel: "Current interests",
       educationLabel: "Education",
@@ -308,9 +307,8 @@ export const uiCopy = {
     about: {
       route: "/about",
       kicker: "Kişisel notlar",
-      title: "Kodun ötesinde\nbiraz bağlam.",
-      intro:
-        "Samsun'da yaşayan; sistemleri, ürünleri ve yazılım üretmenin değişen biçimlerini merak eden bir yazılım mühendisi.",
+      title: "Hakkımda",
+      intro: "Samsun'da yaşayan, backend sistemlerine odaklanan yazılım mühendisi.",
       storyLabel: "Geçmiş",
       currentLabel: "Güncel ilgi alanları",
       educationLabel: "Eğitim",

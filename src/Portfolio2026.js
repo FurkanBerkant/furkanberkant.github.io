@@ -1326,13 +1326,13 @@ const SignatureMark = ({label}) => (
 const WovenSample = () => (
   <div className="woven-sample" aria-hidden="true">
     <div className="woven-sample__threads" />
-    <span>BK / SAMSUN</span>
+    <span>BK / ABOUT</span>
     <strong>
-      NOTES FROM
+      BERKANT
       <br />
-      THE MARGIN
+      KUBAT
     </strong>
-    <small>41.2867° N</small>
+    <small>PERSONAL NOTES</small>
   </div>
 );
 
@@ -1374,21 +1374,7 @@ const AboutPage = ({copy, profileData, educationData}) => (
         </dl>
       </aside>
 
-      <section className="about-interests" data-reveal>
-        <header>
-          <span>04 / current.txt</span>
-          <h2>{copy.about.currentLabel}</h2>
-        </header>
-        <ol>
-          {copy.about.interests.map((interest, index) => (
-            <li key={interest.title}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <strong>{interest.title}</strong>
-              <p>{interest.detail}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
+
     </section>
   </div>
 );

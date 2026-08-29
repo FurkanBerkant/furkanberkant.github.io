@@ -325,8 +325,8 @@ it("renders every route independently with the preserved real content", () => {
   expect(rendered.div.querySelector(".about-collage")).not.toBeNull();
   expect(rendered.div.querySelector(".signature-mark svg")).not.toBeNull();
   expect(rendered.div.querySelector(".woven-sample")).not.toBeNull();
-  expect(rendered.div.querySelectorAll(".about-interests li")).toHaveLength(4);
-  expect(rendered.div.textContent).toContain("how AI is changing");
+  expect(rendered.div.querySelector(".about-interests")).toBeNull();
+  expect(rendered.div.textContent).toContain("Statistics and Computer Science");
   rendered.cleanup();
 
   rendered = renderAt("/contact");
@@ -484,8 +484,8 @@ it("preserves theme and language through client navigation and direct entry", ()
     "cyber"
   );
   expect(document.documentElement.lang).toBe("tr");
-  expect(rendered.div.querySelector(".about-page h1").textContent).toContain(
-    "Kodun ötesinde"
+  expect(rendered.div.querySelector(".about-page h1").textContent).toBe(
+    "Hakkımda"
   );
   rendered.cleanup();
 
