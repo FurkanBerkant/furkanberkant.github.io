@@ -585,7 +585,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     capabilitiesData[0].technologyIds[0]
   );
   const [sceneReady, setSceneReady] = React.useState(false);
-  const [gestureAvailable, setGestureAvailable] = React.useState(false);
   const stageRef = React.useRef(null);
   const canvasRef = React.useRef(null);
   const sceneRef = React.useRef(null);
@@ -597,31 +596,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     ? activeTechnologyId
     : active.technologyIds[0];
   const activeTechnology = technologies[resolvedTechnologyId];
-  const groupIndex = capabilitiesData.findIndex(
-    capability => capability.id === active.id
-  );
-  const technologyIndex = active.technologyIds.indexOf(resolvedTechnologyId);
-
-  const sceneStateRef = React.useRef({
-    activeId: active.id,
-    technologyId: resolvedTechnologyId,
-    groupIndex,
-    technologyIndex,
-    groupCount: capabilitiesData.length,
-    technologyCount: active.technologyIds.length,
-    targetY: 0.5
-  });
-
-  sceneStateRef.current = {
-    ...sceneStateRef.current,
-    activeId: active.id,
-    technologyId: resolvedTechnologyId,
-    groupIndex,
-    technologyIndex,
-    groupCount: capabilitiesData.length,
-    technologyCount: active.technologyIds.length
-  };
-
   React.useEffect(() => {
     if (process.env.NODE_ENV === "test") {
       return undefined;
@@ -634,17 +608,14 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     let cancelled = false;
     let controller = null;
     setSceneReady(false);
-    setGestureAvailable(false);
 
     createTechnologyScene({
       canvas,
       container: stage,
-      stateRef: sceneStateRef,
       reducedMotion,
-      onReady: details => {
+      onReady: () => {
         if (!cancelled) {
           setSceneReady(true);
-          setGestureAvailable(Boolean(details?.gestureAvailable));
         }
       }
     })
@@ -667,27 +638,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     };
   }, [reducedMotion]);
 
-  React.useLayoutEffect(() => {
-    const stage = stageRef.current;
-    const target = document.querySelector(
-      `[data-technology-id="${resolvedTechnologyId}"]`
-    );
-
-    if (stage && target) {
-      const stageRect = stage.getBoundingClientRect();
-      const targetRect = target.getBoundingClientRect();
-      const normalizedTargetY =
-        (targetRect.top + targetRect.height / 2 - stageRect.top) /
-        Math.max(stageRect.height, 1);
-
-      sceneStateRef.current.targetY = Math.max(
-        0.08,
-        Math.min(0.92, normalizedTargetY)
-      );
-    }
-
-    sceneRef.current?.refresh();
-  }, [activeId, resolvedTechnologyId]);
 
   const selectGroup = capability => {
     setActiveId(capability.id);
@@ -787,7 +737,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
           ref={stageRef}
           data-reduced-motion={reducedMotion ? "true" : "false"}
           data-scene-ready={sceneReady ? "true" : "false"}
-          data-gesture-ready={gestureAvailable ? "true" : "false"}
         >
           <div className="technology-stage__spotlight" aria-hidden="true" />
           <canvas
@@ -1493,6 +1442,7 @@ function Portfolio2026() {
       : location.pathname;
   const [language, setLanguage] = React.useState(getInitialLanguage);
   const [theme, setTheme] = React.useState(getInitialTheme);
+  const themeTransitionTimerRef = React.useRef(null);
   const [introPlayed, setIntroPlayed] = React.useState(getInitialIntroPlayed);
   const previousPathRef = React.useRef(pathname);
   const trackedPathRef = React.useRef(pathname);
@@ -1556,6 +1506,7 @@ function Portfolio2026() {
 
   React.useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    document.documentElement.dataset.themeTransition = "true";
     document
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute("content", themeColors[theme]);
@@ -1563,11 +1514,26 @@ function Portfolio2026() {
       .querySelector('meta[name="color-scheme"]')
       ?.setAttribute("content", theme === "light" ? "light" : "dark");
 
+    if (themeTransitionTimerRef.current) {
+      window.clearTimeout(themeTransitionTimerRef.current);
+    }
+    themeTransitionTimerRef.current = window.setTimeout(() => {
+      delete document.documentElement.dataset.themeTransition;
+      themeTransitionTimerRef.current = null;
+    }, 420);
+
     try {
       window.localStorage.setItem(THEME_STORAGE_KEY, theme);
     } catch {
       // Storage may be unavailable in privacy-focused browser contexts.
     }
+
+    return () => {
+      if (themeTransitionTimerRef.current) {
+        window.clearTimeout(themeTransitionTimerRef.current);
+        themeTransitionTimerRef.current = null;
+      }
+    };
   }, [theme]);
 
   React.useEffect(() => {

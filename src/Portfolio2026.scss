@@ -43,30 +43,30 @@ html[data-theme="dark"],
 html[data-theme="light"],
 .portfolio-site[data-theme="light"] {
   color-scheme: light;
-  --page: #f3ecdc;
-  --page-rgb: 243, 236, 220;
-  --paper: #f8f0df;
-  --paper-2: #fff8e9;
-  --ink: #19150f;
-  --ink-soft: #51493d;
-  --ink-faint: #6b6256;
-  --line: rgba(25, 21, 15, 0.14);
-  --line-strong: rgba(25, 21, 15, 0.29);
-  --accent: #ad3f16;
-  --accent-rgb: 173, 63, 22;
-  --signal: #176e7c;
-  --panel: #1a1712;
-  --panel-ink: #f4ead6;
-  --particle-color: #a63c18;
-  --spiral-highlight: #74250d;
-  --spiral-orbit: #176e7c;
-  --spiral-opacity: 0.5;
-  --dock: rgba(250, 243, 226, 0.9);
-  --shadow: rgba(58, 40, 20, 0.18);
-  --focus: #90320f;
-  --woven-a: #e6d8bc;
-  --woven-b: #8b3327;
-  --woven-ink: #76261f;
+  --page: #f6f0e5;
+  --page-rgb: 246, 240, 229;
+  --paper: #fffaf1;
+  --paper-2: #efe5d4;
+  --ink: #201a13;
+  --ink-soft: #564c40;
+  --ink-faint: #766a5c;
+  --line: rgba(68, 55, 39, 0.14);
+  --line-strong: rgba(68, 55, 39, 0.32);
+  --accent: #b76a28;
+  --accent-rgb: 183, 106, 40;
+  --signal: #2b7378;
+  --panel: #241f18;
+  --panel-ink: #fff8eb;
+  --particle-color: #b76a28;
+  --spiral-highlight: #7f451b;
+  --spiral-orbit: #2b7378;
+  --spiral-opacity: 0.46;
+  --dock: rgba(255, 250, 241, 0.97);
+  --shadow: rgba(62, 45, 26, 0.16);
+  --focus: #9a531f;
+  --woven-a: #eadfc9;
+  --woven-b: #91503b;
+  --woven-ink: #71382e;
 }
 
 html[data-theme="cyber"],
@@ -3068,5 +3068,126 @@ body {
 
   .contact-intro h1 {
     font-size: clamp(3.2rem, 15vw, 5.5rem);
+  }
+}
+
+/* Unified theme transition */
+html[data-theme-transition="true"] body,
+html[data-theme-transition="true"] .portfolio-site,
+html[data-theme-transition="true"] .portfolio-site :where(
+  .site-index,
+  .site-route,
+  .theme-switch,
+  .language-switch,
+  .route-dock ol,
+  .route-dock a,
+  .route-page,
+  .technology-explorer,
+  .technology-panel,
+  .technology-panel__groups button,
+  .technology-panel__nodes button,
+  .chronicle-entry,
+  .product-context,
+  .about-essay,
+  .about-fabric,
+  .woven-sample,
+  .personal-directory,
+  .directory-row a,
+  .directory-row--plain,
+  .page-footer
+) {
+  transition:
+    background-color 360ms ease,
+    border-color 360ms ease,
+    color 360ms ease,
+    box-shadow 360ms ease;
+}
+
+/* Dock visibility and hierarchy */
+.route-dock ol {
+  padding: 0.48rem;
+  border-color: var(--line-strong);
+  background: var(--dock);
+  box-shadow:
+    0 18px 54px var(--shadow),
+    0 0 0 1px rgba(var(--accent-rgb), 0.08),
+    0 0 28px rgba(var(--accent-rgb), 0.07);
+}
+
+.route-dock a {
+  color: var(--ink-soft);
+}
+
+.route-dock a.is-active,
+.route-dock li[data-distance="0"] a {
+  border-color: rgba(var(--accent-rgb), 0.55);
+  background: var(--paper-2);
+  color: var(--ink);
+  box-shadow: inset 0 2px 0 rgba(var(--accent-rgb), 0.9);
+}
+
+.route-dock a.is-active .route-dock__symbol {
+  color: var(--accent);
+  text-shadow: 0 0 14px rgba(var(--accent-rgb), 0.28);
+}
+
+.portfolio-site[data-theme="light"] .route-dock ol,
+.portfolio-site[data-theme="light"] .theme-switch,
+.portfolio-site[data-theme="light"] .language-switch,
+.portfolio-site[data-theme="light"] .portfolio-site--route .site-index,
+.portfolio-site[data-theme="light"] .portfolio-site--route .site-route {
+  box-shadow: 0 14px 36px rgba(76, 56, 32, 0.13);
+}
+
+/* The Spline robot follows pointer as one scene, without arm-specific overrides. */
+.technology-stage__canvas--spline {
+  transform:
+    translate3d(
+      calc(var(--robot-follow-x, 0) * 10px),
+      calc((var(--robot-follow-y, 0) * 7px) - 3%),
+      0
+    )
+    scale(1.04)
+    rotate(
+      calc(var(--robot-follow-x, 0) * 0.45deg)
+    );
+  transform-origin: center;
+  transition:
+    opacity 420ms ease,
+    transform 160ms linear;
+}
+
+.portfolio-site[data-theme="light"] .technology-explorer {
+  background: var(--paper);
+  box-shadow: 0 28px 72px rgba(76, 56, 32, 0.12);
+}
+
+.portfolio-site[data-theme="light"] .technology-panel {
+  background: #f4eadb;
+}
+
+.portfolio-site[data-theme="light"] .technology-panel__groups button:hover,
+.portfolio-site[data-theme="light"] .technology-panel__groups button:focus-visible,
+.portfolio-site[data-theme="light"] .technology-panel__groups button.is-active,
+.portfolio-site[data-theme="light"] .technology-panel__nodes button:hover,
+.portfolio-site[data-theme="light"] .technology-panel__nodes button:focus-visible,
+.portfolio-site[data-theme="light"] .technology-panel__nodes li.is-selected button {
+  background: rgba(var(--accent-rgb), 0.1);
+}
+
+.portfolio-site[data-theme="light"] .woven-sample {
+  box-shadow: 0 18px 44px rgba(76, 56, 32, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme-transition="true"] body,
+  html[data-theme-transition="true"] .portfolio-site,
+  html[data-theme-transition="true"] .portfolio-site * {
+    transition-duration: 0.001ms !important;
+  }
+
+  .technology-stage__canvas--spline {
+    transform: translateY(-3%) scale(1.04);
+    transition: none;
   }
 }

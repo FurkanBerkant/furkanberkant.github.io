@@ -476,6 +476,7 @@ it("preserves theme and language through client navigation and direct entry", ()
   );
 
   click(themeButtons[2]);
+  expect(document.documentElement.dataset.themeTransition).toBe("true");
   click(turkishButton);
   click(rendered.div.querySelector(".route-dock a[href='/about']"));
 
