@@ -2374,8 +2374,7 @@ body,
   letter-spacing: 0.015em;
   transform: rotate(-2deg);
   transform-origin: left center;
-  animation: signature-reveal 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.45s
-    forwards;
+  animation: signature-reveal 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
 }
 
 .signature-mark::after {
