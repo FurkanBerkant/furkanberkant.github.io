@@ -529,23 +529,57 @@ it("uses one palm hologram for group and technology selection", () => {
   expect(div.querySelector(".technology-stage__groups")).toBeNull();
   expect(div.querySelector(".technology-stage__stack")).toBeNull();
   expect(stage.dataset.hologramView).toBe("groups");
-  expect(div.querySelector(".technology-stage__canvas--spline")).not.toBeNull();
+  expect(
+    div.querySelector(
+      ".technology-stage__scene .technology-stage__canvas--spline"
+    )
+  ).not.toBeNull();
   expect(div.querySelector(".technology-stage__projector")).not.toBeNull();
   expect(div.querySelector(".technology-stage__beam")).not.toBeNull();
   expect(div.querySelector(".technology-hologram")).not.toBeNull();
+  expect(div.querySelector(".technology-guide")).not.toBeNull();
+  expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
+    "Build a system path"
+  );
+  expect(div.querySelector(".technology-guide__follow").textContent).toBe(
+    "Cursor trackingActive"
+  );
+  expect(div.querySelector(".technology-guide__primary").textContent).toBe(
+    "Start guided stack→"
+  );
   expect(groupButtons()).toHaveLength(4);
   expect(groupButtons().map(button => button.textContent)).toEqual([
-    "01Backend04",
-    "02Messaging / Data06",
-    "03Infrastructure / Delivery05",
-    "04Observability02"
+    "01BackendService foundations04",
+    "02Messaging / DataEvents & data planes06",
+    "03Infrastructure / DeliveryCloud delivery05",
+    "04ObservabilityProduction signals02"
   ]);
+
+  click(div.querySelector(".technology-guide__primary"));
+  expect(stage.dataset.hologramView).toBe("technologies");
+  expect(stage.dataset.activeGroup).toBe("build");
+  expect(stage.dataset.selectedTechnology).toBe("java");
+  expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
+    "Java"
+  );
+  click(div.querySelector(".technology-guide__controls > button"));
+  expect(stage.dataset.hologramView).toBe("groups");
 
   click(groupButtons()[1]);
 
   expect(stage.dataset.hologramView).toBe("technologies");
+  expect(stage.dataset.guideStep).toBe("technology");
   expect(stage.dataset.activeGroup).toBe("move");
   expect(stage.dataset.selectedTechnology).toBe("kafka");
+  expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
+    "Apache Kafka"
+  );
+  expect(div.querySelector(".technology-guide__context").textContent).toContain(
+    "Event-driven architecture"
+  );
+  expect(
+    div.querySelector(".technology-stage__projection-label").textContent
+  ).toBe("Apache Kafka");
   expect(technologyButtons()).toHaveLength(6);
   expect(technologyButtons().map(button => button.textContent)).toContain(
     "PostgreSQL02 / 06"
@@ -559,10 +593,31 @@ it("uses one palm hologram for group and technology selection", () => {
   expect(redisButton.getAttribute("aria-pressed")).toBe("true");
   expect(stage.dataset.selectedTechnology).toBe("redis");
   expect(redisButton.textContent).toContain("04 / 06");
+  expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
+    "Redis"
+  );
 
-  click(div.querySelector(".technology-hologram__back"));
+  click(
+    div.querySelector(
+      ".technology-guide__controls button[aria-label='Show next technology']"
+    )
+  );
+  expect(stage.dataset.selectedTechnology).toBe("sqlserver");
+  expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
+    "SQL Server"
+  );
+
+  click(
+    div.querySelector(
+      ".technology-guide__controls button[aria-label='Show previous technology']"
+    )
+  );
+  expect(stage.dataset.selectedTechnology).toBe("redis");
+
+  click(div.querySelector(".technology-guide__controls > button"));
 
   expect(stage.dataset.hologramView).toBe("groups");
+  expect(stage.dataset.guideStep).toBe("groups");
   expect(groupButtons()).toHaveLength(4);
 
   cleanup();

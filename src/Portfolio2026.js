@@ -585,6 +585,9 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
   const resolvedTechnologyId = active.technologyIds.includes(activeTechnologyId)
     ? activeTechnologyId
     : active.technologyIds[0];
+  const activeTechnology = technologies[resolvedTechnologyId];
+  const activeTechnologyIndex =
+    active.technologyIds.indexOf(resolvedTechnologyId);
 
   React.useEffect(() => {
     if (process.env.NODE_ENV === "test") {
@@ -637,6 +640,17 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     setActiveTechnologyId(technologyId);
   };
 
+  const moveTechnology = direction => {
+    const nextIndex =
+      (activeTechnologyIndex + direction + active.technologyIds.length) %
+      active.technologyIds.length;
+    setActiveTechnologyId(active.technologyIds[nextIndex]);
+  };
+
+  const showGroups = () => {
+    setHologramView("groups");
+  };
+
   return (
     <section className="technology-explorer" aria-label={copy.explorerLabel}>
       <header className="technology-explorer__header">
@@ -659,6 +673,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
         data-active-group={active.id}
         data-selected-technology={resolvedTechnologyId}
         data-hologram-view={hologramView}
+        data-guide-step={hologramView === "groups" ? "groups" : "technology"}
         style={{
           "--technology-palm-x": `${technologyPalmOrigin.x}%`,
           "--technology-palm-y": `${technologyPalmOrigin.y}%`
@@ -708,13 +723,24 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
           />
         </svg>
 
-        <canvas
-          className="technology-stage__canvas technology-stage__canvas--spline"
-          ref={canvasRef}
-          aria-hidden="true"
-        />
+        <div className="technology-stage__scene" aria-hidden="true">
+          <canvas
+            className="technology-stage__canvas technology-stage__canvas--spline"
+            ref={canvasRef}
+          />
+        </div>
 
-        <div className="technology-hologram" aria-live="polite">
+        {hologramView === "technologies" && (
+          <div
+            className="technology-stage__projection-label"
+            aria-hidden="true"
+          >
+            <img src={activeTechnology.icon} alt="" />
+            <span>{activeTechnology.name}</span>
+          </div>
+        )}
+
+        <div className="technology-hologram">
           <div className="technology-hologram__chrome" aria-hidden="true">
             <span />
             <span />
@@ -724,8 +750,14 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
           {hologramView === "groups" ? (
             <div className="technology-hologram__view technology-hologram__view--groups">
               <header className="technology-hologram__header">
-                <span>STACK / GROUPS</span>
-                <small>04</small>
+                <div>
+                  <span>{copy.hologramGroupsTitle}</span>
+                  <small>{copy.hologramGroupsHint}</small>
+                </div>
+                <small>
+                  {String(capabilitiesData.length).padStart(2, "0")}{" "}
+                  {copy.groupsLabel}
+                </small>
               </header>
 
               <div
@@ -740,8 +772,13 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
                     data-hologram-group-id={capability.id}
                     onClick={() => openGroup(capability)}
                   >
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <strong>{copy.groups[capability.id]}</strong>
+                    <span className="technology-hologram__group-index">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="technology-hologram__group-copy">
+                      <strong>{copy.groups[capability.id]}</strong>
+                      <em>{capability.title}</em>
+                    </span>
                     <small>
                       {String(capability.technologyIds.length).padStart(2, "0")}
                     </small>
@@ -755,8 +792,8 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
                 <button
                   type="button"
                   className="technology-hologram__back"
-                  onClick={() => setHologramView("groups")}
-                  aria-label={copy.chooseGroup}
+                  onClick={showGroups}
+                  aria-label={copy.backToGroups}
                 >
                   ←
                 </button>
@@ -769,8 +806,13 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
                 </div>
               </header>
 
+              <p className="technology-hologram__hint">
+                {copy.hologramTechnologiesHint}
+              </p>
+
               <div
                 className="technology-hologram__technologies"
+                role="group"
                 aria-label={copy.groupTechnologies}
               >
                 {active.technologyIds.map((technologyId, index) => {
@@ -803,6 +845,95 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
             </div>
           )}
         </div>
+
+        <aside className="technology-guide" aria-label={copy.guideLabel}>
+          <header className="technology-guide__status">
+            <span>
+              <i aria-hidden="true" />
+              {copy.guideLabel}
+            </span>
+            <small>{copy.guideStatus[sceneStatus]}</small>
+          </header>
+
+          <div
+            className="technology-guide__body"
+            key={`${hologramView}-${active.id}-${resolvedTechnologyId}`}
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span className="technology-guide__step">
+              {hologramView === "groups"
+                ? copy.guideGroupsStep
+                : copy.guideTechnologyStep}
+            </span>
+            <h2>
+              {hologramView === "groups"
+                ? copy.guideGroupsTitle
+                : activeTechnology.name}
+            </h2>
+            <p>
+              {hologramView === "groups"
+                ? copy.guideGroupsBody
+                : active.description}
+            </p>
+
+            {hologramView === "technologies" && (
+              <div className="technology-guide__context">
+                <span>{copy.guideContextLabel}</span>
+                <ul>
+                  {active.practices.slice(0, 3).map(practice => (
+                    <li key={practice}>{practice}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {hologramView === "groups" ? (
+            <button
+              className="technology-guide__primary"
+              type="button"
+              onClick={() => openGroup(active)}
+            >
+              <span>{copy.guideStart}</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          ) : (
+            <div className="technology-guide__controls">
+              <button type="button" onClick={showGroups}>
+                {copy.backToGroups}
+              </button>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => moveTechnology(-1)}
+                  aria-label={copy.previousTechnology}
+                >
+                  ←
+                </button>
+                <span>
+                  {String(activeTechnologyIndex + 1).padStart(2, "0")} /{" "}
+                  {String(active.technologyIds.length).padStart(2, "0")}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => moveTechnology(1)}
+                  aria-label={copy.nextTechnology}
+                >
+                  →
+                </button>
+              </div>
+            </div>
+          )}
+
+          <footer className="technology-guide__follow">
+            <span>{copy.cursorFollowLabel}</span>
+            <strong>
+              <i aria-hidden="true" />
+              {copy.cursorFollowActive}
+            </strong>
+          </footer>
+        </aside>
 
         <div className="technology-stage__loader" aria-hidden="true">
           <span />

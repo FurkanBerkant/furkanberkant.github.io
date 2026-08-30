@@ -82,6 +82,28 @@ export const uiCopy = {
       selectedTechnology: "Selected technology",
       groupTechnologies: "Technologies in the selected group",
       sceneHint: "Drag to rotate the stack",
+      hologramGroupsTitle: "Stack / system layers",
+      hologramGroupsHint: "Choose a layer to inspect its tools",
+      hologramTechnologiesHint:
+        "Select a tool to update the robot's engineering brief.",
+      guideLabel: "Robot guide",
+      guideStatus: {
+        loading: "Synchronizing",
+        ready: "Online",
+        unavailable: "Interface only"
+      },
+      guideGroupsStep: "Step 01 / choose a layer",
+      guideTechnologyStep: "Step 02 / inspect the stack",
+      guideGroupsTitle: "Build a system path",
+      guideGroupsBody:
+        "Choose a system layer. The robot will project its tools and explain the engineering context while cursor tracking stays active.",
+      guideContextLabel: "Engineering context",
+      guideStart: "Start guided stack",
+      backToGroups: "All system layers",
+      previousTechnology: "Show previous technology",
+      nextTechnology: "Show next technology",
+      cursorFollowLabel: "Cursor tracking",
+      cursorFollowActive: "Active",
       groups: {
         build: "Backend",
         move: "Messaging / Data",
@@ -244,6 +266,28 @@ export const uiCopy = {
       selectedTechnology: "Seçili teknoloji",
       groupTechnologies: "Seçili gruptaki teknolojiler",
       sceneHint: "Yığını döndürmek için sürükle",
+      hologramGroupsTitle: "Stack / sistem katmanları",
+      hologramGroupsHint: "Araçlarını incelemek için bir katman seç",
+      hologramTechnologiesHint:
+        "Robotun mühendislik özetini güncellemek için bir araç seç.",
+      guideLabel: "Robot rehberi",
+      guideStatus: {
+        loading: "Eşitleniyor",
+        ready: "Çevrimiçi",
+        unavailable: "Yalnız arayüz"
+      },
+      guideGroupsStep: "Adım 01 / katman seç",
+      guideTechnologyStep: "Adım 02 / teknoloji yığınını incele",
+      guideGroupsTitle: "Sistem yolunu oluştur",
+      guideGroupsBody:
+        "Bir sistem katmanı seç. İmleç takibi açık kalırken robot araçları yansıtsın ve mühendislik bağlamını anlatsın.",
+      guideContextLabel: "Mühendislik bağlamı",
+      guideStart: "Rehberli keşfi başlat",
+      backToGroups: "Tüm sistem katmanları",
+      previousTechnology: "Önceki teknolojiyi göster",
+      nextTechnology: "Sonraki teknolojiyi göster",
+      cursorFollowLabel: "İmleç takibi",
+      cursorFollowActive: "Aktif",
       groups: {
         build: "Backend",
         move: "Mesajlaşma / Veri",
