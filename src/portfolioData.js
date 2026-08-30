@@ -97,6 +97,32 @@ export const technologies = {
   }
 };
 
+export const technologyEvidence = {
+  java: "Built production backend services and the ReelShelf API with Java.",
+  spring:
+    "Used across production microservices and ReelShelf's authenticated API.",
+  python:
+    "Automated XML, stock and reporting workflows for an e-commerce operation.",
+  grpc: "Used in backend service communication alongside Java and Spring systems.",
+  kafka: "Architected telemetry pipelines serving 60K+ connected devices.",
+  postgresql:
+    "Optimised transactional queries as part of a 50%+ p95 latency reduction.",
+  cassandra: "Stored and operated high-volume connected-vehicle telemetry.",
+  redis:
+    "Combined Redis and Caffeine caching to cut critical API p95 latency by 50%+.",
+  sqlserver: "Used for operational data access and reporting-oriented work.",
+  liquibase:
+    "Versioned production schemas alongside transactional and telemetry stores.",
+  docker: "Containerised microservices for repeatable production delivery.",
+  kubernetes: "Operated and shipped microservices on Kubernetes.",
+  helm: "Packaged repeatable Kubernetes releases with Helm.",
+  argocd: "Managed production delivery through ArgoCD GitOps workflows.",
+  githubactions: "Automated CI/CD checks and delivery with GitHub Actions.",
+  prometheus: "Tracked service health and Kafka lag in production.",
+  grafana:
+    "Built operational views and alerts for service health and Kafka lag."
+};
+
 export const experiences = [
   {
     company: "Comodif",
@@ -316,10 +342,9 @@ export const capabilities = [
       "Production APIs and service boundaries built for change, concurrency and predictable failure.",
     technologyIds: ["java", "spring", "python", "grpc"],
     practices: [
-      "Spring Cloud",
-      "REST APIs",
-      "Microservices",
-      "Async & concurrent programming"
+      "Connected-mobility APIs",
+      "ReelShelf backend",
+      "Async service workloads"
     ]
   },
   {
@@ -337,9 +362,9 @@ export const capabilities = [
       "liquibase"
     ],
     practices: [
-      "Event-driven architecture",
-      "High-volume telemetry",
-      "Query optimisation"
+      "60K+ device telemetry",
+      "50%+ p95 reduction",
+      "Transactional + telemetry storage"
     ]
   },
   {
@@ -349,7 +374,11 @@ export const capabilities = [
     description:
       "Repeatable delivery from container build to cluster state, with GitOps keeping intent visible.",
     technologyIds: ["docker", "kubernetes", "helm", "argocd", "githubactions"],
-    practices: ["GitOps", "CI/CD", "Container orchestration"]
+    practices: [
+      "Production microservice releases",
+      "GitOps-managed clusters",
+      "CI/CD automation"
+    ]
   },
   {
     id: "see",
@@ -358,12 +387,7 @@ export const capabilities = [
     description:
       "Metrics, logs and alerts that turn an invisible failure into an actionable engineering signal.",
     technologyIds: ["prometheus", "grafana"],
-    practices: [
-      "Loki",
-      "Kafka lag alerts",
-      "Service health",
-      "Slack escalation"
-    ]
+    practices: ["Kafka lag alerts", "Service health", "Slack escalation"]
   }
 ];
 

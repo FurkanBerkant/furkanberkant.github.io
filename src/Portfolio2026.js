@@ -13,6 +13,7 @@ import {
   education,
   experiences,
   profile,
+  technologyEvidence,
   technologies,
   visualProjects
 } from "./portfolioData";
@@ -21,6 +22,7 @@ import {
   educationTr,
   experiencesTr,
   profileTr,
+  technologyEvidenceTr,
   visualProjectsTr
 } from "./portfolioData.tr";
 import {
@@ -70,8 +72,6 @@ const experienceTechnologies = {
   ],
   Otoparcasan: ["Python", "SQL", "XML", "Excel"]
 };
-
-const technologyPalmOrigin = {x: 46, y: 62};
 
 export const resolveInitialTheme = savedTheme =>
   themeOptions.some(option => option.id === savedTheme) ? savedTheme : "dark";
@@ -569,15 +569,22 @@ const HomePage = ({copy, profileData, playIntro, theme, reducedMotion}) => {
   );
 };
 
-const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
+const TechnologyStage = ({
+  copy,
+  capabilitiesData,
+  reducedMotion,
+  technologyEvidenceData
+}) => {
   const [activeId, setActiveId] = React.useState(capabilitiesData[0].id);
   const [activeTechnologyId, setActiveTechnologyId] = React.useState(
     capabilitiesData[0].technologyIds[0]
   );
   const [hologramView, setHologramView] = React.useState("groups");
   const [sceneStatus, setSceneStatus] = React.useState("loading");
+  const [palmProjectionReady, setPalmProjectionReady] = React.useState(false);
   const stageRef = React.useRef(null);
   const canvasRef = React.useRef(null);
+  const sceneControllerRef = React.useRef(null);
 
   const active =
     capabilitiesData.find(capability => capability.id === activeId) ||
@@ -586,8 +593,30 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     ? activeTechnologyId
     : active.technologyIds[0];
   const activeTechnology = technologies[resolvedTechnologyId];
+  const activeTechnologyEvidence =
+    technologyEvidenceData[resolvedTechnologyId] || active.description;
   const activeTechnologyIndex =
     active.technologyIds.indexOf(resolvedTechnologyId);
+  const scenePresentation = React.useMemo(
+    () => ({
+      visible: hologramView === "technologies",
+      technology: activeTechnology,
+      groupLabel: active.title,
+      index: activeTechnologyIndex,
+      total: active.technologyIds.length,
+      projectionLabel: copy.palmProjectionLabel
+    }),
+    [
+      active.title,
+      active.technologyIds.length,
+      activeTechnology,
+      activeTechnologyIndex,
+      copy.palmProjectionLabel,
+      hologramView
+    ]
+  );
+  const scenePresentationRef = React.useRef(scenePresentation);
+  scenePresentationRef.current = scenePresentation;
 
   React.useEffect(() => {
     if (process.env.NODE_ENV === "test") {
@@ -601,13 +630,33 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     let cancelled = false;
     let controller = null;
     setSceneStatus("loading");
+    setPalmProjectionReady(false);
 
     createTechnologyScene({
       canvas,
       reducedMotion,
-      onReady: () => {
+      onPalmPosition: ({clientX, clientY}) => {
+        if (cancelled) {
+          return;
+        }
+
+        const stageRect = stage.getBoundingClientRect();
+        if (!stageRect.width || !stageRect.height) {
+          return;
+        }
+
+        const x = ((clientX - stageRect.left) / stageRect.width) * 100;
+        const y = ((clientY - stageRect.top) / stageRect.height) * 100;
+        stage.style.setProperty("--technology-palm-x", `${x}%`);
+        stage.style.setProperty("--technology-palm-y", `${y}%`);
+        stage.dataset.palmPositioned = "true";
+        stage.dataset.palmInView =
+          x >= 0 && x <= 100 && y >= 0 && y <= 100 ? "true" : "false";
+      },
+      onReady: ({palmProjectionAvailable}) => {
         if (!cancelled) {
           setSceneStatus("ready");
+          setPalmProjectionReady(palmProjectionAvailable);
         }
       }
     })
@@ -617,6 +666,8 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
           return;
         }
         controller = instance;
+        sceneControllerRef.current = instance;
+        controller.setPresentation(scenePresentationRef.current);
       })
       .catch(() => {
         if (!cancelled) {
@@ -626,9 +677,16 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
 
     return () => {
       cancelled = true;
+      if (sceneControllerRef.current === controller) {
+        sceneControllerRef.current = null;
+      }
       controller?.dispose();
     };
   }, [reducedMotion]);
+
+  React.useEffect(() => {
+    sceneControllerRef.current?.setPresentation(scenePresentation);
+  }, [scenePresentation]);
 
   const openGroup = capability => {
     setActiveId(capability.id);
@@ -674,54 +732,9 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
         data-selected-technology={resolvedTechnologyId}
         data-hologram-view={hologramView}
         data-guide-step={hologramView === "groups" ? "groups" : "technology"}
-        style={{
-          "--technology-palm-x": `${technologyPalmOrigin.x}%`,
-          "--technology-palm-y": `${technologyPalmOrigin.y}%`
-        }}
+        data-palm-projection={palmProjectionReady ? "ready" : "unavailable"}
       >
         <div className="technology-stage__spotlight" aria-hidden="true" />
-
-        <svg
-          className="technology-stage__projector"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <defs>
-            <linearGradient
-              id="technology-projection-beam"
-              x1="0"
-              y1="1"
-              x2="0"
-              y2="0"
-            >
-              <stop offset="0" stopColor="var(--accent)" stopOpacity="0.22" />
-              <stop offset="1" stopColor="var(--accent)" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path
-            className="technology-stage__beam"
-            d={`M ${technologyPalmOrigin.x - 2.5} ${
-              technologyPalmOrigin.y
-            } L 17 18 L 42 18 L ${technologyPalmOrigin.x + 2.5} ${
-              technologyPalmOrigin.y
-            } Z`}
-          />
-          <ellipse
-            className="technology-stage__palm-ring technology-stage__palm-ring--outer"
-            cx={technologyPalmOrigin.x}
-            cy={technologyPalmOrigin.y}
-            rx="6.5"
-            ry="2.5"
-          />
-          <ellipse
-            className="technology-stage__palm-ring technology-stage__palm-ring--inner"
-            cx={technologyPalmOrigin.x}
-            cy={technologyPalmOrigin.y}
-            rx="3.8"
-            ry="1.35"
-          />
-        </svg>
 
         <div className="technology-stage__scene" aria-hidden="true">
           <canvas
@@ -731,12 +744,25 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
         </div>
 
         {hologramView === "technologies" && (
-          <div
-            className="technology-stage__projection-label"
-            aria-hidden="true"
-          >
-            <img src={activeTechnology.icon} alt="" />
-            <span>{activeTechnology.name}</span>
+          <div className="technology-stage__palm-projection" aria-hidden="true">
+            <span className="technology-stage__palm-beam" />
+            <span className="technology-stage__palm-ring" />
+            <div className="technology-stage__palm-card">
+              <header>
+                <span>{copy.palmProjectionLabel}</span>
+                <small>
+                  {String(activeTechnologyIndex + 1).padStart(2, "0")} /{" "}
+                  {String(active.technologyIds.length).padStart(2, "0")}
+                </small>
+              </header>
+              <div>
+                <img src={activeTechnology.icon} alt="" />
+                <span>
+                  <strong>{activeTechnology.name}</strong>
+                  <small>{copy.groups[active.id]}</small>
+                </span>
+              </div>
+            </div>
           </div>
         )}
 
@@ -874,7 +900,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
             <p>
               {hologramView === "groups"
                 ? copy.guideGroupsBody
-                : active.description}
+                : activeTechnologyEvidence}
             </p>
 
             {hologramView === "technologies" && (
@@ -926,12 +952,23 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
             </div>
           )}
 
-          <footer className="technology-guide__follow">
-            <span>{copy.cursorFollowLabel}</span>
-            <strong>
-              <i aria-hidden="true" />
-              {copy.cursorFollowActive}
-            </strong>
+          <footer className="technology-guide__signals">
+            <div className="technology-guide__follow">
+              <span>{copy.cursorFollowLabel}</span>
+              <strong>
+                <i aria-hidden="true" />
+                {copy.cursorFollowActive}
+              </strong>
+            </div>
+            <div className="technology-guide__presentation">
+              <span>{copy.palmProjectionLabel}</span>
+              <strong>
+                <i aria-hidden="true" />
+                {hologramView === "technologies"
+                  ? copy.palmProjectionActive
+                  : copy.palmProjectionStandby}
+              </strong>
+            </div>
           </footer>
         </aside>
 
@@ -943,7 +980,12 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
   );
 };
 
-const TechnologiesPage = ({copy, capabilitiesData, reducedMotion}) => (
+const TechnologiesPage = ({
+  copy,
+  capabilitiesData,
+  reducedMotion,
+  technologyEvidenceData
+}) => (
   <div className="technologies-page route-page">
     <header className="technologies-intro" data-reveal>
       <div>
@@ -957,6 +999,7 @@ const TechnologiesPage = ({copy, capabilitiesData, reducedMotion}) => (
       copy={copy.technologies}
       capabilitiesData={capabilitiesData}
       reducedMotion={reducedMotion}
+      technologyEvidenceData={technologyEvidenceData}
     />
   </div>
 );
@@ -2060,6 +2103,9 @@ function Portfolio2026() {
   const experiencesData = isTurkish ? experiencesTr : experiences;
   const visualProjectsData = isTurkish ? visualProjectsTr : visualProjects;
   const capabilitiesData = isTurkish ? capabilitiesTr : capabilities;
+  const technologyEvidenceData = isTurkish
+    ? technologyEvidenceTr
+    : technologyEvidence;
   const educationData = isTurkish ? educationTr : education;
   const routeMeta = copy.meta.routes[pathname] || copy.meta.notFound;
   const knownRoute = Boolean(copy.meta.routes[pathname]);
@@ -2273,6 +2319,7 @@ function Portfolio2026() {
               copy={copy}
               capabilitiesData={capabilitiesData}
               reducedMotion={reducedMotion}
+              technologyEvidenceData={technologyEvidenceData}
             />
           </Route>
           <Route exact path="/projects">

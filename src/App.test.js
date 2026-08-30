@@ -534,18 +534,18 @@ it("uses one palm hologram for group and technology selection", () => {
       ".technology-stage__scene .technology-stage__canvas--spline"
     )
   ).not.toBeNull();
-  expect(div.querySelector(".technology-stage__projector")).not.toBeNull();
-  expect(div.querySelector(".technology-stage__beam")).not.toBeNull();
+  expect(div.querySelector(".technology-stage__projector")).toBeNull();
+  expect(div.querySelector(".technology-stage__beam")).toBeNull();
   expect(div.querySelector(".technology-hologram")).not.toBeNull();
   expect(div.querySelector(".technology-guide")).not.toBeNull();
   expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
-    "Build a system path"
+    "Trace the stack I shipped"
   );
   expect(div.querySelector(".technology-guide__follow").textContent).toBe(
     "Cursor trackingActive"
   );
   expect(div.querySelector(".technology-guide__primary").textContent).toBe(
-    "Start guided stack→"
+    "Open my stack→"
   );
   expect(groupButtons()).toHaveLength(4);
   expect(groupButtons().map(button => button.textContent)).toEqual([
@@ -575,11 +575,17 @@ it("uses one palm hologram for group and technology selection", () => {
     "Apache Kafka"
   );
   expect(div.querySelector(".technology-guide__context").textContent).toContain(
-    "Event-driven architecture"
+    "60K+ device telemetry"
   );
   expect(
-    div.querySelector(".technology-stage__projection-label").textContent
-  ).toBe("Apache Kafka");
+    div.querySelector(".technology-stage__palm-card").textContent
+  ).toContain("Apache Kafka");
+  expect(div.querySelector(".technology-guide__body p").textContent).toContain(
+    "60K+ connected devices"
+  );
+  expect(div.querySelector(".technology-guide__presentation").textContent).toBe(
+    "Palm projectionHolding selection"
+  );
   expect(technologyButtons()).toHaveLength(6);
   expect(technologyButtons().map(button => button.textContent)).toContain(
     "PostgreSQL02 / 06"

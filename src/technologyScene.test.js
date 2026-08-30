@@ -1,5 +1,7 @@
 import {
+  createTechnologyPresentationController,
   createTechnologySceneInteraction,
+  resolvePalmClientPoint,
   resolveTechnologyCenterPoint,
   TECHNOLOGY_IDLE_DELAY_MS
 } from "./technologyScene";
@@ -37,6 +39,24 @@ it("resolves the scene center for idle positioning", () => {
       height: 500
     })
   ).toBeNull();
+});
+
+it("maps the animated palm anchor into browser coordinates", () => {
+  expect(
+    resolvePalmClientPoint({
+      normalizedX: 0.75,
+      normalizedY: 0.6,
+      rect: {left: 100, top: 50, width: 800, height: 600}
+    })
+  ).toEqual({clientX: 700, clientY: 410, inView: true});
+
+  expect(
+    resolvePalmClientPoint({
+      normalizedX: 1.2,
+      normalizedY: 0.5,
+      rect: {left: 0, top: 0, width: 800, height: 600}
+    })
+  ).toEqual({clientX: 960, clientY: 300, inView: false});
 });
 
 it("keeps Spline global follow enabled while the idle timer runs", () => {
@@ -108,4 +128,49 @@ it("keeps all scene interactions disabled with reduced motion", () => {
   expect(addEventListener).not.toHaveBeenCalled();
 
   interaction.dispose();
+});
+
+it("moves both arms only when presentation mode changes", () => {
+  const arm = {
+    name: "arm",
+    emitEvent: jest.fn(),
+    emitEventReverse: jest.fn()
+  };
+  const head = {
+    name: "Head",
+    emitEvent: jest.fn(),
+    emitEventReverse: jest.fn()
+  };
+  const app = {
+    getSplineEvents: () => ({start: {arm: {}, head: {}}}),
+    findObjectById: id => ({arm, head}[id])
+  };
+  const projection = {
+    available: true,
+    setPresentation: jest.fn(),
+    dispose: jest.fn()
+  };
+  const controller = createTechnologyPresentationController({
+    app,
+    projection,
+    reducedMotion: false
+  });
+
+  expect(arm.emitEventReverse).toHaveBeenCalledTimes(1);
+  expect(head.emitEventReverse).not.toHaveBeenCalled();
+
+  controller.setPresentation({visible: true, technology: {name: "Java"}});
+  controller.setPresentation({
+    visible: true,
+    technology: {name: "Spring Boot"}
+  });
+
+  expect(arm.emitEvent).toHaveBeenCalledTimes(1);
+  expect(projection.setPresentation).toHaveBeenCalledTimes(2);
+
+  controller.setPresentation({visible: false});
+  expect(arm.emitEventReverse).toHaveBeenCalledTimes(2);
+
+  controller.dispose();
+  expect(projection.dispose).toHaveBeenCalledTimes(1);
 });

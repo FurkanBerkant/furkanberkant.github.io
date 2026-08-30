@@ -20,6 +20,35 @@ export const engineeringFocusTr = [
   }
 ];
 
+export const technologyEvidenceTr = {
+  java: "Üretim backend servislerini ve ReelShelf API'sini Java ile geliştirdim.",
+  spring:
+    "Üretim mikroservislerinde ve ReelShelf'in kimlik doğrulamalı API'sinde kullandım.",
+  python:
+    "Bir e-ticaret operasyonunun XML, stok ve raporlama akışlarını otomatikleştirdim.",
+  grpc: "Java ve Spring sistemleriyle birlikte backend servis iletişiminde kullandım.",
+  kafka:
+    "60 binin üzerinde bağlantılı cihaz için telemetri akışları tasarladım.",
+  postgresql:
+    "Kritik API'lerde %50'den fazla p95 iyileşmesinin parçası olarak sorguları optimize ettim.",
+  cassandra: "Yüksek hacimli bağlantılı araç telemetrisini depolayıp işlettim.",
+  redis:
+    "Kritik API p95 gecikmesini %50'den fazla azaltmak için Redis ve Caffeine önbelleklerini birleştirdim.",
+  sqlserver: "Operasyonel veri erişimi ve raporlama odaklı işlerde kullandım.",
+  liquibase:
+    "İşlemsel ve telemetri depolarıyla birlikte üretim şemalarını sürümledim.",
+  docker:
+    "Tekrarlanabilir üretim dağıtımları için mikroservisleri konteynerleştirdim.",
+  kubernetes: "Mikroservisleri Kubernetes üzerinde işlettim ve yayına aldım.",
+  helm: "Tekrarlanabilir Kubernetes yayınlarını Helm ile paketledim.",
+  argocd: "Üretim dağıtımlarını ArgoCD GitOps akışlarıyla yönettim.",
+  githubactions:
+    "CI/CD kontrollerini ve dağıtımı GitHub Actions ile otomatikleştirdim.",
+  prometheus: "Üretimde servis sağlığını ve Kafka gecikmesini izledim.",
+  grafana:
+    "Servis sağlığı ve Kafka gecikmesi için operasyon panoları ve uyarılar kurdum."
+};
+
 export const experiencesTr = [
   {
     company: "Comodif",
@@ -239,10 +268,9 @@ export const capabilitiesTr = [
       "Değişime, eşzamanlı çalışmaya ve öngörülebilir hata davranışına uygun üretim API'leri ve servis sınırları.",
     technologyIds: ["java", "spring", "python", "grpc"],
     practices: [
-      "Spring Cloud",
-      "REST API'leri",
-      "Mikroservisler",
-      "Asenkron ve eşzamanlı programlama"
+      "Bağlantılı mobilite API'leri",
+      "ReelShelf backend'i",
+      "Asenkron servis iş yükleri"
     ]
   },
   {
@@ -260,9 +288,9 @@ export const capabilitiesTr = [
       "liquibase"
     ],
     practices: [
-      "Olay güdümlü mimari",
-      "Yüksek hacimli telemetri",
-      "Sorgu optimizasyonu"
+      "60K+ cihaz telemetrisi",
+      "%50+ p95 iyileşmesi",
+      "İşlemsel + telemetri verisi"
     ]
   },
   {
@@ -272,7 +300,11 @@ export const capabilitiesTr = [
     description:
       "Konteyner derlemesinden küme durumuna uzanan tekrarlanabilir dağıtım; GitOps ile görünür kalan sistem niyeti.",
     technologyIds: ["docker", "kubernetes", "helm", "argocd", "githubactions"],
-    practices: ["GitOps", "CI/CD", "Konteyner orkestrasyonu"]
+    practices: [
+      "Üretim mikroservis yayınları",
+      "GitOps yönetimli kümeler",
+      "CI/CD otomasyonu"
+    ]
   },
   {
     id: "see",
@@ -282,7 +314,6 @@ export const capabilitiesTr = [
       "Görünmeyen bir hatayı müdahale edilebilir bir mühendislik sinyaline dönüştüren metrikler, loglar ve uyarılar.",
     technologyIds: ["prometheus", "grafana"],
     practices: [
-      "Loki",
       "Kafka gecikme uyarıları",
       "Servis sağlığı",
       "Slack üzerinden sorun aktarımı"
