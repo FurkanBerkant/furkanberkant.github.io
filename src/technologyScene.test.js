@@ -1,7 +1,6 @@
 import {
   createTechnologySceneInteraction,
-  resolveTechnologyFocusPoint,
-  TECHNOLOGY_FOCUS_HOLD_MS,
+  resolveTechnologyCenterPoint,
   TECHNOLOGY_IDLE_DELAY_MS
 } from "./technologyScene";
 
@@ -17,77 +16,30 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
-it("maps a selected technology element to a restrained scene focus point", () => {
+it("resolves the scene center for idle positioning", () => {
   expect(
-    resolveTechnologyFocusPoint({
-      canvasRect: {left: 600, top: 100, width: 600, height: 500},
-      targetRect: {left: 100, top: 200, width: 180, height: 40}
+    resolveTechnologyCenterPoint({
+      left: 600,
+      top: 100,
+      width: 600,
+      height: 500
     })
   ).toEqual({
-    clientX: 684,
-    clientY: 220
+    clientX: 900,
+    clientY: 350
   });
 
   expect(
-    resolveTechnologyFocusPoint({
-      canvasRect: {left: 600, top: 100, width: 600, height: 500},
-      targetRect: {left: 100, top: -1000, width: 180, height: 40}
+    resolveTechnologyCenterPoint({
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 500
     })
-  ).toEqual({
-    clientX: 684,
-    clientY: 190
-  });
+  ).toBeNull();
 });
 
-it("briefly focuses a selected technology, then resumes global cursor follow", () => {
-  jest.useFakeTimers();
-
-  const app = {
-    setGlobalEvents: jest.fn(),
-    stop: jest.fn()
-  };
-  const pointerTarget = document.createElement("div");
-  const canvas = document.createElement("canvas");
-  const target = document.createElement("button");
-
-  canvas.getBoundingClientRect = () => ({
-    left: 600,
-    top: 100,
-    width: 600,
-    height: 500,
-    right: 1200,
-    bottom: 600
-  });
-  target.getBoundingClientRect = () => ({
-    left: 100,
-    top: 250,
-    width: 180,
-    height: 40,
-    right: 280,
-    bottom: 290
-  });
-
-  const interaction = createTechnologySceneInteraction({
-    app,
-    canvas,
-    reducedMotion: false,
-    pointerTarget
-  });
-
-  expect(app.setGlobalEvents).toHaveBeenLastCalledWith(true);
-
-  interaction.focusElement(target);
-
-  expect(app.setGlobalEvents).toHaveBeenLastCalledWith(false);
-
-  jest.advanceTimersByTime(TECHNOLOGY_FOCUS_HOLD_MS);
-
-  expect(app.setGlobalEvents).toHaveBeenLastCalledWith(true);
-
-  interaction.dispose();
-});
-
-it("returns the scene to idle center and wakes on the next pointer movement", () => {
+it("keeps Spline global follow enabled while the idle timer runs", () => {
   jest.useFakeTimers();
 
   const app = {
@@ -113,21 +65,26 @@ it("returns the scene to idle center and wakes on the next pointer movement", ()
     pointerTarget
   });
 
-  jest.advanceTimersByTime(TECHNOLOGY_IDLE_DELAY_MS);
-  expect(app.setGlobalEvents).toHaveBeenLastCalledWith(false);
+  expect(app.setGlobalEvents).toHaveBeenCalledTimes(1);
+  expect(app.setGlobalEvents).toHaveBeenLastCalledWith(true);
 
   pointerTarget.dispatchEvent(
     createPointerEvent({
-      clientX: 900,
-      clientY: 300,
+      clientX: 100,
+      clientY: 100,
       pointerType: "mouse",
       isPrimary: true
     })
   );
 
+  jest.advanceTimersByTime(TECHNOLOGY_IDLE_DELAY_MS);
+
+  expect(app.setGlobalEvents).toHaveBeenCalledTimes(1);
   expect(app.setGlobalEvents).toHaveBeenLastCalledWith(true);
 
   interaction.dispose();
+
+  expect(app.setGlobalEvents).toHaveBeenLastCalledWith(false);
 });
 
 it("keeps all scene interactions disabled with reduced motion", () => {

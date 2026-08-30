@@ -3,7 +3,6 @@ const SPLINE_RUNTIME_URL =
 const SPLINE_SCENE_URL =
   "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode";
 
-export const TECHNOLOGY_FOCUS_HOLD_MS = 1050;
 export const TECHNOLOGY_IDLE_DELAY_MS = 3200;
 
 let runtimePromise;
@@ -18,47 +17,34 @@ const loadSplineRuntime = () => {
   return runtimePromise;
 };
 
-const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-
 const isUsableRect = rect =>
   rect &&
   [rect.left, rect.top, rect.width, rect.height].every(Number.isFinite) &&
   rect.width > 0 &&
   rect.height > 0;
 
-export const resolveTechnologyFocusPoint = ({canvasRect, targetRect}) => {
-  if (!isUsableRect(canvasRect) || !isUsableRect(targetRect)) {
-    return null;
-  }
-
-  const targetCenterY = targetRect.top + targetRect.height / 2;
-  const relativeY = clamp(
-    (targetCenterY - canvasRect.top) / canvasRect.height,
-    0.18,
-    0.82
-  );
-
-  return {
-    clientX: canvasRect.left + canvasRect.width * 0.14,
-    clientY: canvasRect.top + canvasRect.height * relativeY
-  };
-};
-
-const resolveTechnologyCenterPoint = canvasRect => {
-  if (!isUsableRect(canvasRect)) {
+export const resolveTechnologyCenterPoint = rect => {
+  if (!isUsableRect(rect)) {
     return null;
   }
 
   return {
-    clientX: canvasRect.left + canvasRect.width / 2,
-    clientY: canvasRect.top + canvasRect.height / 2
+    clientX: rect.left + rect.width / 2,
+    clientY: rect.top + rect.height / 2
   };
 };
 
-const dispatchScenePointer = (target, point) => {
+const dispatchIdlePointer = (target, point) => {
   if (!point) {
     return;
   }
+
+  const markSynthetic = event => {
+    Object.defineProperty(event, "__technologyIdlePointer", {
+      value: true
+    });
+    return event;
+  };
 
   const eventInit = {
     bubbles: true,
@@ -70,15 +56,19 @@ const dispatchScenePointer = (target, point) => {
 
   if (typeof window.PointerEvent === "function") {
     target.dispatchEvent(
-      new window.PointerEvent("pointermove", {
-        ...eventInit,
-        pointerType: "mouse",
-        isPrimary: true
-      })
+      markSynthetic(
+        new window.PointerEvent("pointermove", {
+          ...eventInit,
+          pointerType: "mouse",
+          isPrimary: true
+        })
+      )
     );
   }
 
-  target.dispatchEvent(new window.MouseEvent("mousemove", eventInit));
+  target.dispatchEvent(
+    markSynthetic(new window.MouseEvent("mousemove", eventInit))
+  );
 };
 
 export const createTechnologySceneInteraction = ({
@@ -89,17 +79,8 @@ export const createTechnologySceneInteraction = ({
   setTimer = (callback, delay) => window.setTimeout(callback, delay),
   clearTimer = timer => window.clearTimeout(timer)
 }) => {
-  let focusTimer = null;
   let idleTimer = null;
-  let idle = false;
   let disposed = false;
-
-  const clearFocusTimer = () => {
-    if (focusTimer !== null) {
-      clearTimer(focusTimer);
-      focusTimer = null;
-    }
-  };
 
   const clearIdleTimer = () => {
     if (idleTimer !== null) {
@@ -108,28 +89,16 @@ export const createTechnologySceneInteraction = ({
     }
   };
 
-  const enableGlobalEvents = () => app.setGlobalEvents?.(true);
-  const disableGlobalEvents = () => app.setGlobalEvents?.(false);
-
-  const pointSceneAt = point => {
-    dispatchScenePointer(canvas, point);
-  };
-
-  const returnToCenter = () => {
-    pointSceneAt(
-      resolveTechnologyCenterPoint(canvas.getBoundingClientRect())
-    );
-  };
-
   const enterIdle = () => {
     idleTimer = null;
-    if (disposed || reducedMotion || focusTimer !== null) {
+    if (disposed || reducedMotion) {
       return;
     }
 
-    idle = true;
-    disableGlobalEvents();
-    returnToCenter();
+    dispatchIdlePointer(
+      pointerTarget,
+      resolveTechnologyCenterPoint(canvas.getBoundingClientRect())
+    );
   };
 
   const scheduleIdle = () => {
@@ -141,75 +110,39 @@ export const createTechnologySceneInteraction = ({
 
   const onPointerMove = event => {
     if (
+      event.__technologyIdlePointer ||
       event.pointerType === "touch" ||
-      event.isPrimary === false ||
-      focusTimer !== null
+      event.isPrimary === false
     ) {
       return;
-    }
-
-    if (idle) {
-      idle = false;
-      enableGlobalEvents();
     }
 
     scheduleIdle();
   };
 
   if (reducedMotion) {
-    disableGlobalEvents();
+    app.setGlobalEvents?.(false);
     app.stop?.();
 
     return {
-      focusElement() {},
       dispose() {
         disposed = true;
-        clearFocusTimer();
         clearIdleTimer();
-        disableGlobalEvents();
+        app.setGlobalEvents?.(false);
       }
     };
   }
 
-  enableGlobalEvents();
+  app.setGlobalEvents?.(true);
   pointerTarget.addEventListener("pointermove", onPointerMove, {passive: true});
   scheduleIdle();
 
   return {
-    focusElement(element) {
-      const targetRect = element?.getBoundingClientRect?.();
-      const focusPoint = resolveTechnologyFocusPoint({
-        canvasRect: canvas.getBoundingClientRect(),
-        targetRect
-      });
-
-      if (!focusPoint) {
-        return;
-      }
-
-      clearFocusTimer();
-      clearIdleTimer();
-      idle = false;
-      disableGlobalEvents();
-      pointSceneAt(focusPoint);
-
-      focusTimer = setTimer(() => {
-        focusTimer = null;
-        if (disposed) {
-          return;
-        }
-
-        enableGlobalEvents();
-        scheduleIdle();
-      }, TECHNOLOGY_FOCUS_HOLD_MS);
-    },
-
     dispose() {
       disposed = true;
-      clearFocusTimer();
       clearIdleTimer();
       pointerTarget.removeEventListener("pointermove", onPointerMove);
-      disableGlobalEvents();
+      app.setGlobalEvents?.(false);
     }
   };
 };
@@ -239,9 +172,6 @@ export async function createTechnologyScene({canvas, reducedMotion, onReady}) {
   onReady?.({motionEnabled: !reducedMotion});
 
   return {
-    focusElement(element) {
-      interaction.focusElement(element);
-    },
     dispose() {
       interaction.dispose();
       app.dispose?.();

@@ -589,7 +589,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
   const [sceneStatus, setSceneStatus] = React.useState("loading");
   const stageRef = React.useRef(null);
   const canvasRef = React.useRef(null);
-  const sceneControllerRef = React.useRef(null);
 
   const active =
     capabilitiesData.find(capability => capability.id === activeId) ||
@@ -627,7 +626,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
           return;
         }
         controller = instance;
-        sceneControllerRef.current = instance;
       })
       .catch(() => {
         if (!cancelled) {
@@ -637,30 +635,13 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
 
     return () => {
       cancelled = true;
-      if (sceneControllerRef.current === controller) {
-        sceneControllerRef.current = null;
-      }
       controller?.dispose();
     };
   }, [reducedMotion]);
 
-  const focusSceneTarget = target => {
-    if (reducedMotion || !target) {
-      return;
-    }
-
-    sceneControllerRef.current?.focusElement?.(target);
-  };
-
-  const selectGroup = (capability, target) => {
+  const selectGroup = capability => {
     setActiveId(capability.id);
     setActiveTechnologyId(capability.technologyIds[0]);
-    focusSceneTarget(target);
-  };
-
-  const selectTechnology = (technologyId, target) => {
-    setActiveTechnologyId(technologyId);
-    focusSceneTarget(target);
   };
 
   const moveTabFocus = (event, currentIndex) => {
@@ -678,11 +659,8 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     if (nextIndex === undefined) return;
     event.preventDefault();
     const nextCapability = capabilitiesData[nextIndex];
-    const nextTab = document.getElementById(
-      `technology-tab-${nextCapability.id}`
-    );
-    selectGroup(nextCapability, nextTab);
-    nextTab?.focus();
+    selectGroup(nextCapability);
+    document.getElementById(`technology-tab-${nextCapability.id}`)?.focus();
   };
 
   return (
@@ -715,7 +693,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
                 aria-controls="technology-scene"
                 tabIndex={capability.id === active.id ? 0 : -1}
                 className={capability.id === active.id ? "is-active" : ""}
-                onClick={event => selectGroup(capability, event.currentTarget)}
+                onClick={() => selectGroup(capability)}
                 onKeyDown={event => moveTabFocus(event, index)}
               >
                 <span>{String(index + 1).padStart(2, "0")}</span>
@@ -744,15 +722,9 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
                     type="button"
                     data-technology-id={technologyId}
                     aria-pressed={selected}
-                    onClick={event =>
-                      selectTechnology(technologyId, event.currentTarget)
-                    }
-                    onMouseEnter={event =>
-                      selectTechnology(technologyId, event.currentTarget)
-                    }
-                    onFocus={event =>
-                      selectTechnology(technologyId, event.currentTarget)
-                    }
+                    onClick={() => setActiveTechnologyId(technologyId)}
+                    onMouseEnter={() => setActiveTechnologyId(technologyId)}
+                    onFocus={() => setActiveTechnologyId(technologyId)}
                   >
                     <img src={technology.icon} alt="" aria-hidden="true" />
                     <span>{technology.name}</span>
