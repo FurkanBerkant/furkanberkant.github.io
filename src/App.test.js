@@ -411,34 +411,56 @@ it("marks exactly one clean route as current in the dock", () => {
   });
 });
 
-it("explores technology groups and tools with accessible controls", () => {
+it("explores technology groups and presents the active stack around the robot", () => {
   const {div, cleanup} = renderAt("/technologies");
   const tabs = div.querySelectorAll(".technology-explorer [role='tab']");
   const panel = div.querySelector("#technology-scene");
   const nodeButtons = () =>
     Array.from(div.querySelectorAll(".technology-panel__nodes button"));
+  const floatingButtons = () =>
+    Array.from(div.querySelectorAll(".technology-stage__stack button"));
 
   expect(tabs[0].getAttribute("aria-selected")).toBe("true");
   expect(div.querySelector(".technology-stage__canvas--spline")).not.toBeNull();
+  expect(div.querySelector(".technology-context")).toBeNull();
   expect(panel.textContent).toContain("Java");
   expect(nodeButtons()).toHaveLength(4);
+  expect(floatingButtons()).toHaveLength(4);
+  expect(floatingButtons().map(button => button.textContent)).toEqual([
+    "Java",
+    "Spring Boot",
+    "Python",
+    "gRPC"
+  ]);
+  expect(
+    div.querySelector(".technology-stage__group-label").textContent
+  ).toContain("Backend");
 
   click(tabs[1]);
   expect(tabs[0].getAttribute("aria-selected")).toBe("false");
   expect(tabs[1].getAttribute("aria-selected")).toBe("true");
   expect(panel.textContent).toContain("Apache Kafka");
   expect(nodeButtons()).toHaveLength(6);
-  expect(nodeButtons().map(button => button.textContent)).toContain(
+  expect(floatingButtons()).toHaveLength(6);
+  expect(floatingButtons().map(button => button.textContent)).toContain(
     "PostgreSQL"
+  );
+  expect(floatingButtons().map(button => button.textContent)).not.toContain(
+    "Java"
   );
   expect(tabs[0].getAttribute("tabindex")).toBe("-1");
   expect(tabs[1].getAttribute("tabindex")).toBe("0");
 
+  const floatingRedis = floatingButtons().find(
+    button => button.textContent === "Redis"
+  );
+  click(floatingRedis);
+
   const redisButton = nodeButtons().find(
     button => button.textContent === "Redis"
   );
-  click(redisButton);
   expect(redisButton.getAttribute("aria-pressed")).toBe("true");
+  expect(floatingRedis.getAttribute("aria-pressed")).toBe("true");
   expect(
     panel.querySelector(".technology-stage__readout-row strong").textContent
   ).toBe("Redis");
@@ -448,6 +470,9 @@ it("explores technology groups and tools with accessible controls", () => {
   expect(tabs[2].getAttribute("tabindex")).toBe("0");
   expect(document.activeElement).toBe(tabs[2]);
   expect(nodeButtons().map(button => button.textContent)).toContain("Docker");
+  expect(floatingButtons().map(button => button.textContent)).toContain(
+    "Kubernetes"
+  );
 
   cleanup();
 });

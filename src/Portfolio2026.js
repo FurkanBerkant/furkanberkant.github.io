@@ -72,6 +72,45 @@ const experienceTechnologies = {
   Otoparcasan: ["Python", "SQL", "XML", "Excel"]
 };
 
+const technologyStageSlots = {
+  1: [{x: 18, y: 34}],
+  2: [
+    {x: 17, y: 28},
+    {x: 78, y: 28}
+  ],
+  3: [
+    {x: 16, y: 22},
+    {x: 78, y: 35},
+    {x: 18, y: 66}
+  ],
+  4: [
+    {x: 16, y: 20},
+    {x: 78, y: 20},
+    {x: 13, y: 58},
+    {x: 78, y: 58}
+  ],
+  5: [
+    {x: 15, y: 17},
+    {x: 77, y: 17},
+    {x: 11, y: 45},
+    {x: 79, y: 45},
+    {x: 69, y: 70}
+  ],
+  6: [
+    {x: 15, y: 16},
+    {x: 76, y: 16},
+    {x: 10, y: 43},
+    {x: 80, y: 42},
+    {x: 17, y: 70},
+    {x: 71, y: 70}
+  ]
+};
+
+const resolveTechnologyStageSlot = (count, index) => {
+  const slots = technologyStageSlots[count] || technologyStageSlots[6];
+  return slots[index % slots.length];
+};
+
 export const resolveInitialTheme = savedTheme =>
   themeOptions.some(option => option.id === savedTheme) ? savedTheme : "dark";
 
@@ -644,6 +683,10 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     setActiveTechnologyId(capability.technologyIds[0]);
   };
 
+  const selectTechnology = technologyId => {
+    setActiveTechnologyId(technologyId);
+  };
+
   const moveTabFocus = (event, currentIndex) => {
     const destinations = {
       ArrowRight: (currentIndex + 1) % capabilitiesData.length,
@@ -722,9 +765,9 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
                     type="button"
                     data-technology-id={technologyId}
                     aria-pressed={selected}
-                    onClick={() => setActiveTechnologyId(technologyId)}
-                    onMouseEnter={() => setActiveTechnologyId(technologyId)}
-                    onFocus={() => setActiveTechnologyId(technologyId)}
+                    onClick={() => selectTechnology(technologyId)}
+                    onMouseEnter={() => selectTechnology(technologyId)}
+                    onFocus={() => selectTechnology(technologyId)}
                   >
                     <img src={technology.icon} alt="" aria-hidden="true" />
                     <span>{technology.name}</span>
@@ -748,6 +791,51 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
             ref={canvasRef}
             aria-hidden="true"
           />
+
+          <div className="technology-stage__group-label" aria-hidden="true">
+            <span>{copy.groups[active.id]}</span>
+            <small>
+              {String(active.technologyIds.length).padStart(2, "0")}{" "}
+              {copy.toolsLabel}
+            </small>
+          </div>
+
+          <div
+            className="technology-stage__stack"
+            key={active.id}
+            aria-label={copy.groupTechnologies}
+          >
+            {active.technologyIds.map((technologyId, index) => {
+              const technology = technologies[technologyId];
+              const selected = technologyId === resolvedTechnologyId;
+              const slot = resolveTechnologyStageSlot(
+                active.technologyIds.length,
+                index
+              );
+
+              return (
+                <button
+                  type="button"
+                  key={technologyId}
+                  className={selected ? "is-selected" : ""}
+                  data-floating-technology-id={technologyId}
+                  aria-pressed={selected}
+                  style={{
+                    "--technology-token-x": `${slot.x}%`,
+                    "--technology-token-y": `${slot.y}%`,
+                    "--technology-token-delay": `${index * 45}ms`
+                  }}
+                  onClick={() => selectTechnology(technologyId)}
+                  onMouseEnter={() => selectTechnology(technologyId)}
+                  onFocus={() => selectTechnology(technologyId)}
+                >
+                  <img src={technology.icon} alt="" aria-hidden="true" />
+                  <span>{technology.name}</span>
+                </button>
+              );
+            })}
+          </div>
+
           <div className="technology-stage__loader" aria-hidden="true">
             <span />
           </div>
