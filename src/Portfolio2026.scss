@@ -3322,18 +3322,17 @@ html[data-theme-transition="true"] .portfolio-site :where(
 .technology-stage__canvas--spline {
   transform:
     translate3d(
-      calc(var(--robot-follow-x, 0) * 10px),
-      calc((var(--robot-follow-y, 0) * 7px) - 3%),
+      var(--robot-follow-x, 0px),
+      calc(var(--robot-follow-y, 0px) - 3%),
       0
     )
     scale(1.04)
-    rotate(
-      calc(var(--robot-follow-x, 0) * 0.45deg)
-    );
+    rotate(var(--robot-follow-rotate, 0deg));
   transform-origin: center;
+  will-change: transform;
   transition:
     opacity 420ms ease,
-    transform 160ms linear;
+    transform 90ms linear;
 }
 
 .portfolio-site[data-theme="light"] .technology-explorer {
