@@ -411,23 +411,23 @@ it("marks exactly one clean route as current in the dock", () => {
   });
 });
 
-it("explores technology groups through a holographic robot console", () => {
+it("lets the robot present groups and technologies from one holographic stage", () => {
   const {div, cleanup} = renderAt("/technologies");
-  const tabs = div.querySelectorAll(".technology-explorer [role='tab']");
+  const tabs = () =>
+    Array.from(div.querySelectorAll(".technology-stage__groups [role='tab']"));
   const stage = div.querySelector("#technology-scene");
-  const nodeButtons = () =>
-    Array.from(div.querySelectorAll(".technology-panel__nodes button"));
   const floatingButtons = () =>
     Array.from(div.querySelectorAll(".technology-stage__stack button"));
 
-  expect(tabs[0].getAttribute("aria-selected")).toBe("true");
+  expect(div.querySelector(".technology-panel")).toBeNull();
   expect(stage.getAttribute("role")).toBe("tabpanel");
+  expect(stage.dataset.activeGroup).toBe("build");
   expect(stage.dataset.selectedTechnology).toBe("java");
   expect(div.querySelector(".technology-stage__canvas--spline")).not.toBeNull();
-  expect(div.querySelector(".technology-stage__hologram")).not.toBeNull();
-  expect(div.querySelectorAll(".technology-stage__link")).toHaveLength(4);
-  expect(div.querySelector(".technology-stage__readout")).toBeNull();
-  expect(nodeButtons()).toHaveLength(4);
+  expect(div.querySelector(".technology-stage__projector")).not.toBeNull();
+  expect(div.querySelector(".technology-stage__beam")).not.toBeNull();
+  expect(div.querySelector(".technology-stage__palm-core")).not.toBeNull();
+  expect(tabs()).toHaveLength(4);
   expect(floatingButtons()).toHaveLength(4);
   expect(floatingButtons().map(button => button.textContent)).toEqual([
     "Java01 / 04",
@@ -435,17 +435,13 @@ it("explores technology groups through a holographic robot console", () => {
     "Python",
     "gRPC"
   ]);
-  expect(div.querySelector(".technology-stage__mode").textContent).toContain(
-    "Backend"
-  );
 
-  click(tabs[1]);
-  expect(tabs[0].getAttribute("aria-selected")).toBe("false");
-  expect(tabs[1].getAttribute("aria-selected")).toBe("true");
+  click(tabs()[1]);
+  expect(stage.dataset.activeGroup).toBe("move");
   expect(stage.dataset.selectedTechnology).toBe("kafka");
-  expect(nodeButtons()).toHaveLength(6);
+  expect(tabs()[0].getAttribute("aria-selected")).toBe("false");
+  expect(tabs()[1].getAttribute("aria-selected")).toBe("true");
   expect(floatingButtons()).toHaveLength(6);
-  expect(div.querySelectorAll(".technology-stage__link")).toHaveLength(6);
   expect(floatingButtons().map(button => button.textContent)).toContain(
     "PostgreSQL"
   );
@@ -458,19 +454,15 @@ it("explores technology groups through a holographic robot console", () => {
   );
   click(floatingRedis);
 
-  const redisButton = nodeButtons().find(
-    button => button.textContent === "Redis"
-  );
-  expect(redisButton.getAttribute("aria-pressed")).toBe("true");
   expect(floatingRedis.getAttribute("aria-pressed")).toBe("true");
   expect(stage.dataset.selectedTechnology).toBe("redis");
   expect(floatingRedis.textContent).toContain("04 / 06");
 
-  keyDown(tabs[1], "ArrowRight");
-  expect(tabs[2].getAttribute("aria-selected")).toBe("true");
-  expect(tabs[2].getAttribute("tabindex")).toBe("0");
-  expect(document.activeElement).toBe(tabs[2]);
-  expect(nodeButtons().map(button => button.textContent)).toContain("Docker");
+  keyDown(tabs()[1], "ArrowRight");
+  expect(stage.dataset.activeGroup).toBe("ship");
+  expect(tabs()[2].getAttribute("aria-selected")).toBe("true");
+  expect(tabs()[2].getAttribute("tabindex")).toBe("0");
+  expect(document.activeElement).toBe(tabs()[2]);
   expect(floatingButtons().map(button => button.textContent)).toContain(
     "Kubernetes"
   );
