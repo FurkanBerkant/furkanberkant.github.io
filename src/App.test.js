@@ -403,21 +403,21 @@ it("uses Fibonacci spiral geometry with a repeating pulse", () => {
   expect(pulsed.alpha).toBeGreaterThan(first.alpha);
 });
 
-it("matches the source dock magnification falloff", () => {
+it("keeps dock magnification noticeable without overpowering the page", () => {
   const center = resolveDockMagnification(0);
   const neighbor = resolveDockMagnification(75);
   const edge = resolveDockMagnification(150);
   const mirrored = resolveDockMagnification(-75);
 
-  expect(center.size).toBeCloseTo(80, 3);
-  expect(center.scale).toBeCloseTo(2, 3);
-  expect(neighbor.size).toBeCloseTo(60, 3);
+  expect(center.size).toBeCloseTo(56, 3);
+  expect(center.scale).toBeCloseTo(1.4, 3);
+  expect(neighbor.size).toBeCloseTo(46, 3);
   expect(mirrored.size).toBeCloseTo(neighbor.size, 5);
   expect(edge.size).toBeCloseTo(40, 3);
   expect(edge.lift).toBeCloseTo(0, 3);
 });
 
-it("matches Aceternity container-scroll transform ranges", () => {
+it("keeps container-scroll motion readable for project screenshots", () => {
   const approaching = resolveProjectPerspective({
     top: 800,
     height: 640,
@@ -444,19 +444,20 @@ it("matches Aceternity container-scroll transform ranges", () => {
   });
 
   expect(approaching.progress).toBe(0);
-  expect(approaching.tilt).toBe("20.00deg");
-  expect(approaching.scale).toBe("1.0500");
-  expect(approaching.shift).toBe("0.00px");
+  expect(approaching.tilt).toBe("10.00deg");
+  expect(approaching.scale).toBe("0.9400");
+  expect(approaching.shift).toBe("30.00px");
   expect(halfway.progress).toBeCloseTo(0.5, 4);
-  expect(halfway.tilt).toBe("10.00deg");
-  expect(halfway.scale).toBe("1.0250");
-  expect(halfway.shift).toBe("-50.00px");
+  expect(halfway.tilt).toBe("5.00deg");
+  expect(halfway.scale).toBe("0.9700");
+  expect(halfway.shift).toBe("15.00px");
   expect(settled.progress).toBe(1);
   expect(settled.tilt).toBe("0.00deg");
   expect(settled.scale).toBe("1.0000");
-  expect(settled.shift).toBe("-100.00px");
-  expect(compact.tilt).toBe("20.00deg");
-  expect(compact.scale).toBe("0.7000");
+  expect(settled.shift).toBe("0.00px");
+  expect(compact.tilt).toBe("6.00deg");
+  expect(compact.scale).toBe("0.9600");
+  expect(compact.shift).toBe("18.00px");
 });
 
 it("matches Aceternity timeline start and end scroll offsets", () => {
@@ -500,6 +501,9 @@ it("marks exactly one clean route as current in the dock", () => {
 
     expect(current.classList.contains("is-active")).toBe(true);
     expect(current.getAttribute("aria-current")).toBe("page");
+    expect(current.querySelector(".route-dock__label").textContent).toBe(
+      path === "/" ? "Home" : current.getAttribute("aria-label")
+    );
     expect(
       div.querySelectorAll(".route-dock a[aria-current='page']")
     ).toHaveLength(1);
