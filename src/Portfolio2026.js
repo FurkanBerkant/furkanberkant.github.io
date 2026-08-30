@@ -202,8 +202,8 @@ const LanguageSwitch = ({language, onChange, copy, interactive = true}) => (
 );
 
 const DOCK_BASE_SIZE = 40;
-const DOCK_MAGNIFIED_SIZE = 80;
-const DOCK_MAGNIFICATION_DISTANCE = 150;
+const DOCK_MAGNIFIED_SIZE = 56;
+const DOCK_MAGNIFICATION_DISTANCE = 120;
 
 export const resolveDockMagnification = distance => {
   const resolvedDistance = Math.min(
@@ -219,7 +219,7 @@ export const resolveDockMagnification = distance => {
   return {
     size,
     scale: size / DOCK_BASE_SIZE,
-    lift: (size - DOCK_BASE_SIZE) * 0.24
+    lift: (size - DOCK_BASE_SIZE) * 0.18
   };
 };
 
@@ -376,7 +376,7 @@ const SiteTopbar = ({
         <strong>BK</strong>
         <span>portfolio.index</span>
       </Link>
-      <p className="site-route" aria-label={copy.routeLabel}>
+      <p className="site-route" aria-label={copy.routeLabel} key={pathname}>
         <span>route</span>
         <strong>{pathname === "/" ? "/index" : pathname}</strong>
       </p>
@@ -846,17 +846,17 @@ export const resolveProjectPerspective = ({
   const progress = clampProjectProgress(
     (safeViewportHeight - top) / (safeHeight + safeViewportHeight)
   );
-  const rotate = (1 - progress) * 20;
-  const scaleStart = compact ? 0.7 : 1.05;
-  const scaleEnd = compact ? 0.9 : 1;
-  const translate = -100 * progress;
+  const rotate = (1 - progress) * (compact ? 6 : 10);
+  const scaleStart = compact ? 0.96 : 0.94;
+  const shiftStart = compact ? 18 : 30;
+  const shift = shiftStart * (1 - progress);
 
   return {
     progress,
     tilt: `${rotate.toFixed(2)}deg`,
-    scale: (scaleStart + progress * (scaleEnd - scaleStart)).toFixed(4),
-    shift: `${translate.toFixed(2)}px`,
-    galleryShift: `${(translate * 0.45).toFixed(2)}px`,
+    scale: (scaleStart + progress * (1 - scaleStart)).toFixed(4),
+    shift: `${shift.toFixed(2)}px`,
+    galleryShift: `${(shift * 0.35).toFixed(2)}px`,
     opacity: "1"
   };
 };
@@ -2140,6 +2140,7 @@ function Portfolio2026() {
 
       <main
         id="main-content"
+        key={pathname}
         className={isHome ? "site-main--home" : "site-main--route"}
       >
         <Switch>
