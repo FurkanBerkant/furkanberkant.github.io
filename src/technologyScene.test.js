@@ -2,6 +2,7 @@ import {
   createTechnologyPresentationController,
   createTechnologySceneInteraction,
   resolvePalmClientPoint,
+  resolveRobotPalmPercentage,
   resolveTechnologyCenterPoint,
   TECHNOLOGY_IDLE_DELAY_MS
 } from "./technologyScene";
@@ -57,6 +58,32 @@ it("maps the animated palm anchor into browser coordinates", () => {
       rect: {left: 0, top: 0, width: 800, height: 600}
     })
   ).toEqual({clientX: 960, clientY: 300, inView: false});
+});
+
+it("maps palm coordinates into the robot column", () => {
+  expect(
+    resolveRobotPalmPercentage({
+      clientX: 850,
+      clientY: 350,
+      rect: {left: 600, top: 100, width: 500, height: 500}
+    })
+  ).toEqual({x: 50, y: 50});
+
+  expect(
+    resolveRobotPalmPercentage({
+      clientX: 1200,
+      clientY: 50,
+      rect: {left: 600, top: 100, width: 500, height: 500}
+    })
+  ).toEqual({x: 120, y: -10});
+
+  expect(
+    resolveRobotPalmPercentage({
+      clientX: 850,
+      clientY: 350,
+      rect: {left: 600, top: 100, width: 0, height: 500}
+    })
+  ).toBeNull();
 });
 
 it("keeps Spline global follow enabled while the idle timer runs", () => {

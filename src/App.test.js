@@ -5,7 +5,6 @@ import App from "./App";
 import {shouldEnableAnalytics, trackEvent} from "./analytics";
 import {
   HOME_INTRO_DURATION,
-  HOME_INTRO_SESSION_KEY,
   THEME_STORAGE_KEY,
   resolveDockMagnification,
   resolveProjectPerspective,
@@ -204,7 +203,7 @@ it("renders the sequenced identity home without portfolio previews", () => {
   cleanup();
 });
 
-it("stages the home intro once per session and skips it on return", () => {
+it("replays the home identity on every visit without hiding navigation", () => {
   jest.useFakeTimers();
 
   try {
@@ -214,17 +213,18 @@ it("stages the home intro once per session and skips it on return", () => {
     expect(
       rendered.div.querySelector(".identity-sequence--play")
     ).not.toBeNull();
-    expect(rendered.div.querySelector(".site-topbar--intro")).not.toBeNull();
-    expect(rendered.div.querySelector(".route-dock--intro")).not.toBeNull();
     expect(handle.getAttribute("aria-label")).toBe("/berkant.dev_");
+    expect(rendered.div.querySelectorAll(".site-primary-nav a")).toHaveLength(
+      6
+    );
     expect(
       rendered.div.querySelector(".route-dock a").getAttribute("tabindex")
-    ).toBe("-1");
+    ).toBeNull();
     expect(
       rendered.div
         .querySelector(".site-controls button")
         .getAttribute("tabindex")
-    ).toBe("-1");
+    ).toBeNull();
 
     act(() => {
       jest.advanceTimersByTime(HOME_INTRO_DURATION - 1);
@@ -232,7 +232,6 @@ it("stages the home intro once per session and skips it on return", () => {
     expect(
       rendered.div.querySelector(".identity-sequence--play")
     ).not.toBeNull();
-    expect(window.sessionStorage.getItem(HOME_INTRO_SESSION_KEY)).toBeNull();
 
     act(() => {
       jest.advanceTimersByTime(1);
@@ -240,18 +239,16 @@ it("stages the home intro once per session and skips it on return", () => {
     expect(
       rendered.div.querySelector(".identity-sequence--settled")
     ).not.toBeNull();
-    expect(rendered.div.querySelector(".site-topbar--intro")).toBeNull();
-    expect(rendered.div.querySelector(".route-dock--intro")).toBeNull();
-    expect(
-      rendered.div.querySelector(".route-dock").hasAttribute("aria-hidden")
-    ).toBe(false);
-    expect(
-      rendered.div.querySelector(".route-dock a").getAttribute("tabindex")
-    ).toBeNull();
-    expect(window.sessionStorage.getItem(HOME_INTRO_SESSION_KEY)).toBe("true");
 
-    click(rendered.div.querySelector(".route-dock a[href='/projects']"));
-    click(rendered.div.querySelector(".route-dock a[href='/']"));
+    click(rendered.div.querySelector(".site-primary-nav a[href='/projects']"));
+    click(rendered.div.querySelector(".site-primary-nav a[href='/']"));
+    expect(
+      rendered.div.querySelector(".identity-sequence--play")
+    ).not.toBeNull();
+
+    act(() => {
+      jest.advanceTimersByTime(HOME_INTRO_DURATION);
+    });
     expect(
       rendered.div.querySelector(".identity-sequence--settled")
     ).not.toBeNull();
@@ -259,10 +256,8 @@ it("stages the home intro once per session and skips it on return", () => {
 
     rendered = renderAt("/");
     expect(
-      rendered.div.querySelector(".identity-sequence--settled")
+      rendered.div.querySelector(".identity-sequence--play")
     ).not.toBeNull();
-    expect(rendered.div.querySelector(".site-topbar--intro")).toBeNull();
-    expect(rendered.div.querySelector(".route-dock--intro")).toBeNull();
     rendered.cleanup();
   } finally {
     jest.useRealTimers();
@@ -496,6 +491,9 @@ it("marks exactly one clean route as current in the dock", () => {
   paths.forEach(path => {
     const {div, cleanup} = renderAt(path);
     const current = div.querySelector(`.route-dock a[href='${path}']`);
+    const primaryCurrent = div.querySelector(
+      `.site-primary-nav a[href='${path}']`
+    );
 
     expect(current.classList.contains("is-active")).toBe(true);
     expect(current.getAttribute("aria-current")).toBe("page");
@@ -505,6 +503,17 @@ it("marks exactly one clean route as current in the dock", () => {
     expect(
       div.querySelectorAll(".route-dock a[aria-current='page']")
     ).toHaveLength(1);
+    expect(primaryCurrent.classList.contains("is-active")).toBe(true);
+    expect(primaryCurrent.getAttribute("aria-current")).toBe("page");
+    expect(
+      div.querySelectorAll(".site-primary-nav a[aria-current='page']")
+    ).toHaveLength(1);
+    expect(
+      div.querySelector(".site-primary-nav").getAttribute("aria-label")
+    ).toBe("Primary navigation");
+    expect(div.querySelector(".route-dock").getAttribute("aria-label")).toBe(
+      "Quick navigation"
+    );
     cleanup();
   });
 });
@@ -538,15 +547,13 @@ it("uses one palm hologram for group and technology selection", () => {
   expect(div.querySelector(".technology-stage__beam")).toBeNull();
   expect(div.querySelector(".technology-hologram")).not.toBeNull();
   expect(div.querySelector(".technology-guide")).not.toBeNull();
+  expect(div.querySelector(".technology-stage__console")).not.toBeNull();
+  expect(div.querySelector(".technology-stage__robot")).not.toBeNull();
   expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
     "Trace the stack I shipped"
   );
-  expect(div.querySelector(".technology-guide__follow").textContent).toBe(
-    "Cursor trackingActive"
-  );
-  expect(div.querySelector(".technology-guide__primary").textContent).toBe(
-    "Open my stack→"
-  );
+  expect(div.querySelector(".technology-guide__signals")).toBeNull();
+  expect(div.querySelector(".technology-guide__controls")).toBeNull();
   expect(groupButtons()).toHaveLength(4);
   expect(groupButtons().map(button => button.textContent)).toEqual([
     "01BackendService foundations04",
@@ -555,15 +562,21 @@ it("uses one palm hologram for group and technology selection", () => {
     "04ObservabilityProduction signals02"
   ]);
 
-  click(div.querySelector(".technology-guide__primary"));
+  const guideAnnouncer = div.querySelector(".technology-guide__announcer");
+  click(groupButtons()[0]);
   expect(stage.dataset.hologramView).toBe("technologies");
   expect(stage.dataset.activeGroup).toBe("build");
   expect(stage.dataset.selectedTechnology).toBe("java");
+  expect(document.activeElement).toBe(technologyButtons()[0]);
+  expect(div.querySelector(".technology-guide__announcer")).toBe(
+    guideAnnouncer
+  );
   expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
     "Java"
   );
-  click(div.querySelector(".technology-guide__controls > button"));
+  click(div.querySelector(".technology-hologram__back"));
   expect(stage.dataset.hologramView).toBe("groups");
+  expect(document.activeElement).toBe(groupButtons()[0]);
 
   click(groupButtons()[1]);
 
@@ -583,9 +596,6 @@ it("uses one palm hologram for group and technology selection", () => {
   expect(div.querySelector(".technology-guide__body p").textContent).toContain(
     "60K+ connected devices"
   );
-  expect(div.querySelector(".technology-guide__presentation").textContent).toBe(
-    "Palm projectionHolding selection"
-  );
   expect(technologyButtons()).toHaveLength(6);
   expect(technologyButtons().map(button => button.textContent)).toContain(
     "PostgreSQL02 / 06"
@@ -602,25 +612,11 @@ it("uses one palm hologram for group and technology selection", () => {
   expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
     "Redis"
   );
-
-  click(
-    div.querySelector(
-      ".technology-guide__controls button[aria-label='Show next technology']"
-    )
-  );
-  expect(stage.dataset.selectedTechnology).toBe("sqlserver");
-  expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
-    "SQL Server"
+  expect(div.querySelector(".technology-guide__announcer")).toBe(
+    guideAnnouncer
   );
 
-  click(
-    div.querySelector(
-      ".technology-guide__controls button[aria-label='Show previous technology']"
-    )
-  );
-  expect(stage.dataset.selectedTechnology).toBe("redis");
-
-  click(div.querySelector(".technology-guide__controls > button"));
+  click(div.querySelector(".technology-hologram__back"));
 
   expect(stage.dataset.hologramView).toBe("groups");
   expect(stage.dataset.guideStep).toBe("groups");
@@ -878,10 +874,8 @@ it("honors reduced motion for the intro, technology scene and project media", ()
   expect(
     rendered.div.querySelector(".identity-sequence--settled")
   ).not.toBeNull();
-  expect(rendered.div.querySelector(".site-topbar--intro")).toBeNull();
-  expect(rendered.div.querySelector(".route-dock--intro")).toBeNull();
   expect(window.requestAnimationFrame).not.toHaveBeenCalled();
-  expect(window.sessionStorage.getItem(HOME_INTRO_SESSION_KEY)).toBe("true");
+  expect(rendered.div.querySelectorAll(".site-primary-nav a")).toHaveLength(6);
   rendered.cleanup();
 
   rendered = renderAt("/technologies");

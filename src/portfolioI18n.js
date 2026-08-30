@@ -55,7 +55,8 @@ export const uiCopy = {
       cyberAria: "Use cyber theme"
     },
     skipLink: "Skip to content",
-    navigationLabel: "Portfolio routes",
+    primaryNavigationLabel: "Primary navigation",
+    quickNavigationLabel: "Quick navigation",
     routeLabel: "Current route",
     navigation: {
       home: "Home",
@@ -75,7 +76,11 @@ export const uiCopy = {
       route: "/technologies",
       kicker: "Technology index / 17",
       title: "Technologies",
+      intro:
+        "The tools behind my production systems, independent projects and delivery workflows.",
       explorerLabel: "Interactive technology explorer",
+      explorerTitle: "My engineering stack",
+      explorerHint: "Choose a layer, then inspect the work behind each tool",
       chooseGroup: "Technology groups",
       groupsLabel: "groups",
       toolsLabel: "technologies",
@@ -83,9 +88,13 @@ export const uiCopy = {
       groupTechnologies: "Technologies in the selected group",
       sceneHint: "Drag to rotate the stack",
       hologramGroupsTitle: "Stack / system layers",
-      hologramGroupsHint: "Choose a layer to inspect its tools",
+      hologramGroupsHint: "Start with the kind of work you want to inspect",
       hologramTechnologiesHint:
-        "Select a tool; the robot presents it while this panel shows where I used it.",
+        "Choose a tool. The robot presents it while the evidence panel shows where I used it.",
+      sceneFallback:
+        "The 3D guide could not load. The stack explorer and usage evidence are still available.",
+      projectionFallback:
+        "Palm projection is unavailable, but the selected tool remains visible in the evidence panel.",
       guideLabel: "Portfolio evidence",
       guideStatus: {
         loading: "Synchronizing",
@@ -96,7 +105,7 @@ export const uiCopy = {
       guideTechnologyStep: "Selected tool / real use",
       guideGroupsTitle: "Trace the stack I shipped",
       guideGroupsBody:
-        "Choose a layer to trace tools through my production systems, shipped projects and delivery workflows. The robot switches from idle tracking to a coordinated presentation.",
+        "Choose a work layer to trace the tools I used across production systems, shipped projects and delivery workflows. The robot keeps following your cursor, then presents your selection in its palm.",
       guideContextLabel: "Work signals",
       guideStart: "Open my stack",
       backToGroups: "All system layers",
@@ -242,7 +251,8 @@ export const uiCopy = {
       cyberAria: "Siber temayı kullan"
     },
     skipLink: "İçeriğe geç",
-    navigationLabel: "Portfolyo rotaları",
+    primaryNavigationLabel: "Ana navigasyon",
+    quickNavigationLabel: "Hızlı navigasyon",
     routeLabel: "Geçerli rota",
     navigation: {
       home: "Ana sayfa",
@@ -262,7 +272,12 @@ export const uiCopy = {
       route: "/technologies",
       kicker: "Teknoloji dizini / 17",
       title: "Teknolojiler",
+      intro:
+        "Üretim sistemlerimin, bağımsız projelerimin ve dağıtım akışlarımın arkasındaki araçlar.",
       explorerLabel: "Etkileşimli teknoloji gezgini",
+      explorerTitle: "Mühendislik stack'im",
+      explorerHint:
+        "Bir katman seç, ardından her aracın arkasındaki işi incele",
       chooseGroup: "Teknoloji grupları",
       groupsLabel: "grup",
       toolsLabel: "teknoloji",
@@ -270,9 +285,13 @@ export const uiCopy = {
       groupTechnologies: "Seçili gruptaki teknolojiler",
       sceneHint: "Yığını döndürmek için sürükle",
       hologramGroupsTitle: "Stack / sistem katmanları",
-      hologramGroupsHint: "Araçlarını incelemek için bir katman seç",
+      hologramGroupsHint: "İncelemek istediğin çalışma türüyle başla",
       hologramTechnologiesHint:
-        "Bir araç seç; robot onu sunarken bu panel nerede kullandığımı göstersin.",
+        "Bir araç seç. Robot onu sunarken kanıt paneli nerede kullandığımı göstersin.",
+      sceneFallback:
+        "3B rehber yüklenemedi. Stack gezgini ve kullanım kanıtları çalışmaya devam ediyor.",
+      projectionFallback:
+        "Avuç projeksiyonu kullanılamıyor; seçili araç kanıt panelinde görünmeye devam ediyor.",
       guideLabel: "Portföy kanıtı",
       guideStatus: {
         loading: "Eşitleniyor",
@@ -283,7 +302,7 @@ export const uiCopy = {
       guideTechnologyStep: "Seçili araç / gerçek kullanım",
       guideGroupsTitle: "Yayına aldığım stack'i izle",
       guideGroupsBody:
-        "Üretim sistemlerimde, yayınladığım projelerde ve dağıtım akışlarında kullandığım araçları görmek için bir katman seç. Robot imleç takibinden eşzamanlı sunuma geçsin.",
+        "Üretim sistemlerimde, yayınladığım projelerde ve dağıtım akışlarında kullandığım araçları izlemek için bir çalışma katmanı seç. Robot imlecini takip etmeyi sürdürür, ardından seçimini avucunda sunar.",
       guideContextLabel: "Çalışma izleri",
       guideStart: "Stack'imi aç",
       backToGroups: "Tüm sistem katmanları",

@@ -190,7 +190,22 @@ export const resolvePalmClientPoint = ({normalizedX, normalizedY, rect}) => {
   };
 };
 
-const createPalmProjection = ({app, canvas, onPosition}) => {
+export const resolveRobotPalmPercentage = ({clientX, clientY, rect}) => {
+  if (
+    !isUsableRect(rect) ||
+    !Number.isFinite(clientX) ||
+    !Number.isFinite(clientY)
+  ) {
+    return null;
+  }
+
+  return {
+    x: ((clientX - rect.left) / rect.width) * 100,
+    y: ((clientY - rect.top) / rect.height) * 100
+  };
+};
+
+const createPalmProjection = ({app, canvas, onPosition, reducedMotion}) => {
   const hand = findPresentationHand(app);
   const camera = app._camera;
   if (!hand || !camera) {
@@ -208,6 +223,7 @@ const createPalmProjection = ({app, canvas, onPosition}) => {
   const projectedAnchor = hand.position.clone();
 
   const updatePosition = () => {
+    animationFrame = null;
     if (disposed) {
       return;
     }
@@ -226,15 +242,22 @@ const createPalmProjection = ({app, canvas, onPosition}) => {
       onPosition?.({...point, visible});
     }
 
-    animationFrame = window.requestAnimationFrame(updatePosition);
+    if (!reducedMotion) {
+      animationFrame = window.requestAnimationFrame(updatePosition);
+    }
   };
 
-  animationFrame = window.requestAnimationFrame(updatePosition);
+  if (!reducedMotion) {
+    animationFrame = window.requestAnimationFrame(updatePosition);
+  }
 
   return {
     available: true,
     setPresentation(presentation) {
       visible = Boolean(presentation?.visible);
+      if (reducedMotion && visible && animationFrame === null) {
+        animationFrame = window.requestAnimationFrame(updatePosition);
+      }
     },
     dispose() {
       disposed = true;
@@ -318,7 +341,8 @@ export async function createTechnologyScene({
   const projection = createPalmProjection({
     app,
     canvas,
-    onPosition: onPalmPosition
+    onPosition: onPalmPosition,
+    reducedMotion
   });
   const presentation = createTechnologyPresentationController({
     app,

@@ -31,7 +31,10 @@ import {
   uiCopy
 } from "./portfolioI18n";
 import {trackEvent} from "./analytics";
-import {createTechnologyScene} from "./technologyScene";
+import {
+  createTechnologyScene,
+  resolveRobotPalmPercentage
+} from "./technologyScene";
 import "./Portfolio2026.scss";
 
 const navigationItems = [
@@ -44,7 +47,6 @@ const navigationItems = [
 ];
 
 export const THEME_STORAGE_KEY = "berkant-portfolio-theme";
-export const HOME_INTRO_SESSION_KEY = "berkant-home-intro-seen";
 export const HOME_INTRO_DURATION = 1760;
 
 const themeOptions = [
@@ -85,26 +87,6 @@ const getInitialTheme = () => {
     return resolveInitialTheme(window.localStorage.getItem(THEME_STORAGE_KEY));
   } catch {
     return "dark";
-  }
-};
-
-const getInitialIntroPlayed = () => {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  try {
-    return window.sessionStorage.getItem(HOME_INTRO_SESSION_KEY) === "true";
-  } catch {
-    return false;
-  }
-};
-
-const rememberHomeIntro = () => {
-  try {
-    window.sessionStorage.setItem(HOME_INTRO_SESSION_KEY, "true");
-  } catch {
-    // Session storage may be unavailable in privacy-focused browser contexts.
   }
 };
 
@@ -221,11 +203,10 @@ export const resolveDockMagnification = distance => {
   };
 };
 
-const RouteDock = ({copy, introPlayed, isHome, reducedMotion}) => {
+const RouteDock = ({copy, reducedMotion}) => {
   const listRef = React.useRef(null);
   const animationFrameRef = React.useRef(null);
   const springsRef = React.useRef([]);
-  const introPending = isHome && !introPlayed;
 
   const ensureSprings = () => {
     const items = Array.from(listRef.current?.children || []);
@@ -270,7 +251,7 @@ const RouteDock = ({copy, introPlayed, isHome, reducedMotion}) => {
       );
       items[index]?.style.setProperty(
         "--dock-icon-font-size",
-        `${Math.min(21.6, Math.max(11.52, spring.value * 0.3)).toFixed(2)}px`
+        `${Math.min(22.4, Math.max(13, spring.value * 0.32)).toFixed(2)}px`
       );
     });
 
@@ -314,9 +295,8 @@ const RouteDock = ({copy, introPlayed, isHome, reducedMotion}) => {
 
   return (
     <nav
-      className={`route-dock ${introPending ? "route-dock--intro" : ""}`}
-      aria-label={copy.navigationLabel}
-      aria-hidden={introPending || undefined}
+      className="route-dock"
+      aria-label={copy.quickNavigationLabel}
       onMouseMove={event => {
         if (!reducedMotion) {
           setDockTargets(event.clientX);
@@ -332,7 +312,6 @@ const RouteDock = ({copy, introPlayed, isHome, reducedMotion}) => {
               activeClassName="is-active"
               to={item.href}
               aria-label={copy.navigation[item.id]}
-              tabIndex={introPending ? -1 : undefined}
             >
               <span className="route-dock__symbol" aria-hidden="true">
                 {item.symbol}
@@ -358,38 +337,54 @@ const SiteTopbar = ({
   language,
   onThemeChange,
   onLanguageChange,
-  introPlayed,
   isHome
 }) => {
-  const introPending = isHome && !introPlayed;
+  const primaryNavRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const nav = primaryNavRef.current;
+    const activeLink = nav?.querySelector("a[aria-current='page']");
+    if (!nav || !activeLink) {
+      return;
+    }
+
+    nav.scrollLeft = Math.max(
+      activeLink.offsetLeft - (nav.clientWidth - activeLink.offsetWidth) / 2,
+      0
+    );
+  }, [language, pathname]);
 
   return (
-    <header
-      className={`site-topbar ${isHome ? "site-topbar--home" : ""} ${
-        introPending ? "site-topbar--intro" : ""
-      }`}
-      aria-hidden={introPending || undefined}
-    >
+    <header className={`site-topbar ${isHome ? "site-topbar--home" : ""}`}>
       <Link className="site-index" to="/" aria-label={copy.aria.home}>
         <strong>BK</strong>
-        <span>portfolio.index</span>
+        <span>berkant.dev</span>
       </Link>
-      <p className="site-route" aria-label={copy.routeLabel} key={pathname}>
-        <span>route</span>
-        <strong>{pathname === "/" ? "/index" : pathname}</strong>
-      </p>
+      <nav
+        className="site-primary-nav"
+        aria-label={copy.primaryNavigationLabel}
+        ref={primaryNavRef}
+      >
+        <ol>
+          {navigationItems.map(item => (
+            <li key={item.href}>
+              <NavLink
+                exact={item.href === "/"}
+                activeClassName="is-active"
+                to={item.href}
+              >
+                {copy.navigation[item.id]}
+              </NavLink>
+            </li>
+          ))}
+        </ol>
+      </nav>
       <div className="site-controls">
-        <ThemeSwitch
-          theme={theme}
-          onChange={onThemeChange}
-          copy={copy.theme}
-          interactive={!introPending}
-        />
+        <ThemeSwitch theme={theme} onChange={onThemeChange} copy={copy.theme} />
         <LanguageSwitch
           language={language}
           onChange={onLanguageChange}
           copy={copy.language}
-          interactive={!introPending}
         />
       </div>
     </header>
@@ -514,8 +509,25 @@ const ParticleSpiral = ({theme, reducedMotion, playIntro}) => {
   );
 };
 
-const HomePage = ({copy, profileData, playIntro, theme, reducedMotion}) => {
+const HomePage = ({copy, profileData, theme, reducedMotion}) => {
   const handleGlyphs = Array.from(copy.home.handle);
+  const [introComplete, setIntroComplete] = React.useState(reducedMotion);
+
+  React.useEffect(() => {
+    if (reducedMotion) {
+      setIntroComplete(true);
+      return undefined;
+    }
+
+    setIntroComplete(false);
+    const timer = window.setTimeout(
+      () => setIntroComplete(true),
+      HOME_INTRO_DURATION
+    );
+    return () => window.clearTimeout(timer);
+  }, [reducedMotion]);
+
+  const playIntro = !introComplete && !reducedMotion;
 
   return (
     <section
@@ -583,8 +595,12 @@ const TechnologyStage = ({
   const [sceneStatus, setSceneStatus] = React.useState("loading");
   const [palmProjectionReady, setPalmProjectionReady] = React.useState(false);
   const stageRef = React.useRef(null);
+  const robotRef = React.useRef(null);
   const canvasRef = React.useRef(null);
   const sceneControllerRef = React.useRef(null);
+  const groupButtonRefs = React.useRef(new Map());
+  const firstTechnologyButtonRef = React.useRef(null);
+  const pendingFocusRef = React.useRef(null);
 
   const active =
     capabilitiesData.find(capability => capability.id === activeId) ||
@@ -595,25 +611,11 @@ const TechnologyStage = ({
   const activeTechnology = technologies[resolvedTechnologyId];
   const activeTechnologyEvidence =
     technologyEvidenceData[resolvedTechnologyId] || active.description;
-  const activeTechnologyIndex =
-    active.technologyIds.indexOf(resolvedTechnologyId);
   const scenePresentation = React.useMemo(
     () => ({
-      visible: hologramView === "technologies",
-      technology: activeTechnology,
-      groupLabel: active.title,
-      index: activeTechnologyIndex,
-      total: active.technologyIds.length,
-      projectionLabel: copy.palmProjectionLabel
+      visible: hologramView === "technologies"
     }),
-    [
-      active.title,
-      active.technologyIds.length,
-      activeTechnology,
-      activeTechnologyIndex,
-      copy.palmProjectionLabel,
-      hologramView
-    ]
+    [hologramView]
   );
   const scenePresentationRef = React.useRef(scenePresentation);
   scenePresentationRef.current = scenePresentation;
@@ -624,8 +626,9 @@ const TechnologyStage = ({
     }
 
     const stage = stageRef.current;
+    const robot = robotRef.current;
     const canvas = canvasRef.current;
-    if (!stage || !canvas) return undefined;
+    if (!stage || !robot || !canvas) return undefined;
 
     let cancelled = false;
     let controller = null;
@@ -635,23 +638,28 @@ const TechnologyStage = ({
     createTechnologyScene({
       canvas,
       reducedMotion,
-      onPalmPosition: ({clientX, clientY}) => {
-        if (cancelled) {
+      onPalmPosition: ({clientX, clientY, visible}) => {
+        if (cancelled || !visible) {
           return;
         }
 
-        const stageRect = stage.getBoundingClientRect();
-        if (!stageRect.width || !stageRect.height) {
+        const robotRect = robot.getBoundingClientRect();
+        const palmPosition = resolveRobotPalmPercentage({
+          clientX,
+          clientY,
+          rect: robotRect
+        });
+
+        if (!palmPosition) {
+          stage.dataset.palmInView = "false";
           return;
         }
 
-        const x = ((clientX - stageRect.left) / stageRect.width) * 100;
-        const y = ((clientY - stageRect.top) / stageRect.height) * 100;
-        stage.style.setProperty("--technology-palm-x", `${x}%`);
-        stage.style.setProperty("--technology-palm-y", `${y}%`);
+        const {x, y} = palmPosition;
+        robot.style.setProperty("--technology-palm-x", `${x}%`);
+        robot.style.setProperty("--technology-palm-y", `${y}%`);
         stage.dataset.palmPositioned = "true";
-        stage.dataset.palmInView =
-          x >= 0 && x <= 100 && y >= 0 && y <= 100 ? "true" : "false";
+        stage.dataset.palmInView = "true";
       },
       onReady: ({palmProjectionAvailable}) => {
         if (!cancelled) {
@@ -688,7 +696,21 @@ const TechnologyStage = ({
     sceneControllerRef.current?.setPresentation(scenePresentation);
   }, [scenePresentation]);
 
-  const openGroup = capability => {
+  React.useEffect(() => {
+    if (!pendingFocusRef.current) {
+      return;
+    }
+
+    if (pendingFocusRef.current === "technology") {
+      firstTechnologyButtonRef.current?.focus();
+    } else {
+      groupButtonRefs.current.get(active.id)?.focus();
+    }
+    pendingFocusRef.current = null;
+  }, [active.id, hologramView]);
+
+  const openGroup = (capability, event) => {
+    pendingFocusRef.current = event.detail === 0 ? "technology" : null;
     setActiveId(capability.id);
     setActiveTechnologyId(capability.technologyIds[0]);
     setHologramView("technologies");
@@ -698,21 +720,18 @@ const TechnologyStage = ({
     setActiveTechnologyId(technologyId);
   };
 
-  const moveTechnology = direction => {
-    const nextIndex =
-      (activeTechnologyIndex + direction + active.technologyIds.length) %
-      active.technologyIds.length;
-    setActiveTechnologyId(active.technologyIds[nextIndex]);
-  };
-
-  const showGroups = () => {
+  const showGroups = event => {
+    pendingFocusRef.current = event.detail === 0 ? "group" : null;
     setHologramView("groups");
   };
 
   return (
     <section className="technology-explorer" aria-label={copy.explorerLabel}>
       <header className="technology-explorer__header">
-        <code>stack.spline</code>
+        <div>
+          <strong>{copy.explorerTitle}</strong>
+          <small>{copy.explorerHint}</small>
+        </div>
         <span>
           {String(capabilitiesData.length).padStart(2, "0")} {copy.groupsLabel}
           <i aria-hidden="true"> / </i>
@@ -734,243 +753,203 @@ const TechnologyStage = ({
         data-guide-step={hologramView === "groups" ? "groups" : "technology"}
         data-palm-projection={palmProjectionReady ? "ready" : "unavailable"}
       >
-        <div className="technology-stage__spotlight" aria-hidden="true" />
+        <div
+          className="technology-stage__robot"
+          ref={robotRef}
+          aria-hidden="true"
+        >
+          <div className="technology-stage__spotlight" />
 
-        <div className="technology-stage__scene" aria-hidden="true">
-          <canvas
-            className="technology-stage__canvas technology-stage__canvas--spline"
-            ref={canvasRef}
-          />
-        </div>
+          <div className="technology-stage__scene">
+            <canvas
+              className="technology-stage__canvas technology-stage__canvas--spline"
+              ref={canvasRef}
+            />
+          </div>
 
-        {hologramView === "technologies" && (
-          <div className="technology-stage__palm-projection" aria-hidden="true">
-            <span className="technology-stage__palm-beam" />
-            <span className="technology-stage__palm-ring" />
-            <div className="technology-stage__palm-card">
-              <header>
-                <span>{copy.palmProjectionLabel}</span>
-                <small>
-                  {String(activeTechnologyIndex + 1).padStart(2, "0")} /{" "}
-                  {String(active.technologyIds.length).padStart(2, "0")}
-                </small>
-              </header>
-              <div>
+          {hologramView === "technologies" && (
+            <div className="technology-stage__palm-projection">
+              <span className="technology-stage__palm-beam" />
+              <span className="technology-stage__palm-ring" />
+              <div className="technology-stage__palm-card">
                 <img src={activeTechnology.icon} alt="" />
-                <span>
-                  <strong>{activeTechnology.name}</strong>
-                  <small>{copy.groups[active.id]}</small>
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="technology-hologram">
-          <div className="technology-hologram__chrome" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-
-          {hologramView === "groups" ? (
-            <div className="technology-hologram__view technology-hologram__view--groups">
-              <header className="technology-hologram__header">
-                <div>
-                  <span>{copy.hologramGroupsTitle}</span>
-                  <small>{copy.hologramGroupsHint}</small>
-                </div>
-                <small>
-                  {String(capabilitiesData.length).padStart(2, "0")}{" "}
-                  {copy.groupsLabel}
-                </small>
-              </header>
-
-              <div
-                className="technology-hologram__groups"
-                role="group"
-                aria-label={copy.chooseGroup}
-              >
-                {capabilitiesData.map((capability, index) => (
-                  <button
-                    type="button"
-                    key={capability.id}
-                    data-hologram-group-id={capability.id}
-                    onClick={() => openGroup(capability)}
-                  >
-                    <span className="technology-hologram__group-index">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className="technology-hologram__group-copy">
-                      <strong>{copy.groups[capability.id]}</strong>
-                      <em>{capability.title}</em>
-                    </span>
-                    <small>
-                      {String(capability.technologyIds.length).padStart(2, "0")}
-                    </small>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="technology-hologram__view technology-hologram__view--technologies">
-              <header className="technology-hologram__header">
-                <button
-                  type="button"
-                  className="technology-hologram__back"
-                  onClick={showGroups}
-                  aria-label={copy.backToGroups}
-                >
-                  ←
-                </button>
-                <div>
-                  <span>{copy.groups[active.id]}</span>
-                  <small>
-                    {String(active.technologyIds.length).padStart(2, "0")}{" "}
-                    {copy.toolsLabel}
-                  </small>
-                </div>
-              </header>
-
-              <p className="technology-hologram__hint">
-                {copy.hologramTechnologiesHint}
-              </p>
-
-              <div
-                className="technology-hologram__technologies"
-                role="group"
-                aria-label={copy.groupTechnologies}
-              >
-                {active.technologyIds.map((technologyId, index) => {
-                  const technology = technologies[technologyId];
-                  const selected = technologyId === resolvedTechnologyId;
-
-                  return (
-                    <button
-                      type="button"
-                      key={technologyId}
-                      className={selected ? "is-selected" : ""}
-                      data-hologram-technology-id={technologyId}
-                      aria-pressed={selected}
-                      onClick={() => selectTechnology(technologyId)}
-                      onMouseEnter={() => selectTechnology(technologyId)}
-                      onFocus={() => selectTechnology(technologyId)}
-                    >
-                      <img src={technology.icon} alt="" aria-hidden="true" />
-                      <span>
-                        <strong>{technology.name}</strong>
-                        <small>
-                          {String(index + 1).padStart(2, "0")} /{" "}
-                          {String(active.technologyIds.length).padStart(2, "0")}
-                        </small>
-                      </span>
-                    </button>
-                  );
-                })}
+                <strong>{activeTechnology.name}</strong>
               </div>
             </div>
           )}
         </div>
 
-        <aside className="technology-guide" aria-label={copy.guideLabel}>
-          <header className="technology-guide__status">
-            <span>
-              <i aria-hidden="true" />
-              {copy.guideLabel}
-            </span>
-            <small>{copy.guideStatus[sceneStatus]}</small>
-          </header>
+        <div className="technology-stage__console">
+          <div className="technology-hologram">
+            <div className="technology-hologram__chrome" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
 
-          <div
-            className="technology-guide__body"
-            key={`${hologramView}-${active.id}-${resolvedTechnologyId}`}
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            <span className="technology-guide__step">
-              {hologramView === "groups"
-                ? copy.guideGroupsStep
-                : copy.guideTechnologyStep}
-            </span>
-            <h2>
-              {hologramView === "groups"
-                ? copy.guideGroupsTitle
-                : activeTechnology.name}
-            </h2>
-            <p>
-              {hologramView === "groups"
-                ? copy.guideGroupsBody
-                : activeTechnologyEvidence}
-            </p>
+            {hologramView === "groups" ? (
+              <div className="technology-hologram__view technology-hologram__view--groups">
+                <header className="technology-hologram__header">
+                  <div>
+                    <span>{copy.hologramGroupsTitle}</span>
+                    <small>{copy.hologramGroupsHint}</small>
+                  </div>
+                  <small>
+                    {String(capabilitiesData.length).padStart(2, "0")}{" "}
+                    {copy.groupsLabel}
+                  </small>
+                </header>
 
-            {hologramView === "technologies" && (
-              <div className="technology-guide__context">
-                <span>{copy.guideContextLabel}</span>
-                <ul>
-                  {active.practices.slice(0, 3).map(practice => (
-                    <li key={practice}>{practice}</li>
+                <div
+                  className="technology-hologram__groups"
+                  role="group"
+                  aria-label={copy.chooseGroup}
+                >
+                  {capabilitiesData.map((capability, index) => (
+                    <button
+                      type="button"
+                      key={capability.id}
+                      data-hologram-group-id={capability.id}
+                      onClick={event => openGroup(capability, event)}
+                      ref={node => {
+                        if (node) {
+                          groupButtonRefs.current.set(capability.id, node);
+                        } else {
+                          groupButtonRefs.current.delete(capability.id);
+                        }
+                      }}
+                    >
+                      <span className="technology-hologram__group-index">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="technology-hologram__group-copy">
+                        <strong>{copy.groups[capability.id]}</strong>
+                        <em>{capability.title}</em>
+                      </span>
+                      <small>
+                        {String(capability.technologyIds.length).padStart(
+                          2,
+                          "0"
+                        )}
+                      </small>
+                    </button>
                   ))}
-                </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="technology-hologram__view technology-hologram__view--technologies">
+                <header className="technology-hologram__header">
+                  <button
+                    type="button"
+                    className="technology-hologram__back"
+                    onClick={showGroups}
+                    aria-label={copy.backToGroups}
+                  >
+                    ←
+                  </button>
+                  <div>
+                    <span>{copy.groups[active.id]}</span>
+                    <small>
+                      {String(active.technologyIds.length).padStart(2, "0")}{" "}
+                      {copy.toolsLabel}
+                    </small>
+                  </div>
+                </header>
+
+                <p className="technology-hologram__hint">
+                  {copy.hologramTechnologiesHint}
+                </p>
+
+                <div
+                  className="technology-hologram__technologies"
+                  role="group"
+                  aria-label={copy.groupTechnologies}
+                >
+                  {active.technologyIds.map((technologyId, index) => {
+                    const technology = technologies[technologyId];
+                    const selected = technologyId === resolvedTechnologyId;
+
+                    return (
+                      <button
+                        type="button"
+                        key={technologyId}
+                        className={selected ? "is-selected" : ""}
+                        data-hologram-technology-id={technologyId}
+                        aria-pressed={selected}
+                        onClick={() => selectTechnology(technologyId)}
+                        ref={index === 0 ? firstTechnologyButtonRef : undefined}
+                      >
+                        <img src={technology.icon} alt="" aria-hidden="true" />
+                        <span>
+                          <strong>{technology.name}</strong>
+                          <small>
+                            {String(index + 1).padStart(2, "0")} /{" "}
+                            {String(active.technologyIds.length).padStart(
+                              2,
+                              "0"
+                            )}
+                          </small>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
 
-          {hologramView === "groups" ? (
-            <button
-              className="technology-guide__primary"
-              type="button"
-              onClick={() => openGroup(active)}
-            >
-              <span>{copy.guideStart}</span>
-              <span aria-hidden="true">→</span>
-            </button>
-          ) : (
-            <div className="technology-guide__controls">
-              <button type="button" onClick={showGroups}>
-                {copy.backToGroups}
-              </button>
-              <div>
-                <button
-                  type="button"
-                  onClick={() => moveTechnology(-1)}
-                  aria-label={copy.previousTechnology}
-                >
-                  ←
-                </button>
-                <span>
-                  {String(activeTechnologyIndex + 1).padStart(2, "0")} /{" "}
-                  {String(active.technologyIds.length).padStart(2, "0")}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => moveTechnology(1)}
-                  aria-label={copy.nextTechnology}
-                >
-                  →
-                </button>
-              </div>
-            </div>
+          {sceneStatus === "unavailable" && (
+            <p className="technology-stage__fallback" role="status">
+              {copy.sceneFallback}
+            </p>
           )}
 
-          <footer className="technology-guide__signals">
-            <div className="technology-guide__follow">
-              <span>{copy.cursorFollowLabel}</span>
-              <strong>
-                <i aria-hidden="true" />
-                {copy.cursorFollowActive}
-              </strong>
+          {sceneStatus === "ready" && !palmProjectionReady && (
+            <p className="technology-stage__fallback" role="status">
+              {copy.projectionFallback}
+            </p>
+          )}
+
+          <aside className="technology-guide" aria-label={copy.guideLabel}>
+            <div
+              className="technology-guide__announcer"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <div
+                className="technology-guide__body"
+                key={`${hologramView}-${active.id}-${resolvedTechnologyId}`}
+              >
+                <span className="technology-guide__step">
+                  {hologramView === "groups"
+                    ? copy.guideGroupsStep
+                    : copy.guideTechnologyStep}
+                </span>
+                <h2>
+                  {hologramView === "groups"
+                    ? copy.guideGroupsTitle
+                    : activeTechnology.name}
+                </h2>
+                <p>
+                  {hologramView === "groups"
+                    ? copy.guideGroupsBody
+                    : activeTechnologyEvidence}
+                </p>
+
+                {hologramView === "technologies" && (
+                  <div className="technology-guide__context">
+                    <span>{copy.guideContextLabel}</span>
+                    <ul>
+                      {active.practices.slice(0, 3).map(practice => (
+                        <li key={practice}>{practice}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="technology-guide__presentation">
-              <span>{copy.palmProjectionLabel}</span>
-              <strong>
-                <i aria-hidden="true" />
-                {hologramView === "technologies"
-                  ? copy.palmProjectionActive
-                  : copy.palmProjectionStandby}
-              </strong>
-            </div>
-          </footer>
-        </aside>
+          </aside>
+        </div>
 
         <div className="technology-stage__loader" aria-hidden="true">
           <span />
@@ -992,7 +971,10 @@ const TechnologiesPage = ({
         <span className="route-kicker">{copy.technologies.kicker}</span>
         <code>{copy.technologies.route}</code>
       </div>
-      <h1 tabIndex="-1">{copy.technologies.title}</h1>
+      <div className="technologies-intro__copy">
+        <h1 tabIndex="-1">{copy.technologies.title}</h1>
+        <p>{copy.technologies.intro}</p>
+      </div>
     </header>
 
     <TechnologyStage
@@ -2092,7 +2074,6 @@ function Portfolio2026() {
   const [language, setLanguage] = React.useState(getInitialLanguage);
   const [theme, setTheme] = React.useState(getInitialTheme);
   const themeTransitionTimerRef = React.useRef(null);
-  const [introPlayed, setIntroPlayed] = React.useState(getInitialIntroPlayed);
   const previousPathRef = React.useRef(pathname);
   const trackedPathRef = React.useRef(pathname);
   const reducedMotion = useReducedMotion();
@@ -2109,7 +2090,6 @@ function Portfolio2026() {
   const educationData = isTurkish ? educationTr : education;
   const routeMeta = copy.meta.routes[pathname] || copy.meta.notFound;
   const knownRoute = Boolean(copy.meta.routes[pathname]);
-  const introSettled = introPlayed || reducedMotion;
 
   React.useEffect(() => {
     if (location.pathname !== pathname) {
@@ -2225,24 +2205,6 @@ function Portfolio2026() {
     }
   }, [pathname, routeMeta.title]);
 
-  React.useEffect(() => {
-    if (!isHome || introPlayed) {
-      return undefined;
-    }
-
-    if (reducedMotion) {
-      rememberHomeIntro();
-      setIntroPlayed(true);
-      return undefined;
-    }
-
-    const timer = window.setTimeout(() => {
-      rememberHomeIntro();
-      setIntroPlayed(true);
-    }, HOME_INTRO_DURATION);
-    return () => window.clearTimeout(timer);
-  }, [introPlayed, isHome, reducedMotion]);
-
   const changeLanguage = nextLanguage => {
     if (nextLanguage === language) {
       return;
@@ -2295,7 +2257,6 @@ function Portfolio2026() {
         language={language}
         onThemeChange={changeTheme}
         onLanguageChange={changeLanguage}
-        introPlayed={introSettled}
         isHome={isHome}
       />
 
@@ -2309,7 +2270,6 @@ function Portfolio2026() {
             <HomePage
               copy={copy}
               profileData={profileData}
-              playIntro={!introSettled}
               theme={theme}
               reducedMotion={reducedMotion}
             />
@@ -2360,12 +2320,7 @@ function Portfolio2026() {
       </main>
 
       {!isHome && <PageFooter copy={copy} profileData={profileData} />}
-      <RouteDock
-        copy={copy}
-        introPlayed={introSettled}
-        isHome={isHome}
-        reducedMotion={reducedMotion}
-      />
+      <RouteDock copy={copy} reducedMotion={reducedMotion} />
     </div>
   );
 }
