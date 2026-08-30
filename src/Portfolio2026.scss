@@ -937,25 +937,17 @@ body,
 }
 
 .technology-stage__canvas {
-  --technology-scene-x: 0px;
-  --technology-scene-y: 0px;
   position: absolute;
   z-index: 2;
   inset: 0;
   display: block;
   width: 100%;
   height: 100%;
-  transform: translate3d(
-      var(--technology-scene-x),
-      var(--technology-scene-y),
-      0
-    )
-    scale(1.035);
+  transform: scale(1.035);
   transform-origin: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 480ms var(--ease-out), transform 140ms var(--ease-out);
-  will-change: transform;
+  transition: opacity 480ms var(--ease-out);
 }
 
 .technology-stage[data-scene-ready="true"] .technology-stage__canvas {
