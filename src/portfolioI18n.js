@@ -91,7 +91,7 @@ export const uiCopy = {
     },
     projects: {
       route: "/projects",
-      kicker: "Project index / 05",
+      kicker: "Project index / 03",
       title: "Selected Projects",
       intro:
         "Personal and independent software projects shown through their real interfaces, architecture and source.",
@@ -253,7 +253,7 @@ export const uiCopy = {
     },
     projects: {
       route: "/projects",
-      kicker: "Proje dizini / 05",
+      kicker: "Proje dizini / 03",
       title: "Seçili projeler",
       intro:
         "Gerçek arayüzleri, mimarileri ve kaynakları üzerinden gösterilen kişisel ve bağımsız yazılım projeleri.",

@@ -13,7 +13,6 @@ import {
   education,
   experiences,
   profile,
-  systemProjects,
   technologies,
   visualProjects
 } from "./portfolioData";
@@ -22,7 +21,6 @@ import {
   educationTr,
   experiencesTr,
   profileTr,
-  systemProjectsTr,
   visualProjectsTr
 } from "./portfolioData.tr";
 import {
@@ -1150,14 +1148,13 @@ const projectLayouts = [
 const ProjectsPage = ({
   copy,
   visualProjectsData,
-  systemProjectsData,
   profileData,
   reducedMotion
 }) => {
-  const projects = [
-    ...visualProjectsData.map(project => ({...project, kind: "visual"})),
-    ...systemProjectsData.map(project => ({...project, kind: "system"}))
-  ];
+  const projects = visualProjectsData.map(project => ({
+    ...project,
+    kind: "visual"
+  }));
 
   return (
     <div className="projects-page route-page">
@@ -1377,19 +1374,21 @@ const ExperiencePage = ({copy, experiencesData, reducedMotion}) => {
 
 const SignatureMark = ({label}) => (
   <div className="signature-mark" role="img" aria-label={label}>
-    <svg viewBox="0 0 420 150" aria-hidden="true" focusable="false">
+    <svg viewBox="0 0 520 150" aria-hidden="true" focusable="false">
       <path
         pathLength="1"
-        d="M28 112 C34 75 38 28 49 22 C62 15 50 100 43 119 C55 84 79 61 96 70 C118 82 93 119 56 110
-           M116 106 C130 84 145 71 157 74 C169 77 165 100 148 108 C132 115 124 102 132 88
-           M177 111 C181 90 185 72 188 66 M186 80 C200 65 217 68 211 87 C207 99 204 106 203 111
-           M230 108 C237 83 246 70 258 72 C271 74 270 95 258 105 C246 116 232 106 239 91
-           M286 34 C282 61 279 87 279 108 M280 91 C294 72 309 68 314 77 C321 90 304 108 282 106
-           M326 77 C341 67 355 70 353 84 C351 98 337 108 326 102 C317 96 322 78 338 73 M356 109 C368 102 378 101 390 104
-           M41 129 C140 139 265 134 391 115"
+        d="M30 118 L30 30
+           M30 30 C72 15 96 30 91 52 C88 68 67 73 30 71
+           M30 71 C76 64 105 78 99 101 C94 121 69 124 30 118
+           M126 92 C132 70 151 61 166 69 C179 76 172 91 151 94 C136 96 128 91 129 82 C130 102 145 112 164 105
+           M187 108 L191 72 M191 84 C202 68 214 68 224 76
+           M244 108 L250 38 M248 87 L275 70 M255 83 L281 108
+           M300 86 C305 70 323 64 338 72 C351 80 349 100 336 108 C320 118 301 105 300 86
+           M300 108 L300 75
+           M368 108 L372 72 M372 83 C383 68 402 66 412 78 L414 108
+           M438 72 L482 72 M460 46 L455 99 C454 108 461 113 474 109"
       />
     </svg>
-    <span>{"// berkant"}</span>
   </div>
 );
 
@@ -1457,15 +1456,15 @@ const WovenSample = ({reducedMotion, theme}) => {
       context.textAlign = "center";
       context.textBaseline = "middle";
       context.font = 'bold 78px Georgia, "Times New Roman", serif';
-      context.fillText("BK", width / 2, 190);
+      context.fillText("SYSTEMS", width / 2, 190);
       context.font = 'normal 20px "Helvetica Neue", Arial, sans-serif';
-      context.fillText("· ABOUT ·", width / 2, 246);
+      context.fillText("· SOFTWARE ·", width / 2, 246);
       context.font = 'bold 118px Georgia, "Times New Roman", serif';
-      context.fillText("BERKANT", width / 2, 400);
-      context.fillText("KUBAT", width / 2, 520);
+      context.fillText("BACKEND", width / 2, 400);
+      context.fillText("ENGINEERING", width / 2, 520);
       context.font = '600 30px "Helvetica Neue", Arial, sans-serif';
       context.fillText(
-        "P E R S O N A L   N O T E S   ·   P O R T F O L I O",
+        "J A V A   ·   K A F K A   ·   K U B E R N E T E S",
         width / 2,
         626
       );
@@ -1943,7 +1942,6 @@ function Portfolio2026() {
   const profileData = isTurkish ? {...profile, ...profileTr} : profile;
   const experiencesData = isTurkish ? experiencesTr : experiences;
   const visualProjectsData = isTurkish ? visualProjectsTr : visualProjects;
-  const systemProjectsData = isTurkish ? systemProjectsTr : systemProjects;
   const capabilitiesData = isTurkish ? capabilitiesTr : capabilities;
   const educationData = isTurkish ? educationTr : education;
   const routeMeta = copy.meta.routes[pathname] || copy.meta.notFound;
@@ -2106,7 +2104,7 @@ function Portfolio2026() {
     themeTransitionTimerRef.current = window.setTimeout(() => {
       delete document.documentElement.dataset.themeTransition;
       themeTransitionTimerRef.current = null;
-    }, 420);
+    }, 240);
 
     trackEvent("theme_change", {
       previous_theme: theme,
@@ -2164,7 +2162,6 @@ function Portfolio2026() {
             <ProjectsPage
               copy={copy}
               visualProjectsData={visualProjectsData}
-              systemProjectsData={systemProjectsData}
               profileData={profileData}
               reducedMotion={reducedMotion}
             />

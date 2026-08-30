@@ -306,15 +306,16 @@ it("renders every route independently with the preserved real content", () => {
   expect(
     JSON.stringify({en: uiCopy.en.projects, tr: uiCopy.tr.projects})
   ).not.toMatch(/staged|sahne/i);
-  expect(rendered.div.querySelectorAll(".project-chapter")).toHaveLength(5);
+  expect(rendered.div.querySelectorAll(".project-chapter")).toHaveLength(3);
   expect(
     Array.from(rendered.div.querySelectorAll(".project-chapter")).map(
       chapter => chapter.dataset.layout
     )
-  ).toEqual(["feature", "split", "panorama", "split-reverse", "editorial"]);
-  expect(rendered.div.querySelectorAll(".project-stage")).toHaveLength(5);
+  ).toEqual(["feature", "split", "panorama"]);
+  expect(rendered.div.querySelectorAll(".project-stage")).toHaveLength(3);
   expect(rendered.div.textContent).toContain("NewDrive");
-  expect(rendered.div.textContent).toContain("Fund Search");
+  expect(rendered.div.textContent).not.toContain("Fund Search");
+  expect(rendered.div.textContent).not.toContain("Randevio");
   expect(
     rendered.div.querySelector(
       "video[src='/images/projects/reelshelf-motion.mp4']"
@@ -323,7 +324,7 @@ it("renders every route independently with the preserved real content", () => {
   expect(
     rendered.div.querySelector("a[href='https://tugrulhukuk.av.tr/']")
   ).not.toBeNull();
-  expect(rendered.div.querySelectorAll(".architecture-plate")).toHaveLength(2);
+  expect(rendered.div.querySelector(".architecture-plate")).toBeNull();
   rendered.cleanup();
 
   rendered = renderAt("/experience");
