@@ -340,13 +340,10 @@ it("renders every route independently with the preserved real content", () => {
 
   rendered = renderAt("/about");
   expect(rendered.div.querySelector(".about-collage")).not.toBeNull();
-  expect(rendered.div.querySelector(".signature-mark svg")).not.toBeNull();
-  expect(rendered.div.querySelectorAll(".signature-mark path")).toHaveLength(1);
-  expect(
-    rendered.div
-      .querySelector(".signature-mark path")
-      .getAttribute("pathLength")
-  ).toBe("1");
+  expect(rendered.div.querySelector(".signature-mark svg")).toBeNull();
+  expect(rendered.div.querySelector(".signature-mark span").textContent).toBe(
+    "Berkant"
+  );
   expect(
     rendered.div.querySelector(".signature-mark").getAttribute("aria-label")
   ).toBe("Handwritten Berkant signature");
