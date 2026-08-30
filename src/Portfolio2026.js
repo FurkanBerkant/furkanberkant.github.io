@@ -38,12 +38,12 @@ import {
 import "./Portfolio2026.scss";
 
 const navigationItems = [
-  {id: "home", href: "/", symbol: "~"},
-  {id: "technologies", href: "/technologies", symbol: "<>"},
-  {id: "projects", href: "/projects", symbol: "[]"},
-  {id: "experience", href: "/experience", symbol: "::"},
-  {id: "about", href: "/about", symbol: "@"},
-  {id: "contact", href: "/contact", symbol: "#"}
+  {id: "home", href: "/", code: "01"},
+  {id: "technologies", href: "/technologies", code: "02"},
+  {id: "projects", href: "/projects", code: "03"},
+  {id: "experience", href: "/experience", code: "04"},
+  {id: "about", href: "/about", code: "05"},
+  {id: "contact", href: "/contact", code: "06"}
 ];
 
 export const THEME_STORAGE_KEY = "berkant-portfolio-theme";
@@ -181,155 +181,6 @@ const LanguageSwitch = ({language, onChange, copy, interactive = true}) => (
   </div>
 );
 
-const DOCK_BASE_SIZE = 40;
-const DOCK_MAGNIFIED_SIZE = 56;
-const DOCK_MAGNIFICATION_DISTANCE = 120;
-
-export const resolveDockMagnification = distance => {
-  const resolvedDistance = Math.min(
-    Math.abs(
-      Number.isFinite(distance) ? distance : DOCK_MAGNIFICATION_DISTANCE
-    ),
-    DOCK_MAGNIFICATION_DISTANCE
-  );
-  const influence = 1 - resolvedDistance / DOCK_MAGNIFICATION_DISTANCE;
-  const size =
-    DOCK_BASE_SIZE + (DOCK_MAGNIFIED_SIZE - DOCK_BASE_SIZE) * influence;
-
-  return {
-    size,
-    scale: size / DOCK_BASE_SIZE,
-    lift: (size - DOCK_BASE_SIZE) * 0.18
-  };
-};
-
-const RouteDock = ({copy, reducedMotion}) => {
-  const listRef = React.useRef(null);
-  const animationFrameRef = React.useRef(null);
-  const springsRef = React.useRef([]);
-
-  const ensureSprings = () => {
-    const items = Array.from(listRef.current?.children || []);
-    if (springsRef.current.length !== items.length) {
-      springsRef.current = items.map(() => ({
-        value: DOCK_BASE_SIZE,
-        velocity: 0,
-        target: DOCK_BASE_SIZE
-      }));
-    }
-    return items;
-  };
-
-  const renderSprings = () => {
-    const items = ensureSprings();
-    let moving = false;
-
-    springsRef.current.forEach((spring, index) => {
-      const delta = spring.target - spring.value;
-      spring.velocity = spring.velocity * 0.72 + delta * 0.18;
-      spring.value += spring.velocity;
-
-      if (Math.abs(delta) < 0.05 && Math.abs(spring.velocity) < 0.05) {
-        spring.value = spring.target;
-        spring.velocity = 0;
-      } else {
-        moving = true;
-      }
-
-      const actualLift = Math.max(0, (spring.value - DOCK_BASE_SIZE) * 0.24);
-      items[index]?.style.setProperty(
-        "--dock-item-lift",
-        `${actualLift.toFixed(2)}px`
-      );
-      items[index]?.style.setProperty(
-        "--dock-item-size",
-        `${spring.value.toFixed(2)}px`
-      );
-      items[index]?.style.setProperty(
-        "--dock-icon-size",
-        `${(spring.value / 2).toFixed(2)}px`
-      );
-      items[index]?.style.setProperty(
-        "--dock-icon-font-size",
-        `${Math.min(22.4, Math.max(13, spring.value * 0.32)).toFixed(2)}px`
-      );
-    });
-
-    if (moving) {
-      animationFrameRef.current = window.requestAnimationFrame(renderSprings);
-    } else {
-      animationFrameRef.current = null;
-    }
-  };
-
-  const startSpring = () => {
-    if (reducedMotion || animationFrameRef.current !== null) {
-      return;
-    }
-    animationFrameRef.current = window.requestAnimationFrame(renderSprings);
-  };
-
-  const setDockTargets = clientX => {
-    const items = ensureSprings();
-
-    items.forEach((item, index) => {
-      const rect = item.getBoundingClientRect();
-      const center = rect.left + rect.width / 2;
-      springsRef.current[index].target =
-        clientX === null
-          ? DOCK_BASE_SIZE
-          : resolveDockMagnification(clientX - center).size;
-    });
-
-    startSpring();
-  };
-
-  React.useEffect(
-    () => () => {
-      if (animationFrameRef.current !== null) {
-        window.cancelAnimationFrame(animationFrameRef.current);
-      }
-    },
-    []
-  );
-
-  return (
-    <nav
-      className="route-dock"
-      aria-label={copy.quickNavigationLabel}
-      onMouseMove={event => {
-        if (!reducedMotion) {
-          setDockTargets(event.clientX);
-        }
-      }}
-      onMouseLeave={() => setDockTargets(null)}
-    >
-      <ol ref={listRef}>
-        {navigationItems.map(item => (
-          <li key={item.href}>
-            <NavLink
-              exact={item.href === "/"}
-              activeClassName="is-active"
-              to={item.href}
-              aria-label={copy.navigation[item.id]}
-            >
-              <span className="route-dock__symbol" aria-hidden="true">
-                {item.symbol}
-              </span>
-              <span className="route-dock__label">
-                {copy.navigation[item.id]}
-              </span>
-              <span className="route-dock__tooltip" aria-hidden="true">
-                {copy.navigation[item.id]}
-              </span>
-            </NavLink>
-          </li>
-        ))}
-      </ol>
-    </nav>
-  );
-};
-
 const SiteTopbar = ({
   copy,
   pathname,
@@ -343,21 +194,37 @@ const SiteTopbar = ({
 
   React.useEffect(() => {
     const nav = primaryNavRef.current;
-    const activeLink = nav?.querySelector("a[aria-current='page']");
-    if (!nav || !activeLink) {
+    if (!nav) {
       return;
     }
 
-    nav.scrollLeft = Math.max(
-      activeLink.offsetLeft - (nav.clientWidth - activeLink.offsetWidth) / 2,
-      0
-    );
+    const syncActiveRoute = () => {
+      const activeLink = nav.querySelector("a[aria-current='page']");
+      if (!activeLink) {
+        return;
+      }
+
+      nav.style.setProperty("--route-signal-x", `${activeLink.offsetLeft}px`);
+      nav.style.setProperty(
+        "--route-signal-width",
+        `${activeLink.offsetWidth}px`
+      );
+      nav.scrollLeft = Math.max(
+        activeLink.offsetLeft - (nav.clientWidth - activeLink.offsetWidth) / 2,
+        0
+      );
+    };
+
+    syncActiveRoute();
+    window.addEventListener("resize", syncActiveRoute);
+
+    return () => window.removeEventListener("resize", syncActiveRoute);
   }, [language, pathname]);
 
   return (
     <header className={`site-topbar ${isHome ? "site-topbar--home" : ""}`}>
       <Link className="site-index" to="/" aria-label={copy.aria.home}>
-        <strong>BK</strong>
+        <img src="/brand-mark.svg" alt="" aria-hidden="true" />
         <span>berkant.dev</span>
       </Link>
       <nav
@@ -373,7 +240,12 @@ const SiteTopbar = ({
                 activeClassName="is-active"
                 to={item.href}
               >
-                {copy.navigation[item.id]}
+                <span className="site-primary-nav__code" aria-hidden="true">
+                  {item.code}
+                </span>
+                <span className="site-primary-nav__label">
+                  {copy.navigation[item.id]}
+                </span>
               </NavLink>
             </li>
           ))}
@@ -2320,7 +2192,6 @@ function Portfolio2026() {
       </main>
 
       {!isHome && <PageFooter copy={copy} profileData={profileData} />}
-      <RouteDock copy={copy} reducedMotion={reducedMotion} />
     </div>
   );
 }

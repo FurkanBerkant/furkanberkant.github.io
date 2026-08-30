@@ -6,7 +6,6 @@ import {shouldEnableAnalytics, trackEvent} from "./analytics";
 import {
   HOME_INTRO_DURATION,
   THEME_STORAGE_KEY,
-  resolveDockMagnification,
   resolveProjectPerspective,
   resolveSpiralDot,
   resolveTimelineProgress,
@@ -180,19 +179,16 @@ it("renders the sequenced identity home without portfolio previews", () => {
   expect(div.querySelector(".identity-sequence__spiral")).not.toBeNull();
   expect(div.querySelector("#profile-github-home")).not.toBeNull();
   expect(div.querySelector("#profile-linkedin-home")).not.toBeNull();
-  expect(div.querySelectorAll(".route-dock__tooltip")).toHaveLength(6);
+  expect(div.querySelector(".route-dock")).toBeNull();
+  expect(div.querySelector(".site-index strong")).toBeNull();
+  expect(div.querySelector(".site-index img").getAttribute("src")).toBe(
+    "/brand-mark.svg"
+  );
   expect(
-    Array.from(div.querySelectorAll(".route-dock__tooltip")).map(
-      tooltip => tooltip.textContent
+    Array.from(div.querySelectorAll(".site-primary-nav__code")).map(
+      code => code.textContent
     )
-  ).toEqual([
-    "Home",
-    "Technologies",
-    "Projects",
-    "Experience",
-    "About",
-    "Contact"
-  ]);
+  ).toEqual(["01", "02", "03", "04", "05", "06"]);
   expect(div.querySelector(".page-footer")).toBeNull();
   expect(div.querySelector(".project-chapter")).toBeNull();
   expect(div.querySelector(".chronicle-entry")).toBeNull();
@@ -217,9 +213,7 @@ it("replays the home identity on every visit without hiding navigation", () => {
     expect(rendered.div.querySelectorAll(".site-primary-nav a")).toHaveLength(
       6
     );
-    expect(
-      rendered.div.querySelector(".route-dock a").getAttribute("tabindex")
-    ).toBeNull();
+    expect(rendered.div.querySelector(".route-dock")).toBeNull();
     expect(
       rendered.div
         .querySelector(".site-controls button")
@@ -396,20 +390,6 @@ it("uses Fibonacci spiral geometry with a repeating pulse", () => {
   expect(pulsed.alpha).toBeGreaterThan(first.alpha);
 });
 
-it("keeps dock magnification noticeable without overpowering the page", () => {
-  const center = resolveDockMagnification(0);
-  const neighbor = resolveDockMagnification(75);
-  const edge = resolveDockMagnification(150);
-  const mirrored = resolveDockMagnification(-75);
-
-  expect(center.size).toBeCloseTo(56, 3);
-  expect(center.scale).toBeCloseTo(1.4, 3);
-  expect(neighbor.size).toBeCloseTo(46, 3);
-  expect(mirrored.size).toBeCloseTo(neighbor.size, 5);
-  expect(edge.size).toBeCloseTo(40, 3);
-  expect(edge.lift).toBeCloseTo(0, 3);
-});
-
 it("keeps container-scroll motion readable for project screenshots", () => {
   const approaching = resolveProjectPerspective({
     top: 800,
@@ -478,7 +458,7 @@ it("matches Aceternity timeline start and end scroll offsets", () => {
   expect(complete.opacity).toBe(1);
 });
 
-it("marks exactly one clean route as current in the dock", () => {
+it("marks exactly one clean route as current in the route rail", () => {
   const paths = [
     "/",
     "/technologies",
@@ -490,30 +470,22 @@ it("marks exactly one clean route as current in the dock", () => {
 
   paths.forEach(path => {
     const {div, cleanup} = renderAt(path);
-    const current = div.querySelector(`.route-dock a[href='${path}']`);
-    const primaryCurrent = div.querySelector(
-      `.site-primary-nav a[href='${path}']`
-    );
+    const current = div.querySelector(`.site-primary-nav a[href='${path}']`);
 
     expect(current.classList.contains("is-active")).toBe(true);
     expect(current.getAttribute("aria-current")).toBe("page");
-    expect(current.querySelector(".route-dock__label").textContent).toBe(
-      path === "/" ? "Home" : current.getAttribute("aria-label")
-    );
-    expect(
-      div.querySelectorAll(".route-dock a[aria-current='page']")
-    ).toHaveLength(1);
-    expect(primaryCurrent.classList.contains("is-active")).toBe(true);
-    expect(primaryCurrent.getAttribute("aria-current")).toBe("page");
     expect(
       div.querySelectorAll(".site-primary-nav a[aria-current='page']")
     ).toHaveLength(1);
+    expect(current.querySelector(".site-primary-nav__label").textContent).toBe(
+      path === "/"
+        ? "Home"
+        : path.slice(1).replace(/^./, character => character.toUpperCase())
+    );
     expect(
       div.querySelector(".site-primary-nav").getAttribute("aria-label")
     ).toBe("Primary navigation");
-    expect(div.querySelector(".route-dock").getAttribute("aria-label")).toBe(
-      "Quick navigation"
-    );
+    expect(div.querySelector(".route-dock")).toBeNull();
     cleanup();
   });
 });
@@ -662,7 +634,7 @@ it("preserves theme and language through client navigation and direct entry", ()
 
   click(themeButtons[2]);
   click(turkishButton);
-  click(rendered.div.querySelector(".route-dock a[href='/about']"));
+  click(rendered.div.querySelector(".site-primary-nav a[href='/about']"));
 
   expect(window.location.pathname).toBe("/about");
   expect(rendered.div.querySelector(".portfolio-site").dataset.theme).toBe(
@@ -775,7 +747,7 @@ it("tracks contact and client-side route events without personal data", () => {
   emailLink.addEventListener("click", event => event.preventDefault());
 
   click(emailLink);
-  click(div.querySelector(".route-dock a[href='/projects']"));
+  click(div.querySelector(".site-primary-nav a[href='/projects']"));
 
   expect(window.gtag).toHaveBeenCalledWith("event", "contact_attempt", {
     method: "email",
@@ -913,7 +885,7 @@ it("scrolls and focuses the destination heading during client navigation", () =>
   const {div, cleanup} = renderAt("/about");
   window.scrollTo.mockClear();
 
-  click(div.querySelector(".route-dock a[href='/projects']"));
+  click(div.querySelector(".site-primary-nav a[href='/projects']"));
 
   expect(window.location.pathname).toBe("/projects");
   expect(window.scrollTo).toHaveBeenCalledWith(0, 0);

@@ -56,7 +56,6 @@ export const uiCopy = {
     },
     skipLink: "Skip to content",
     primaryNavigationLabel: "Primary navigation",
-    quickNavigationLabel: "Quick navigation",
     routeLabel: "Current route",
     navigation: {
       home: "Home",
@@ -252,7 +251,6 @@ export const uiCopy = {
     },
     skipLink: "İçeriğe geç",
     primaryNavigationLabel: "Ana navigasyon",
-    quickNavigationLabel: "Hızlı navigasyon",
     routeLabel: "Geçerli rota",
     navigation: {
       home: "Ana sayfa",
