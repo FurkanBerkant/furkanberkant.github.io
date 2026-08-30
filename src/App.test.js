@@ -7,7 +7,10 @@ import {
   HOME_INTRO_DURATION,
   HOME_INTRO_SESSION_KEY,
   THEME_STORAGE_KEY,
+  resolveDockMagnification,
   resolveProjectPerspective,
+  resolveSpiralDot,
+  resolveTimelineProgress,
   resolveInitialTheme
 } from "./Portfolio2026";
 import {
@@ -313,6 +316,7 @@ it("renders every route independently with the preserved real content", () => {
 
   rendered = renderAt("/experience");
   expect(rendered.div.querySelectorAll(".chronicle-entry")).toHaveLength(2);
+  expect(rendered.div.querySelector(".work-chronicle__beam")).not.toBeNull();
   expect(rendered.div.textContent).toContain("60K+");
   expect(rendered.div.textContent).toContain("Remote · İstanbul office");
   expect(rendered.div.textContent).toContain("On-site · Samsun");
@@ -324,6 +328,12 @@ it("renders every route independently with the preserved real content", () => {
   rendered = renderAt("/about");
   expect(rendered.div.querySelector(".about-collage")).not.toBeNull();
   expect(rendered.div.querySelector(".signature-mark svg")).not.toBeNull();
+  expect(rendered.div.querySelectorAll(".signature-mark path")).toHaveLength(1);
+  expect(
+    rendered.div
+      .querySelector(".signature-mark path")
+      .getAttribute("pathLength")
+  ).toBe("1");
   expect(
     rendered.div.querySelector(".signature-mark").getAttribute("aria-label")
   ).toBe("Handwritten Berkant signature");
@@ -332,7 +342,11 @@ it("renders every route independently with the preserved real content", () => {
       item => item.textContent
     )
   ).toEqual(["Location", "Education"]);
-  expect(rendered.div.querySelector(".woven-sample")).not.toBeNull();
+  expect(
+    rendered.div.querySelector(".woven-sample[data-woven-cloth='threeui']")
+  ).not.toBeNull();
+  expect(rendered.div.querySelector(".woven-sample__canvas")).not.toBeNull();
+  expect(rendered.div.querySelector(".woven-sample__threads")).toBeNull();
   expect(rendered.div.querySelector(".about-interests")).toBeNull();
   expect(rendered.div.textContent).toContain("Statistics and Computer Science");
   rendered.cleanup();
@@ -349,21 +363,63 @@ it("renders every route independently with the preserved real content", () => {
   rendered.cleanup();
 });
 
-it("settles project perspective as a visual enters the viewport", () => {
+it("uses Fibonacci spiral geometry with a repeating pulse", () => {
+  const first = resolveSpiralDot({
+    index: 0,
+    count: 800,
+    time: 0,
+    radius: 300
+  });
+  const next = resolveSpiralDot({
+    index: 1,
+    count: 800,
+    time: 0,
+    radius: 300
+  });
+  const pulsed = resolveSpiralDot({
+    index: 0,
+    count: 800,
+    time: 0.25,
+    radius: 300
+  });
+
+  expect(first.x).toBeGreaterThan(0);
+  expect(Math.abs(first.y)).toBeLessThan(0.001);
+  expect(next.x).toBeLessThan(0);
+  expect(next.y).toBeGreaterThan(0);
+  expect(pulsed.size).toBeGreaterThan(first.size);
+  expect(pulsed.alpha).toBeGreaterThan(first.alpha);
+});
+
+it("matches the source dock magnification falloff", () => {
+  const center = resolveDockMagnification(0);
+  const neighbor = resolveDockMagnification(75);
+  const edge = resolveDockMagnification(150);
+  const mirrored = resolveDockMagnification(-75);
+
+  expect(center.size).toBeCloseTo(80, 3);
+  expect(center.scale).toBeCloseTo(2, 3);
+  expect(neighbor.size).toBeCloseTo(60, 3);
+  expect(mirrored.size).toBeCloseTo(neighbor.size, 5);
+  expect(edge.size).toBeCloseTo(40, 3);
+  expect(edge.lift).toBeCloseTo(0, 3);
+});
+
+it("matches Aceternity container-scroll transform ranges", () => {
   const approaching = resolveProjectPerspective({
     top: 800,
     height: 640,
     viewportHeight: 800,
     viewportWidth: 1280
   });
-  const settled = resolveProjectPerspective({
-    top: 180,
+  const halfway = resolveProjectPerspective({
+    top: 80,
     height: 640,
     viewportHeight: 800,
     viewportWidth: 1280
   });
-  const midApproach = resolveProjectPerspective({
-    top: 520,
+  const settled = resolveProjectPerspective({
+    top: -640,
     height: 640,
     viewportHeight: 800,
     viewportWidth: 1280
@@ -376,16 +432,44 @@ it("settles project perspective as a visual enters the viewport", () => {
   });
 
   expect(approaching.progress).toBe(0);
-  expect(approaching.tilt).toBe("14.00deg");
-  expect(approaching.scale).toBe("0.8600");
-  expect(midApproach.progress).toBeGreaterThan(0.35);
-  expect(midApproach.progress).toBeLessThan(0.5);
-  expect(parseFloat(midApproach.tilt)).toBeGreaterThan(7);
+  expect(approaching.tilt).toBe("20.00deg");
+  expect(approaching.scale).toBe("1.0500");
+  expect(approaching.shift).toBe("0.00px");
+  expect(halfway.progress).toBeCloseTo(0.5, 4);
+  expect(halfway.tilt).toBe("10.00deg");
+  expect(halfway.scale).toBe("1.0250");
+  expect(halfway.shift).toBe("-50.00px");
   expect(settled.progress).toBe(1);
   expect(settled.tilt).toBe("0.00deg");
   expect(settled.scale).toBe("1.0000");
-  expect(compact.tilt).toBe("7.50deg");
-  expect(compact.scale).toBe("0.9200");
+  expect(settled.shift).toBe("-100.00px");
+  expect(compact.tilt).toBe("20.00deg");
+  expect(compact.scale).toBe("0.7000");
+});
+
+it("matches Aceternity timeline start and end scroll offsets", () => {
+  const before = resolveTimelineProgress({
+    top: 800,
+    height: 1600,
+    viewportHeight: 800
+  });
+  const halfway = resolveTimelineProgress({
+    top: -560,
+    height: 1600,
+    viewportHeight: 800
+  });
+  const complete = resolveTimelineProgress({
+    top: -1200,
+    height: 1600,
+    viewportHeight: 800
+  });
+
+  expect(before.progress).toBe(0);
+  expect(before.opacity).toBe(0);
+  expect(halfway.progress).toBeCloseTo(0.5, 4);
+  expect(halfway.opacity).toBe(1);
+  expect(complete.progress).toBe(1);
+  expect(complete.opacity).toBe(1);
 });
 
 it("marks exactly one clean route as current in the dock", () => {

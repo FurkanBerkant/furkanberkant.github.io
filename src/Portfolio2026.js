@@ -1,4 +1,5 @@
 import React from "react";
+import * as THREE from "three";
 import {
   Link,
   NavLink,
@@ -200,45 +201,153 @@ const LanguageSwitch = ({language, onChange, copy, interactive = true}) => (
   </div>
 );
 
-const RouteDock = ({copy, introPlayed, isHome}) => {
-  const [hoveredIndex, setHoveredIndex] = React.useState(null);
+const DOCK_BASE_SIZE = 40;
+const DOCK_MAGNIFIED_SIZE = 80;
+const DOCK_MAGNIFICATION_DISTANCE = 150;
+
+export const resolveDockMagnification = distance => {
+  const resolvedDistance = Math.min(
+    Math.abs(
+      Number.isFinite(distance) ? distance : DOCK_MAGNIFICATION_DISTANCE
+    ),
+    DOCK_MAGNIFICATION_DISTANCE
+  );
+  const influence = 1 - resolvedDistance / DOCK_MAGNIFICATION_DISTANCE;
+  const size =
+    DOCK_BASE_SIZE + (DOCK_MAGNIFIED_SIZE - DOCK_BASE_SIZE) * influence;
+
+  return {
+    size,
+    scale: size / DOCK_BASE_SIZE,
+    lift: (size - DOCK_BASE_SIZE) * 0.24
+  };
+};
+
+const RouteDock = ({copy, introPlayed, isHome, reducedMotion}) => {
+  const listRef = React.useRef(null);
+  const animationFrameRef = React.useRef(null);
+  const springsRef = React.useRef([]);
   const introPending = isHome && !introPlayed;
+
+  const ensureSprings = () => {
+    const items = Array.from(listRef.current?.children || []);
+    if (springsRef.current.length !== items.length) {
+      springsRef.current = items.map(() => ({
+        value: DOCK_BASE_SIZE,
+        velocity: 0,
+        target: DOCK_BASE_SIZE
+      }));
+    }
+    return items;
+  };
+
+  const renderSprings = () => {
+    const items = ensureSprings();
+    let moving = false;
+
+    springsRef.current.forEach((spring, index) => {
+      const delta = spring.target - spring.value;
+      spring.velocity = spring.velocity * 0.72 + delta * 0.18;
+      spring.value += spring.velocity;
+
+      if (Math.abs(delta) < 0.05 && Math.abs(spring.velocity) < 0.05) {
+        spring.value = spring.target;
+        spring.velocity = 0;
+      } else {
+        moving = true;
+      }
+
+      const actualLift = Math.max(0, (spring.value - DOCK_BASE_SIZE) * 0.24);
+      items[index]?.style.setProperty(
+        "--dock-item-lift",
+        `${actualLift.toFixed(2)}px`
+      );
+      items[index]?.style.setProperty(
+        "--dock-item-size",
+        `${spring.value.toFixed(2)}px`
+      );
+      items[index]?.style.setProperty(
+        "--dock-icon-size",
+        `${(spring.value / 2).toFixed(2)}px`
+      );
+      items[index]?.style.setProperty(
+        "--dock-icon-font-size",
+        `${Math.min(21.6, Math.max(11.52, spring.value * 0.3)).toFixed(2)}px`
+      );
+    });
+
+    if (moving) {
+      animationFrameRef.current = window.requestAnimationFrame(renderSprings);
+    } else {
+      animationFrameRef.current = null;
+    }
+  };
+
+  const startSpring = () => {
+    if (reducedMotion || animationFrameRef.current !== null) {
+      return;
+    }
+    animationFrameRef.current = window.requestAnimationFrame(renderSprings);
+  };
+
+  const setDockTargets = clientX => {
+    const items = ensureSprings();
+
+    items.forEach((item, index) => {
+      const rect = item.getBoundingClientRect();
+      const center = rect.left + rect.width / 2;
+      springsRef.current[index].target =
+        clientX === null
+          ? DOCK_BASE_SIZE
+          : resolveDockMagnification(clientX - center).size;
+    });
+
+    startSpring();
+  };
+
+  React.useEffect(
+    () => () => {
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+      }
+    },
+    []
+  );
 
   return (
     <nav
       className={`route-dock ${introPending ? "route-dock--intro" : ""}`}
       aria-label={copy.navigationLabel}
       aria-hidden={introPending || undefined}
-      onMouseLeave={() => setHoveredIndex(null)}
+      onMouseMove={event => {
+        if (!reducedMotion) {
+          setDockTargets(event.clientX);
+        }
+      }}
+      onMouseLeave={() => setDockTargets(null)}
     >
-      <ol>
-        {navigationItems.map((item, index) => {
-          const distance =
-            hoveredIndex === null ? -1 : Math.abs(hoveredIndex - index);
-
-          return (
-            <li key={item.href} data-distance={distance}>
-              <NavLink
-                exact={item.href === "/"}
-                activeClassName="is-active"
-                to={item.href}
-                onMouseEnter={() => setHoveredIndex(index)}
-                aria-label={copy.navigation[item.id]}
-                tabIndex={introPending ? -1 : undefined}
-              >
-                <span className="route-dock__symbol" aria-hidden="true">
-                  {item.symbol}
-                </span>
-                <span className="route-dock__label">
-                  {copy.navigation[item.id]}
-                </span>
-                <span className="route-dock__tooltip" aria-hidden="true">
-                  {copy.navigation[item.id]}
-                </span>
-              </NavLink>
-            </li>
-          );
-        })}
+      <ol ref={listRef}>
+        {navigationItems.map(item => (
+          <li key={item.href}>
+            <NavLink
+              exact={item.href === "/"}
+              activeClassName="is-active"
+              to={item.href}
+              aria-label={copy.navigation[item.id]}
+              tabIndex={introPending ? -1 : undefined}
+            >
+              <span className="route-dock__symbol" aria-hidden="true">
+                {item.symbol}
+              </span>
+              <span className="route-dock__label">
+                {copy.navigation[item.id]}
+              </span>
+              <span className="route-dock__tooltip" aria-hidden="true">
+                {copy.navigation[item.id]}
+              </span>
+            </NavLink>
+          </li>
+        ))}
       </ol>
     </nav>
   );
@@ -289,6 +398,25 @@ const SiteTopbar = ({
   );
 };
 
+const SPIRAL_DOT_COUNT = 800;
+const SPIRAL_GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+
+export const resolveSpiralDot = ({index, count, time, radius}) => {
+  const safeCount = Math.max(count || 1, 1);
+  const progress = (index + 0.5) / safeCount;
+  const angle = index * SPIRAL_GOLDEN_ANGLE;
+  const distance = Math.sqrt(progress) * radius;
+  const phase = time * Math.PI * 2 + index * 0.115;
+  const pulse = 0.5 + 0.5 * Math.sin(phase);
+
+  return {
+    x: Math.cos(angle) * distance,
+    y: Math.sin(angle) * distance,
+    size: 0.55 + pulse * 1.15,
+    alpha: 0.2 + pulse * 0.62
+  };
+};
+
 const ParticleSpiral = ({theme, reducedMotion, playIntro}) => {
   const canvasRef = React.useRef(null);
 
@@ -299,18 +427,11 @@ const ParticleSpiral = ({theme, reducedMotion, playIntro}) => {
       return undefined;
     }
 
-    let animationFrame;
-    let particles = [];
+    let animationFrame = null;
     let width = 0;
     let height = 0;
-    let startTime = 0;
-    const pointer = {x: 0, y: 0, targetX: 0, targetY: 0};
+    let startTime = null;
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-
-    const seeded = value => {
-      const result = Math.sin(value * 78.233) * 43758.5453;
-      return result - Math.floor(result);
-    };
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -319,185 +440,54 @@ const ParticleSpiral = ({theme, reducedMotion, playIntro}) => {
       canvas.width = Math.round(width * pixelRatio);
       canvas.height = Math.round(height * pixelRatio);
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      const count = Math.max(180, Math.min(420, Math.round(width / 3.5)));
-      const armCount = width < 640 ? 3 : 4;
-
-      particles = Array.from({length: count}, (_, index) => ({
-        arm: index % armCount,
-        armCount,
-        depth: Math.floor(index / armCount) / Math.ceil(count / armCount),
-        jitter: (seeded(index + 1) - 0.5) * 0.34,
-        size: 0.45 + seeded(index + 17) * 1.2,
-        alpha: 0.22 + seeded(index + 31) * 0.62,
-        stretch: 0.92 + seeded(index + 53) * 0.18,
-        trail: index % 9 === 0
-      }));
-    };
-
-    const onPointerMove = event => {
-      pointer.targetX =
-        (event.clientX / Math.max(window.innerWidth, 1) - 0.5) * 2;
-      pointer.targetY =
-        (event.clientY / Math.max(window.innerHeight, 1) - 0.5) * 2;
-    };
-
-    const projectPoint = (
-      particle,
-      depth,
-      elapsed,
-      reveal,
-      centerX,
-      centerY,
-      maxRadius
-    ) => {
-      const rotation = reducedMotion ? 0.42 : elapsed * 0.000055;
-      const angle =
-        (particle.arm / particle.armCount) * Math.PI * 2 +
-        depth * Math.PI * 5.2 +
-        rotation +
-        particle.jitter;
-      const perspective = 0.16 + Math.pow(depth, 1.55) * 0.84;
-      const radius =
-        (16 + Math.pow(depth, 1.45) * maxRadius) *
-        particle.stretch *
-        (0.16 + reveal * 0.84);
-
-      return {
-        x:
-          centerX +
-          Math.cos(angle) * radius * 1.12 +
-          pointer.x * 18 * perspective,
-        y:
-          centerY +
-          Math.sin(angle) * radius * 0.53 +
-          (depth - 0.5) * maxRadius * 0.08 +
-          pointer.y * 12 * perspective,
-        perspective
-      };
     };
 
     const draw = timestamp => {
-      if (!startTime) {
-        startTime = timestamp || 1;
+      if (startTime === null) {
+        startTime = timestamp || 0;
       }
 
-      const elapsed = (timestamp || 1800) - startTime;
-      const intro =
-        reducedMotion || !playIntro
-          ? 1
-          : Math.min(Math.max(elapsed / 360, 0), 1);
-      const eased = 1 - Math.pow(1 - intro, 3);
+      const elapsed = Math.max((timestamp || 0) - startTime, 0);
       const computed = window.getComputedStyle(canvas);
-      const color =
+      const dotColor =
         computed.getPropertyValue("--particle-color").trim() || "#f2a638";
       const highlight =
-        computed.getPropertyValue("--spiral-highlight").trim() || color;
-      const orbit =
-        computed.getPropertyValue("--spiral-orbit").trim() || highlight;
-      const centerX = width * 0.5;
-      const centerY = height * 0.49;
-      const maxRadius = Math.min(
-        510,
-        Math.max(210, Math.min(width, height) * 0.58)
-      );
-      const travel = reducedMotion ? 0.18 : elapsed * 0.000032;
+        computed.getPropertyValue("--spiral-highlight").trim() || dotColor;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = Math.min(width, height) * 0.47;
+      const cycle = reducedMotion ? 0.25 : (elapsed % 2000) / 2000;
+      const reveal =
+        reducedMotion || !playIntro
+          ? 1
+          : Math.min(Math.max(elapsed / 420, 0), 1);
+      const easedReveal = 1 - Math.pow(1 - reveal, 3);
 
       context.clearRect(0, 0, width, height);
-      pointer.x += (pointer.targetX - pointer.x) * 0.045;
-      pointer.y += (pointer.targetY - pointer.y) * 0.045;
-
       context.save();
-      context.translate(centerX + pointer.x * 5, centerY + pointer.y * 4);
-      context.scale(1.1, 0.54);
-      context.rotate(reducedMotion ? -0.08 : elapsed * 0.000018 - 0.08);
-      context.strokeStyle = orbit;
-      context.lineWidth = 0.75;
-      [0.32, 0.54, 0.78, 1].forEach((scale, index) => {
-        context.globalAlpha = (0.035 + index * 0.012) * eased;
+      context.translate(centerX, centerY);
+      context.scale(1.08, 0.68);
+
+      for (let index = 0; index < SPIRAL_DOT_COUNT; index += 1) {
+        const dot = resolveSpiralDot({
+          index,
+          count: SPIRAL_DOT_COUNT,
+          time: cycle,
+          radius
+        });
+        const dotReveal = Math.min(
+          Math.max(easedReveal * 1.2 - (index / SPIRAL_DOT_COUNT) * 0.2, 0),
+          1
+        );
+
+        context.globalAlpha = dot.alpha * dotReveal;
+        context.fillStyle = index % 17 === 0 ? highlight : dotColor;
         context.beginPath();
-        context.arc(
-          0,
-          0,
-          maxRadius * scale,
-          Math.PI * (0.12 + index * 0.16),
-          Math.PI * (1.18 + index * 0.24)
-        );
-        context.stroke();
-      });
-      context.restore();
-
-      particles.forEach(particle => {
-        const depth = (particle.depth + travel) % 1;
-        const point = projectPoint(
-          particle,
-          depth,
-          elapsed,
-          eased,
-          centerX,
-          centerY,
-          maxRadius
-        );
-
-        if (particle.trail && depth > 0.035) {
-          const previous = projectPoint(
-            particle,
-            depth - 0.028,
-            elapsed,
-            eased,
-            centerX,
-            centerY,
-            maxRadius
-          );
-          context.globalAlpha =
-            particle.alpha * point.perspective * eased * 0.34;
-          context.strokeStyle = highlight;
-          context.lineWidth = 0.45 + point.perspective * 0.9;
-          context.beginPath();
-          context.moveTo(previous.x, previous.y);
-          context.lineTo(point.x, point.y);
-          context.stroke();
-        }
-
-        context.globalAlpha =
-          particle.alpha * (0.18 + point.perspective * 0.82) * eased;
-        context.fillStyle = color;
-        context.beginPath();
-        context.arc(
-          point.x,
-          point.y,
-          particle.size * (0.42 + point.perspective * 1.18),
-          0,
-          Math.PI * 2
-        );
+        context.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2);
         context.fill();
-      });
+      }
 
-      [0, 1].forEach(arm => {
-        const head = (0.58 + travel * 3.2 + arm * 0.31) % 1;
-        context.globalAlpha = 0.2 * eased;
-        context.strokeStyle = highlight;
-        context.lineWidth = arm === 0 ? 1.2 : 0.75;
-        context.beginPath();
-        Array.from({length: 18}, (_, index) => head - index * 0.008)
-          .filter(depth => depth > 0.04)
-          .forEach((depth, index) => {
-            const point = projectPoint(
-              {arm, armCount: 4, jitter: 0, stretch: 1},
-              depth,
-              elapsed,
-              eased,
-              centerX,
-              centerY,
-              maxRadius
-            );
-            if (index === 0) {
-              context.moveTo(point.x, point.y);
-            } else {
-              context.lineTo(point.x, point.y);
-            }
-          });
-        context.stroke();
-      });
+      context.restore();
       context.globalAlpha = 1;
 
       if (!reducedMotion && process.env.NODE_ENV !== "test") {
@@ -507,13 +497,11 @@ const ParticleSpiral = ({theme, reducedMotion, playIntro}) => {
 
     resize();
     window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", onPointerMove, {passive: true});
-    draw(reducedMotion ? 1800 : performance.now());
+    draw(reducedMotion ? 500 : performance.now());
 
     return () => {
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", onPointerMove);
-      if (animationFrame) {
+      if (animationFrame !== null) {
         window.cancelAnimationFrame?.(animationFrame);
       }
     };
@@ -700,7 +688,11 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
           </defs>
           <path
             className="technology-stage__beam"
-            d={`M ${technologyPalmOrigin.x - 2.5} ${technologyPalmOrigin.y} L 17 18 L 42 18 L ${technologyPalmOrigin.x + 2.5} ${technologyPalmOrigin.y} Z`}
+            d={`M ${technologyPalmOrigin.x - 2.5} ${
+              technologyPalmOrigin.y
+            } L 17 18 L 42 18 L ${technologyPalmOrigin.x + 2.5} ${
+              technologyPalmOrigin.y
+            } Z`}
           />
           <ellipse
             className="technology-stage__palm-ring technology-stage__palm-ring--outer"
@@ -850,26 +842,22 @@ export const resolveProjectPerspective = ({
 }) => {
   const safeViewportHeight = Math.max(viewportHeight || 0, 1);
   const safeHeight = Math.max(height || 0, 1);
-  const compact = viewportWidth <= 820;
-  const entrySpan = Math.max(
-    safeViewportHeight * 0.74,
-    Math.min(safeHeight, safeViewportHeight) * 0.82
+  const compact = viewportWidth <= 768;
+  const progress = clampProjectProgress(
+    (safeViewportHeight - top) / (safeHeight + safeViewportHeight)
   );
-  const linearProgress = clampProjectProgress(
-    (safeViewportHeight * 0.98 - top) / entrySpan
-  );
-  const progress = linearProgress * linearProgress * (3 - 2 * linearProgress);
-  const tilt = (1 - progress) * (compact ? 7.5 : 14);
-  const scaleStart = compact ? 0.92 : 0.86;
-  const shift = (1 - progress) * (compact ? 30 : 64);
+  const rotate = (1 - progress) * 20;
+  const scaleStart = compact ? 0.7 : 1.05;
+  const scaleEnd = compact ? 0.9 : 1;
+  const translate = -100 * progress;
 
   return {
     progress,
-    tilt: `${tilt.toFixed(2)}deg`,
-    scale: (scaleStart + progress * (1 - scaleStart)).toFixed(4),
-    shift: `${shift.toFixed(2)}px`,
-    galleryShift: `${((1 - progress) * (compact ? 18 : 34)).toFixed(2)}px`,
-    opacity: (0.92 + progress * 0.08).toFixed(3)
+    tilt: `${rotate.toFixed(2)}deg`,
+    scale: (scaleStart + progress * (scaleEnd - scaleStart)).toFixed(4),
+    shift: `${translate.toFixed(2)}px`,
+    galleryShift: `${(translate * 0.45).toFixed(2)}px`,
+    opacity: "1"
   };
 };
 
@@ -1236,102 +1224,560 @@ const ProductContext = ({product, copy}) => (
   </a>
 );
 
-const ExperiencePage = ({copy, experiencesData}) => (
-  <div className="experience-page route-page">
-    <header className="experience-intro" data-reveal>
-      <span className="route-kicker">{copy.experience.kicker}</span>
-      <h1 tabIndex="-1">{copy.experience.title}</h1>
-      <p>{copy.experience.intro}</p>
-      <code>{copy.experience.route}</code>
-    </header>
+export const resolveTimelineProgress = ({top, height, viewportHeight}) => {
+  const safeViewportHeight = Math.max(viewportHeight || 0, 1);
+  const safeHeight = Math.max(height || 0, 1);
+  const startLine = safeViewportHeight * 0.1;
+  const travel = Math.max(safeHeight - safeViewportHeight * 0.4, 1);
+  const progress = clampProjectProgress((startLine - top) / travel);
 
-    <section
-      className="work-chronicle"
-      aria-label={copy.experience.timelineLabel}
-    >
-      {experiencesData.map((experience, index) => (
-        <article
-          className="chronicle-entry"
-          key={`${experience.company}-${experience.period}`}
-        >
-          <div className="chronicle-entry__rail" aria-hidden="true">
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <i />
-          </div>
-          <header className="chronicle-entry__identity">
-            <p>{experience.type}</p>
-            <h2>{experience.company}</h2>
-            <strong>{experience.role}</strong>
-            <time>{experience.period}</time>
-            <small>{experience.workplace}</small>
-          </header>
-          <div className="chronicle-entry__record">
-            <p className="chronicle-entry__summary">{experience.summary}</p>
-            <h3>{copy.experience.contributionLabel}</h3>
-            <ul className="chronicle-entry__highlights">
-              {experience.highlights.map(highlight => (
-                <li key={highlight}>{highlight}</li>
-              ))}
-            </ul>
-            <div className="chronicle-entry__technology">
-              <span>{copy.experience.technologyLabel}</span>
-              <p>
-                {(experienceTechnologies[experience.company] || []).join(" · ")}
-              </p>
+  return {
+    progress,
+    opacity: clampProjectProgress(progress / 0.1)
+  };
+};
+
+const useTimelineProgress = (timelineRef, reducedMotion) => {
+  React.useLayoutEffect(() => {
+    const timeline = timelineRef.current;
+    if (!timeline) {
+      return undefined;
+    }
+
+    const settle = () => {
+      timeline.style.setProperty("--timeline-progress", "1");
+      timeline.style.setProperty("--timeline-opacity", "1");
+    };
+
+    if (reducedMotion) {
+      settle();
+      return undefined;
+    }
+
+    let animationFrame = null;
+    let ticking = false;
+
+    const update = () => {
+      const rect = timeline.getBoundingClientRect();
+      const motion = resolveTimelineProgress({
+        top: rect.top,
+        height: rect.height,
+        viewportHeight: window.innerHeight
+      });
+      timeline.style.setProperty(
+        "--timeline-progress",
+        motion.progress.toFixed(4)
+      );
+      timeline.style.setProperty(
+        "--timeline-opacity",
+        motion.opacity.toFixed(4)
+      );
+    };
+
+    const scheduleUpdate = () => {
+      if (ticking) {
+        return;
+      }
+      ticking = true;
+      animationFrame = window.requestAnimationFrame(() => {
+        ticking = false;
+        animationFrame = null;
+        update();
+      });
+    };
+
+    update();
+    window.addEventListener("scroll", scheduleUpdate, {passive: true});
+    window.addEventListener("resize", scheduleUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      if (animationFrame !== null) {
+        window.cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [reducedMotion, timelineRef]);
+};
+
+const ExperiencePage = ({copy, experiencesData, reducedMotion}) => {
+  const timelineRef = React.useRef(null);
+  useTimelineProgress(timelineRef, reducedMotion);
+
+  return (
+    <div className="experience-page route-page">
+      <header className="experience-intro" data-reveal>
+        <span className="route-kicker">{copy.experience.kicker}</span>
+        <h1 tabIndex="-1">{copy.experience.title}</h1>
+        <p>{copy.experience.intro}</p>
+        <code>{copy.experience.route}</code>
+      </header>
+
+      <section
+        className="work-chronicle"
+        aria-label={copy.experience.timelineLabel}
+        ref={timelineRef}
+      >
+        <div className="work-chronicle__beam" aria-hidden="true">
+          <span />
+        </div>
+        {experiencesData.map((experience, index) => (
+          <article
+            className="chronicle-entry"
+            key={`${experience.company}-${experience.period}`}
+          >
+            <div className="chronicle-entry__rail" aria-hidden="true">
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <i />
             </div>
-          </div>
-          {experience.products && (
-            <div className="chronicle-entry__products">
-              <h3>{copy.experience.productsLabel}</h3>
-              <div>
-                {experience.products.map(product => (
-                  <ProductContext
-                    product={product}
-                    copy={copy}
-                    key={product.id}
-                  />
+            <header className="chronicle-entry__identity">
+              <p>{experience.type}</p>
+              <h2>{experience.company}</h2>
+              <strong>{experience.role}</strong>
+              <time>{experience.period}</time>
+              <small>{experience.workplace}</small>
+            </header>
+            <div className="chronicle-entry__record">
+              <p className="chronicle-entry__summary">{experience.summary}</p>
+              <h3>{copy.experience.contributionLabel}</h3>
+              <ul className="chronicle-entry__highlights">
+                {experience.highlights.map(highlight => (
+                  <li key={highlight}>{highlight}</li>
                 ))}
+              </ul>
+              <div className="chronicle-entry__technology">
+                <span>{copy.experience.technologyLabel}</span>
+                <p>
+                  {(experienceTechnologies[experience.company] || []).join(
+                    " · "
+                  )}
+                </p>
               </div>
             </div>
-          )}
-        </article>
-      ))}
-    </section>
-  </div>
-);
+            {experience.products && (
+              <div className="chronicle-entry__products">
+                <h3>{copy.experience.productsLabel}</h3>
+                <div>
+                  {experience.products.map(product => (
+                    <ProductContext
+                      product={product}
+                      copy={copy}
+                      key={product.id}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </article>
+        ))}
+      </section>
+    </div>
+  );
+};
 
 const SignatureMark = ({label}) => (
   <div className="signature-mark" role="img" aria-label={label}>
     <svg viewBox="0 0 420 150" aria-hidden="true" focusable="false">
-      <path d="M28 112 C34 75 38 28 49 22 C62 15 50 100 43 119 C55 84 79 61 96 70 C118 82 93 119 56 110" />
-      <path d="M116 106 C130 84 145 71 157 74 C169 77 165 100 148 108 C132 115 124 102 132 88" />
-      <path d="M177 111 C181 90 185 72 188 66 M186 80 C200 65 217 68 211 87 C207 99 204 106 203 111" />
-      <path d="M230 108 C237 83 246 70 258 72 C271 74 270 95 258 105 C246 116 232 106 239 91" />
-      <path d="M286 34 C282 61 279 87 279 108 M280 91 C294 72 309 68 314 77 C321 90 304 108 282 106" />
-      <path d="M326 77 C341 67 355 70 353 84 C351 98 337 108 326 102 C317 96 322 78 338 73 M356 109 C368 102 378 101 390 104" />
       <path
-        className="signature-mark__swoop"
-        d="M41 129 C140 139 265 134 391 115"
+        pathLength="1"
+        d="M28 112 C34 75 38 28 49 22 C62 15 50 100 43 119 C55 84 79 61 96 70 C118 82 93 119 56 110
+           M116 106 C130 84 145 71 157 74 C169 77 165 100 148 108 C132 115 124 102 132 88
+           M177 111 C181 90 185 72 188 66 M186 80 C200 65 217 68 211 87 C207 99 204 106 203 111
+           M230 108 C237 83 246 70 258 72 C271 74 270 95 258 105 C246 116 232 106 239 91
+           M286 34 C282 61 279 87 279 108 M280 91 C294 72 309 68 314 77 C321 90 304 108 282 106
+           M326 77 C341 67 355 70 353 84 C351 98 337 108 326 102 C317 96 322 78 338 73 M356 109 C368 102 378 101 390 104
+           M41 129 C140 139 265 134 391 115"
       />
     </svg>
     <span>{"// berkant"}</span>
   </div>
 );
 
-const WovenSample = () => (
-  <div className="woven-sample" aria-hidden="true">
-    <div className="woven-sample__threads" />
-    <span>BK / ABOUT</span>
-    <strong>
-      BERKANT
-      <br />
-      KUBAT
-    </strong>
-    <small>PERSONAL NOTES</small>
-  </div>
-);
+const WOVEN_GRID_X = 40;
+const WOVEN_GRID_Y = 26;
+const WOVEN_WIDTH = 4.4;
+const WOVEN_HEIGHT = 2.75;
+const WOVEN_GRAVITY = -3.1;
+const WOVEN_DAMPING = 0.985;
+const WOVEN_DT = 0.016;
 
-const AboutPage = ({copy, profileData, educationData}) => (
+const WovenSample = ({reducedMotion, theme}) => {
+  const canvasRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === "test") {
+      return undefined;
+    }
+
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return undefined;
+    }
+
+    let renderer;
+    let geometry;
+    let material;
+    let texture;
+    let animationFrame = null;
+    let running = false;
+    let time = 0;
+
+    const makeTexture = () => {
+      const textureCanvas = document.createElement("canvas");
+      const width = 1280;
+      const height = 800;
+      textureCanvas.width = width;
+      textureCanvas.height = height;
+      const context = textureCanvas.getContext("2d");
+      if (!context) {
+        return null;
+      }
+
+      const computed = window.getComputedStyle(canvas);
+      const ground = computed.getPropertyValue("--woven-a").trim() || "#e9dfca";
+      const accent =
+        computed.getPropertyValue("--woven-ink").trim() || "#9e1e2a";
+
+      const gradient = context.createLinearGradient(0, 0, 0, height);
+      gradient.addColorStop(0, ground);
+      gradient.addColorStop(0.5, ground);
+      gradient.addColorStop(1, ground);
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, width, height);
+
+      context.strokeStyle = accent;
+      context.lineWidth = 10;
+      context.strokeRect(46, 46, width - 92, height - 92);
+      context.globalAlpha = 0.72;
+      context.lineWidth = 3;
+      context.strokeRect(66, 66, width - 132, height - 132);
+      context.globalAlpha = 1;
+
+      context.fillStyle = accent;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.font = 'bold 78px Georgia, "Times New Roman", serif';
+      context.fillText("BK", width / 2, 190);
+      context.font = 'normal 20px "Helvetica Neue", Arial, sans-serif';
+      context.fillText("· ABOUT ·", width / 2, 246);
+      context.font = 'bold 118px Georgia, "Times New Roman", serif';
+      context.fillText("BERKANT", width / 2, 400);
+      context.fillText("KUBAT", width / 2, 520);
+      context.font = '600 30px "Helvetica Neue", Arial, sans-serif';
+      context.fillText(
+        "P E R S O N A L   N O T E S   ·   P O R T F O L I O",
+        width / 2,
+        626
+      );
+
+      for (let y = 0; y < height; y += 3) {
+        context.strokeStyle = "rgba(60,30,20,0.05)";
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(0, y + 0.5);
+        context.lineTo(width, y + 0.5);
+        context.stroke();
+      }
+
+      for (let x = 0; x < width; x += 3) {
+        context.strokeStyle = "rgba(255,250,235,0.06)";
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(x + 0.5, 0);
+        context.lineTo(x + 0.5, height);
+        context.stroke();
+      }
+
+      const image = context.getImageData(0, 0, width, height);
+      for (let index = 0; index < image.data.length; index += 4) {
+        const noise = (Math.random() * 2 - 1) * 10;
+        image.data[index] += noise;
+        image.data[index + 1] += noise;
+        image.data[index + 2] += noise;
+      }
+      context.putImageData(image, 0, 0);
+
+      const nextTexture = new THREE.CanvasTexture(textureCanvas);
+      nextTexture.anisotropy = 4;
+      nextTexture.colorSpace = THREE.SRGBColorSpace;
+      return nextTexture;
+    };
+
+    try {
+      const scene = new THREE.Scene();
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+      texture = makeTexture();
+      geometry = new THREE.PlaneGeometry(
+        WOVEN_WIDTH,
+        WOVEN_HEIGHT,
+        WOVEN_GRID_X,
+        WOVEN_GRID_Y
+      );
+      material = new THREE.MeshPhongMaterial({
+        map: texture,
+        side: THREE.DoubleSide,
+        shininess: 6,
+        specular: new THREE.Color(0x2a1410),
+        color: 0xffffff
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+      scene.add(new THREE.AmbientLight(0xffe9d0, 0.62));
+
+      const keyLight = new THREE.DirectionalLight(0xfff0dc, 1.15);
+      keyLight.position.set(-3, 3.5, 3.2);
+      scene.add(keyLight);
+
+      const rimLight = new THREE.DirectionalLight(0xb02330, 0.42);
+      rimLight.position.set(3, -1.5, 2);
+      scene.add(rimLight);
+
+      const positions = geometry.attributes.position;
+      const vertexCount = (WOVEN_GRID_X + 1) * (WOVEN_GRID_Y + 1);
+      const current = new Float32Array(vertexCount * 3);
+      const previous = new Float32Array(vertexCount * 3);
+      const rest = new Float32Array(vertexCount * 3);
+      const pinned = new Uint8Array(vertexCount);
+
+      for (let index = 0; index < vertexCount; index += 1) {
+        const x = positions.getX(index);
+        const y = positions.getY(index);
+        current[index * 3] = previous[index * 3] = rest[index * 3] = x;
+        current[index * 3 + 1] =
+          previous[index * 3 + 1] =
+          rest[index * 3 + 1] =
+            y;
+        current[index * 3 + 2] =
+          previous[index * 3 + 2] =
+          rest[index * 3 + 2] =
+            0;
+      }
+
+      for (let x = 0; x <= WOVEN_GRID_X; x += 1) {
+        pinned[x] = 1;
+      }
+
+      const vertexIndex = (x, y) => x + y * (WOVEN_GRID_X + 1);
+      const horizontalRest = WOVEN_WIDTH / WOVEN_GRID_X;
+      const verticalRest = WOVEN_HEIGHT / WOVEN_GRID_Y;
+
+      const wind = (x, y, elapsed) => {
+        const normalizedX = x / WOVEN_GRID_X;
+        const normalizedY = y / WOVEN_GRID_Y;
+        const travel = elapsed * 1.7 - normalizedY * 4.2;
+        const gust =
+          0.6 +
+          0.42 * Math.sin(elapsed * 0.6) +
+          0.18 * Math.sin(elapsed * 1.9 + 1.3);
+        const amplitude = 4.3 * normalizedY;
+
+        return [
+          Math.sin(elapsed * 0.9 + normalizedY * 2.2) * 0.6 * normalizedY,
+          -0.4 * normalizedY,
+          (Math.sin(travel + normalizedX * 3.3) +
+            0.5 * Math.sin(travel * 1.7 + normalizedX * 6)) *
+            amplitude *
+            gust
+        ];
+      };
+
+      const solve = (a, b, restLength) => {
+        let deltaX = current[b * 3] - current[a * 3];
+        let deltaY = current[b * 3 + 1] - current[a * 3 + 1];
+        let deltaZ = current[b * 3 + 2] - current[a * 3 + 2];
+        const distance =
+          Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ) ||
+          1e-6;
+        const difference = ((distance - restLength) / distance) * 0.5;
+        deltaX *= difference;
+        deltaY *= difference;
+        deltaZ *= difference;
+
+        if (!pinned[a] && !pinned[b]) {
+          current[a * 3] += deltaX;
+          current[a * 3 + 1] += deltaY;
+          current[a * 3 + 2] += deltaZ;
+          current[b * 3] -= deltaX;
+          current[b * 3 + 1] -= deltaY;
+          current[b * 3 + 2] -= deltaZ;
+        } else if (pinned[a] && !pinned[b]) {
+          current[b * 3] -= deltaX * 2;
+          current[b * 3 + 1] -= deltaY * 2;
+          current[b * 3 + 2] -= deltaZ * 2;
+        } else if (!pinned[a] && pinned[b]) {
+          current[a * 3] += deltaX * 2;
+          current[a * 3 + 1] += deltaY * 2;
+          current[a * 3 + 2] += deltaZ * 2;
+        }
+      };
+
+      const step = elapsed => {
+        for (let y = 0; y <= WOVEN_GRID_Y; y += 1) {
+          for (let x = 0; x <= WOVEN_GRID_X; x += 1) {
+            const index = vertexIndex(x, y);
+            if (pinned[index]) {
+              continue;
+            }
+
+            const forces = wind(x, y, elapsed);
+            for (let axis = 0; axis < 3; axis += 1) {
+              const offset = index * 3 + axis;
+              const acceleration =
+                axis === 0
+                  ? forces[0]
+                  : axis === 1
+                  ? forces[1] + WOVEN_GRAVITY
+                  : forces[2];
+              const velocity =
+                (current[offset] - previous[offset]) * WOVEN_DAMPING;
+              previous[offset] = current[offset];
+              current[offset] += velocity + acceleration * WOVEN_DT * WOVEN_DT;
+            }
+          }
+        }
+
+        for (let iteration = 0; iteration < 3; iteration += 1) {
+          for (let y = 0; y <= WOVEN_GRID_Y; y += 1) {
+            for (let x = 0; x < WOVEN_GRID_X; x += 1) {
+              solve(vertexIndex(x, y), vertexIndex(x + 1, y), horizontalRest);
+            }
+          }
+          for (let y = 0; y < WOVEN_GRID_Y; y += 1) {
+            for (let x = 0; x <= WOVEN_GRID_X; x += 1) {
+              solve(vertexIndex(x, y), vertexIndex(x, y + 1), verticalRest);
+            }
+          }
+        }
+
+        for (let x = 0; x <= WOVEN_GRID_X; x += 1) {
+          const index = x;
+          for (let axis = 0; axis < 3; axis += 1) {
+            const offset = index * 3 + axis;
+            current[offset] = rest[offset];
+            previous[offset] = rest[offset];
+          }
+        }
+      };
+
+      const commit = () => {
+        for (let index = 0; index < vertexCount; index += 1) {
+          positions.setXYZ(
+            index,
+            current[index * 3],
+            current[index * 3 + 1],
+            current[index * 3 + 2]
+          );
+        }
+        positions.needsUpdate = true;
+        geometry.computeVertexNormals();
+      };
+
+      let camera;
+      const fit = () => {
+        const rect = canvas.getBoundingClientRect();
+        const width = Math.max(rect.width, 1);
+        const height = Math.max(rect.height, 1);
+        renderer.setSize(width, height, false);
+        const aspect = width / height;
+        camera = new THREE.PerspectiveCamera(42, aspect, 0.1, 100);
+        const verticalFit = WOVEN_HEIGHT / 2 / Math.tan((42 * Math.PI) / 360);
+        const horizontalFit =
+          WOVEN_WIDTH / 2 / Math.tan((42 * Math.PI) / 360) / aspect;
+        camera.position.set(
+          0,
+          0.05,
+          Math.max(verticalFit, horizontalFit) * 1.16 + 0.4
+        );
+        camera.lookAt(0, 0, 0);
+      };
+
+      const renderFrame = () => {
+        if (!running) {
+          return;
+        }
+        time += WOVEN_DT;
+        step(time);
+        commit();
+        renderer.render(scene, camera);
+        animationFrame = window.requestAnimationFrame(renderFrame);
+      };
+
+      const start = () => {
+        if (running) {
+          return;
+        }
+        running = true;
+        animationFrame = window.requestAnimationFrame(renderFrame);
+      };
+
+      const stop = () => {
+        running = false;
+        if (animationFrame !== null) {
+          window.cancelAnimationFrame(animationFrame);
+          animationFrame = null;
+        }
+      };
+
+      const handleVisibility = () => {
+        if (document.hidden) {
+          stop();
+        } else if (!reducedMotion) {
+          start();
+        }
+      };
+
+      fit();
+      window.addEventListener("resize", fit);
+
+      if (reducedMotion) {
+        for (let frame = 0; frame < 220; frame += 1) {
+          step(frame * WOVEN_DT);
+        }
+        commit();
+        renderer.render(scene, camera);
+      } else {
+        for (let frame = 0; frame < 40; frame += 1) {
+          step(frame * WOVEN_DT);
+        }
+        time = 40 * WOVEN_DT;
+        start();
+        document.addEventListener("visibilitychange", handleVisibility);
+      }
+
+      return () => {
+        stop();
+        window.removeEventListener("resize", fit);
+        document.removeEventListener("visibilitychange", handleVisibility);
+        geometry.dispose();
+        material.dispose();
+        texture?.dispose();
+        renderer.dispose();
+      };
+    } catch {
+      return undefined;
+    }
+  }, [reducedMotion, theme]);
+
+  return (
+    <div className="woven-sample" data-woven-cloth="threeui" aria-hidden="true">
+      <canvas className="woven-sample__canvas" ref={canvasRef} />
+    </div>
+  );
+};
+
+const AboutPage = ({
+  copy,
+  profileData,
+  educationData,
+  reducedMotion,
+  theme
+}) => (
   <div className="about-page route-page">
     <header className="about-intro" data-reveal>
       <div>
@@ -1352,7 +1798,7 @@ const AboutPage = ({copy, profileData, educationData}) => (
       </div>
 
       <aside className="about-fabric" data-reveal>
-        <WovenSample />
+        <WovenSample reducedMotion={reducedMotion} theme={theme} />
         <dl>
           <div>
             <dt>{copy.about.locationLabel}</dt>
@@ -1723,13 +2169,19 @@ function Portfolio2026() {
             />
           </Route>
           <Route exact path="/experience">
-            <ExperiencePage copy={copy} experiencesData={experiencesData} />
+            <ExperiencePage
+              copy={copy}
+              experiencesData={experiencesData}
+              reducedMotion={reducedMotion}
+            />
           </Route>
           <Route exact path="/about">
             <AboutPage
               copy={copy}
               profileData={profileData}
               educationData={educationData}
+              reducedMotion={reducedMotion}
+              theme={theme}
             />
           </Route>
           <Route exact path="/contact">
@@ -1746,7 +2198,12 @@ function Portfolio2026() {
       </main>
 
       {!isHome && <PageFooter copy={copy} profileData={profileData} />}
-      <RouteDock copy={copy} introPlayed={introSettled} isHome={isHome} />
+      <RouteDock
+        copy={copy}
+        introPlayed={introSettled}
+        isHome={isHome}
+        reducedMotion={reducedMotion}
+      />
     </div>
   );
 }
