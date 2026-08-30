@@ -2359,8 +2359,8 @@ body,
 }
 
 .signature-mark {
-  width: min(100%, 30rem);
-  margin: 3.5rem 0 0 auto;
+  width: min(100%, 23rem);
+  margin: 2.75rem 0 0 auto;
   overflow: hidden;
   color: var(--accent);
 }
@@ -2368,37 +2368,19 @@ body,
 .signature-mark span {
   display: block;
   width: max-content;
-  padding: 0.18em 0.08em 0.22em 0;
+  padding: 0.12em 0.06em 0.16em 0;
   clip-path: inset(0 100% 0 0);
-  font: 400 clamp(3.6rem, 6vw, 6.4rem) / 1 "Portfolio Signature", cursive;
-  letter-spacing: 0.015em;
-  transform: rotate(-2deg);
+  font: 400 clamp(2.9rem, 4.6vw, 4.8rem) / 1 "Portfolio Signature", cursive;
+  letter-spacing: 0.01em;
+  transform: rotate(-1.25deg);
   transform-origin: left center;
-  animation: signature-reveal 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
-}
-
-.signature-mark::after {
-  display: block;
-  width: 0;
-  height: 1px;
-  margin-top: -0.4rem;
-  background: currentColor;
-  content: "";
-  opacity: 0.72;
-  transform: rotate(-1deg);
-  transform-origin: left center;
-  animation: signature-underline 900ms var(--ease-out) 1.45s forwards;
+  animation: signature-reveal 1.65s cubic-bezier(0.22, 1, 0.36, 1) 0.35s
+    forwards;
 }
 
 @keyframes signature-reveal {
   to {
     clip-path: inset(0 0 0 0);
-  }
-}
-
-@keyframes signature-underline {
-  to {
-    width: min(100%, 25rem);
   }
 }
 
@@ -3139,9 +3121,6 @@ html[data-theme-transition="true"]
     clip-path: none;
   }
 
-  .signature-mark::after {
-    width: min(100%, 25rem);
-  }
 
   .identity-sequence__cursor {
     opacity: 1;
