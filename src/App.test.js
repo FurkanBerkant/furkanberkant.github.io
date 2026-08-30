@@ -285,6 +285,14 @@ it("renders every route independently with the preserved real content", () => {
   expect(
     rendered.div.querySelector(".technology-explorer__header").textContent
   ).toContain("17 technologies");
+  expect(rendered.div.textContent).not.toContain("Spring Boot");
+
+  click(
+    rendered.div.querySelector(
+      ".technology-hologram__groups [data-hologram-group-id='build']"
+    )
+  );
+
   expect(rendered.div.textContent).toContain("Spring Boot");
   expect(rendered.div.querySelector(".project-chapter")).toBeNull();
   rendered.cleanup();
