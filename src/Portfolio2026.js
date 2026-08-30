@@ -635,8 +635,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
   const resolvedTechnologyId = active.technologyIds.includes(activeTechnologyId)
     ? activeTechnologyId
     : active.technologyIds[0];
-  const activeTechnology = technologies[resolvedTechnologyId];
-
   React.useEffect(() => {
     if (process.env.NODE_ENV === "test") {
       return undefined;
@@ -780,22 +778,84 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
 
         <div
           className="technology-stage technology-stage--spline"
+          id="technology-scene"
+          role="tabpanel"
+          aria-labelledby={`technology-tab-${active.id}`}
           ref={stageRef}
           data-reduced-motion={reducedMotion ? "true" : "false"}
           data-scene-ready={sceneStatus === "ready" ? "true" : "false"}
           data-scene-status={sceneStatus}
+          data-selected-technology={resolvedTechnologyId}
         >
           <div className="technology-stage__spotlight" aria-hidden="true" />
+
+          <svg
+            className="technology-stage__hologram"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <ellipse
+              className="technology-stage__orbit technology-stage__orbit--outer"
+              cx="50"
+              cy="48"
+              rx="28"
+              ry="12"
+            />
+            <ellipse
+              className="technology-stage__orbit technology-stage__orbit--inner"
+              cx="50"
+              cy="48"
+              rx="19"
+              ry="8"
+            />
+            <line
+              className="technology-stage__axis"
+              x1="25"
+              y1="48"
+              x2="75"
+              y2="48"
+            />
+            {active.technologyIds.map((technologyId, index) => {
+              const slot = resolveTechnologyStageSlot(
+                active.technologyIds.length,
+                index
+              );
+              const selected = technologyId === resolvedTechnologyId;
+
+              return (
+                <g
+                  key={`${active.id}-link-${technologyId}`}
+                  className={selected ? "is-selected" : ""}
+                >
+                  <line
+                    className="technology-stage__link"
+                    x1="50"
+                    y1="48"
+                    x2={slot.x}
+                    y2={slot.y}
+                  />
+                  <circle
+                    className="technology-stage__endpoint"
+                    cx={slot.x}
+                    cy={slot.y}
+                    r={selected ? "0.7" : "0.45"}
+                  />
+                </g>
+              );
+            })}
+          </svg>
+
           <canvas
             className="technology-stage__canvas technology-stage__canvas--spline"
             ref={canvasRef}
             aria-hidden="true"
           />
 
-          <div className="technology-stage__group-label" aria-hidden="true">
+          <div className="technology-stage__mode" aria-hidden="true">
             <span>{copy.groups[active.id]}</span>
             <small>
-              {String(active.technologyIds.length).padStart(2, "0")}{" "}
+              {String(active.technologyIds.length).padStart(2, "0")} /{" "}
               {copy.toolsLabel}
             </small>
           </div>
@@ -829,8 +889,17 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
                   onMouseEnter={() => selectTechnology(technologyId)}
                   onFocus={() => selectTechnology(technologyId)}
                 >
+                  <span className="technology-stage__node-dot" aria-hidden="true" />
                   <img src={technology.icon} alt="" aria-hidden="true" />
-                  <span>{technology.name}</span>
+                  <span className="technology-stage__node-copy">
+                    <strong>{technology.name}</strong>
+                    {selected ? (
+                      <small>
+                        {String(index + 1).padStart(2, "0")} /{" "}
+                        {String(active.technologyIds.length).padStart(2, "0")}
+                      </small>
+                    ) : null}
+                  </span>
                 </button>
               );
             })}
@@ -838,28 +907,6 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
 
           <div className="technology-stage__loader" aria-hidden="true">
             <span />
-          </div>
-
-          <div
-            className="technology-stage__readout"
-            id="technology-scene"
-            role="tabpanel"
-            aria-labelledby={`technology-tab-${active.id}`}
-            aria-live="polite"
-          >
-            <span>{copy.selectedTechnology}</span>
-            <div className="technology-stage__readout-row">
-              <img src={activeTechnology.icon} alt="" aria-hidden="true" />
-              <strong>{activeTechnology.name}</strong>
-            </div>
-            <small>
-              {copy.groups[active.id]}
-              <i aria-hidden="true"> · </i>
-              {String(
-                active.technologyIds.indexOf(resolvedTechnologyId) + 1
-              ).padStart(2, "0")}
-              /{String(active.technologyIds.length).padStart(2, "0")}
-            </small>
           </div>
         </div>
       </div>
