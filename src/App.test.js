@@ -428,11 +428,15 @@ it("explores technology groups and tools with accessible controls", () => {
   expect(tabs[1].getAttribute("aria-selected")).toBe("true");
   expect(panel.textContent).toContain("Apache Kafka");
   expect(nodeButtons()).toHaveLength(6);
-  expect(nodeButtons().map(button => button.textContent)).toContain("PostgreSQL");
+  expect(nodeButtons().map(button => button.textContent)).toContain(
+    "PostgreSQL"
+  );
   expect(tabs[0].getAttribute("tabindex")).toBe("-1");
   expect(tabs[1].getAttribute("tabindex")).toBe("0");
 
-  const redisButton = nodeButtons().find(button => button.textContent === "Redis");
+  const redisButton = nodeButtons().find(
+    button => button.textContent === "Redis"
+  );
   click(redisButton);
   expect(redisButton.getAttribute("aria-pressed")).toBe("true");
   expect(
@@ -555,13 +559,17 @@ it("marks the selected theme and repaints a reduced-motion home on change", () =
   const initialDrawCount = drawCount();
 
   expect(
-    themeButtons.filter(button => button.getAttribute("aria-pressed") === "true")
+    themeButtons.filter(
+      button => button.getAttribute("aria-pressed") === "true"
+    )
   ).toEqual([themeButtons[0]]);
 
   click(themeButtons[1]);
 
   expect(
-    themeButtons.filter(button => button.getAttribute("aria-pressed") === "true")
+    themeButtons.filter(
+      button => button.getAttribute("aria-pressed") === "true"
+    )
   ).toEqual([themeButtons[1]]);
   expect(div.querySelector(".portfolio-site").dataset.theme).toBe("light");
   expect(drawCount()).toBeGreaterThan(initialDrawCount);
@@ -575,9 +583,9 @@ it("localizes the About detail labels", () => {
   window.localStorage.setItem(LANGUAGE_STORAGE_KEY, "tr");
   const {div, cleanup} = renderAt("/about");
 
-  expect(
-    div.querySelector(".signature-mark").getAttribute("aria-label")
-  ).toBe("El yazısıyla Berkant imzası");
+  expect(div.querySelector(".signature-mark").getAttribute("aria-label")).toBe(
+    "El yazısıyla Berkant imzası"
+  );
   expect(
     Array.from(div.querySelectorAll(".about-fabric dt")).map(
       item => item.textContent
@@ -702,7 +710,9 @@ it("honors reduced motion for the intro, technology scene and project media", ()
   rendered = renderAt("/technologies");
   const technologyStage = rendered.div.querySelector(".technology-stage");
   expect(technologyStage.dataset.reducedMotion).toBe("true");
-  expect(rendered.div.querySelector(".technology-stage__canvas--spline")).not.toBeNull();
+  expect(
+    rendered.div.querySelector(".technology-stage__canvas--spline")
+  ).not.toBeNull();
   rendered.cleanup();
 
   rendered = renderAt("/projects");
