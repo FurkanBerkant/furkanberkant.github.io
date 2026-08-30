@@ -19,6 +19,8 @@ import {
   uiCopy
 } from "./portfolioI18n";
 
+jest.mock("three", () => ({}));
+
 let reduceMotion = false;
 let intersectionObservers = [];
 
@@ -275,7 +277,9 @@ it("renders every route independently with the preserved real content", () => {
   expect(uiCopy.en.technologies.title).toBe("Technologies");
   expect(uiCopy.tr.technologies.title).toBe("Teknolojiler");
   expect(
-    rendered.div.querySelectorAll(".technology-explorer [role='tab']")
+    rendered.div.querySelectorAll(
+      ".technology-hologram__groups [data-hologram-group-id]"
+    )
   ).toHaveLength(4);
   expect(rendered.div.querySelector(".technology-index")).toBeNull();
   expect(
