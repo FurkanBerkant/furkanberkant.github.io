@@ -22,8 +22,7 @@ const routes = {
   },
   about: {
     title: "About — Berkant Kubat",
-    description:
-      "Background, education and current interests of software engineer Berkant Kubat."
+    description: "Background and education of software engineer Berkant Kubat."
   },
   contact: {
     title: "Contact — Berkant Kubat",

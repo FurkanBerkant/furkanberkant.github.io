@@ -125,6 +125,9 @@ export const uiCopy = {
       title: "About",
       intro: "Software engineer focused on backend systems, based in Samsun.",
       storyLabel: "Background",
+      signatureLabel: "Handwritten Berkant signature",
+      locationLabel: "Location",
+      educationLabel: "Education",
       story: [
         "I'm Berkant. I studied Statistics and Computer Science, and today most of my professional work is on production backend systems—mainly Java, Spring and Kafka, together with the data, deployment and observability work behind them.",
         "Lately, I've also been exploring how AI is changing the way software gets made. I enjoy trying new tools, thinking about product design, interfaces and motion, and learning by turning ideas into working things."
@@ -186,8 +189,7 @@ export const uiCopy = {
         },
         "/about": {
           title: "Hakkımda — Berkant Kubat",
-          description:
-            "Yazılım mühendisi Berkant Kubat'ın geçmişi ve eğitimi."
+          description: "Yazılım mühendisi Berkant Kubat'ın geçmişi ve eğitimi."
         },
         "/contact": {
           title: "İletişim — Berkant Kubat",
@@ -283,8 +285,12 @@ export const uiCopy = {
       route: "/about",
       kicker: "Kişisel notlar",
       title: "Hakkımda",
-      intro: "Samsun'da yaşayan, backend sistemlerine odaklanan yazılım mühendisi.",
+      intro:
+        "Samsun'da yaşayan, backend sistemlerine odaklanan yazılım mühendisi.",
       storyLabel: "Geçmiş",
+      signatureLabel: "El yazısıyla Berkant imzası",
+      locationLabel: "Konum",
+      educationLabel: "Eğitim",
       story: [
         "Ben Berkant. İstatistik ve Bilgisayar Bilimleri okudum. Son birkaç yıldır ağırlıklı olarak üretim ortamındaki backend sistemleri üzerinde çalışıyorum; Java, Spring ve Kafka'nın yanı sıra veri, dağıtım ve gözlemlenebilirlik tarafıyla da ilgileniyorum.",
         "Son zamanlarda yapay zekânın yazılım üretme biçimini nasıl değiştirdiğini araştırıyorum. Yeni araçları denemekten; ürün tasarımı, arayüzler ve hareket üzerine düşünmekten; fikirleri çalışır hâle getirerek öğrenmekten keyif alıyorum."

@@ -271,6 +271,7 @@ const SiteTopbar = ({
       </p>
       <div className="site-controls">
         <ThemeSwitch
+          theme={theme}
           onChange={onThemeChange}
           copy={copy.theme}
           interactive={!introPending}
@@ -536,6 +537,7 @@ const HomePage = ({copy, profileData, playIntro, theme, reducedMotion}) => {
       aria-labelledby="home-identity"
     >
       <ParticleSpiral
+        theme={theme}
         reducedMotion={reducedMotion}
         playIntro={playIntro}
       />
@@ -584,10 +586,9 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
   const [activeTechnologyId, setActiveTechnologyId] = React.useState(
     capabilitiesData[0].technologyIds[0]
   );
-  const [sceneReady, setSceneReady] = React.useState(false);
+  const [sceneStatus, setSceneStatus] = React.useState("loading");
   const stageRef = React.useRef(null);
   const canvasRef = React.useRef(null);
-  const sceneRef = React.useRef(null);
 
   const active =
     capabilitiesData.find(capability => capability.id === activeId) ||
@@ -596,6 +597,7 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
     ? activeTechnologyId
     : active.technologyIds[0];
   const activeTechnology = technologies[resolvedTechnologyId];
+
   React.useEffect(() => {
     if (process.env.NODE_ENV === "test") {
       return undefined;
@@ -607,15 +609,14 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
 
     let cancelled = false;
     let controller = null;
-    setSceneReady(false);
+    setSceneStatus("loading");
 
     createTechnologyScene({
       canvas,
-      container: stage,
       reducedMotion,
       onReady: () => {
         if (!cancelled) {
-          setSceneReady(true);
+          setSceneStatus("ready");
         }
       }
     })
@@ -625,19 +626,18 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
           return;
         }
         controller = instance;
-        sceneRef.current = instance;
       })
       .catch(() => {
-        // The static UI remains usable if Spline cannot load.
+        if (!cancelled) {
+          setSceneStatus("unavailable");
+        }
       });
 
     return () => {
       cancelled = true;
       controller?.dispose();
-      sceneRef.current = null;
     };
   }, [reducedMotion]);
-
 
   const selectGroup = capability => {
     setActiveId(capability.id);
@@ -714,7 +714,10 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
               const technology = technologies[technologyId];
               const selected = technologyId === resolvedTechnologyId;
               return (
-                <li key={technologyId} className={selected ? "is-selected" : ""}>
+                <li
+                  key={technologyId}
+                  className={selected ? "is-selected" : ""}
+                >
                   <button
                     type="button"
                     data-technology-id={technologyId}
@@ -736,7 +739,8 @@ const TechnologyStage = ({copy, capabilitiesData, reducedMotion}) => {
           className="technology-stage technology-stage--spline"
           ref={stageRef}
           data-reduced-motion={reducedMotion ? "true" : "false"}
-          data-scene-ready={sceneReady ? "true" : "false"}
+          data-scene-ready={sceneStatus === "ready" ? "true" : "false"}
+          data-scene-status={sceneStatus}
         >
           <div className="technology-stage__spotlight" aria-hidden="true" />
           <canvas
@@ -896,7 +900,6 @@ const useProjectPerspective = (stageRef, reducedMotion) => {
     };
   }, [reducedMotion, stageRef]);
 };
-
 const ArchitecturePlate = ({project, copy}) => (
   <div
     className="architecture-plate"
@@ -1322,8 +1325,6 @@ const AboutPage = ({copy, profileData, educationData}) => (
           </div>
         </dl>
       </aside>
-
-
     </section>
   </div>
 );
@@ -1506,7 +1507,6 @@ function Portfolio2026() {
 
   React.useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    document.documentElement.dataset.themeTransition = "true";
     document
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute("content", themeColors[theme]);
@@ -1514,27 +1514,23 @@ function Portfolio2026() {
       .querySelector('meta[name="color-scheme"]')
       ?.setAttribute("content", theme === "light" ? "light" : "dark");
 
-    if (themeTransitionTimerRef.current) {
-      window.clearTimeout(themeTransitionTimerRef.current);
-    }
-    themeTransitionTimerRef.current = window.setTimeout(() => {
-      delete document.documentElement.dataset.themeTransition;
-      themeTransitionTimerRef.current = null;
-    }, 420);
-
     try {
       window.localStorage.setItem(THEME_STORAGE_KEY, theme);
     } catch {
       // Storage may be unavailable in privacy-focused browser contexts.
     }
+  }, [theme]);
 
-    return () => {
+  React.useEffect(
+    () => () => {
       if (themeTransitionTimerRef.current) {
         window.clearTimeout(themeTransitionTimerRef.current);
         themeTransitionTimerRef.current = null;
       }
-    };
-  }, [theme]);
+      delete document.documentElement.dataset.themeTransition;
+    },
+    []
+  );
 
   React.useEffect(() => {
     const revealItems = Array.from(document.querySelectorAll("[data-reveal]"));
@@ -1614,6 +1610,15 @@ function Portfolio2026() {
       return;
     }
 
+    if (themeTransitionTimerRef.current) {
+      window.clearTimeout(themeTransitionTimerRef.current);
+    }
+    document.documentElement.dataset.themeTransition = "true";
+    themeTransitionTimerRef.current = window.setTimeout(() => {
+      delete document.documentElement.dataset.themeTransition;
+      themeTransitionTimerRef.current = null;
+    }, 420);
+
     trackEvent("theme_change", {
       previous_theme: theme,
       selected_theme: nextTheme
@@ -1636,6 +1641,7 @@ function Portfolio2026() {
       <SiteTopbar
         copy={copy}
         pathname={pathname}
+        theme={theme}
         language={language}
         onThemeChange={changeTheme}
         onLanguageChange={changeLanguage}
@@ -1653,6 +1659,7 @@ function Portfolio2026() {
               copy={copy}
               profileData={profileData}
               playIntro={!introSettled}
+              theme={theme}
               reducedMotion={reducedMotion}
             />
           </Route>

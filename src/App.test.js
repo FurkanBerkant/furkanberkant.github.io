@@ -324,6 +324,14 @@ it("renders every route independently with the preserved real content", () => {
   rendered = renderAt("/about");
   expect(rendered.div.querySelector(".about-collage")).not.toBeNull();
   expect(rendered.div.querySelector(".signature-mark svg")).not.toBeNull();
+  expect(
+    rendered.div.querySelector(".signature-mark").getAttribute("aria-label")
+  ).toBe("Handwritten Berkant signature");
+  expect(
+    Array.from(rendered.div.querySelectorAll(".about-fabric dt")).map(
+      item => item.textContent
+    )
+  ).toEqual(["Location", "Education"]);
   expect(rendered.div.querySelector(".woven-sample")).not.toBeNull();
   expect(rendered.div.querySelector(".about-interests")).toBeNull();
   expect(rendered.div.textContent).toContain("Statistics and Computer Science");
@@ -476,7 +484,6 @@ it("preserves theme and language through client navigation and direct entry", ()
   );
 
   click(themeButtons[2]);
-  expect(document.documentElement.dataset.themeTransition).toBe("true");
   click(turkishButton);
   click(rendered.div.querySelector(".route-dock a[href='/about']"));
 
@@ -516,6 +523,66 @@ it("restores valid preferences and rejects unknown values", () => {
   expect(resolveInitialTheme("cyber")).toBe("cyber");
   expect(resolveInitialTheme("sepia")).toBe("dark");
   expect(resolveInitialTheme(null)).toBe("dark");
+
+  cleanup();
+});
+
+it("marks the selected theme and repaints a reduced-motion home on change", () => {
+  reduceMotion = true;
+  const context = {
+    arc: jest.fn(),
+    beginPath: jest.fn(),
+    clearRect: jest.fn(),
+    fill: jest.fn(),
+    lineTo: jest.fn(),
+    moveTo: jest.fn(),
+    restore: jest.fn(),
+    rotate: jest.fn(),
+    save: jest.fn(),
+    scale: jest.fn(),
+    setTransform: jest.fn(),
+    stroke: jest.fn(),
+    translate: jest.fn()
+  };
+  const getContext = jest
+    .spyOn(window.HTMLCanvasElement.prototype, "getContext")
+    .mockReturnValue(context);
+  const {div, cleanup} = renderAt("/");
+  const themeButtons = Array.from(
+    div.querySelectorAll(".site-controls .theme-switch button")
+  );
+  const drawCount = () => context.clearRect.mock.calls.length;
+  const initialDrawCount = drawCount();
+
+  expect(
+    themeButtons.filter(button => button.getAttribute("aria-pressed") === "true")
+  ).toEqual([themeButtons[0]]);
+
+  click(themeButtons[1]);
+
+  expect(
+    themeButtons.filter(button => button.getAttribute("aria-pressed") === "true")
+  ).toEqual([themeButtons[1]]);
+  expect(div.querySelector(".portfolio-site").dataset.theme).toBe("light");
+  expect(drawCount()).toBeGreaterThan(initialDrawCount);
+  expect(window.requestAnimationFrame).not.toHaveBeenCalled();
+
+  cleanup();
+  getContext.mockRestore();
+});
+
+it("localizes the About detail labels", () => {
+  window.localStorage.setItem(LANGUAGE_STORAGE_KEY, "tr");
+  const {div, cleanup} = renderAt("/about");
+
+  expect(
+    div.querySelector(".signature-mark").getAttribute("aria-label")
+  ).toBe("El yazısıyla Berkant imzası");
+  expect(
+    Array.from(div.querySelectorAll(".about-fabric dt")).map(
+      item => item.textContent
+    )
+  ).toEqual(["Konum", "Eğitim"]);
 
   cleanup();
 });

@@ -3,6 +3,8 @@ const SPLINE_RUNTIME_URL =
 const SPLINE_SCENE_URL =
   "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode";
 
+const MAX_SCENE_OFFSET = {x: 10, y: 7};
+
 let runtimePromise;
 
 const loadSplineRuntime = () => {
@@ -15,106 +17,123 @@ const loadSplineRuntime = () => {
   return runtimePromise;
 };
 
-export async function createTechnologyScene({
+const clampUnit = value => Math.min(Math.max(value, -1), 1);
+
+export const resolveTechnologyPointerTarget = ({clientX, clientY, rect}) => {
+  const values = [
+    Number(clientX),
+    Number(clientY),
+    Number(rect?.left),
+    Number(rect?.top),
+    Number(rect?.width),
+    Number(rect?.height)
+  ];
+
+  if (
+    values.some(value => !Number.isFinite(value)) ||
+    values[4] <= 0 ||
+    values[5] <= 0
+  ) {
+    return {x: 0, y: 0};
+  }
+
+  const [resolvedClientX, resolvedClientY, left, top, width, height] = values;
+  const normalizedX = clampUnit(((resolvedClientX - left) / width - 0.5) * 2);
+  const normalizedY = clampUnit(((resolvedClientY - top) / height - 0.5) * 2);
+
+  return {
+    x: normalizedX * MAX_SCENE_OFFSET.x,
+    y: normalizedY * MAX_SCENE_OFFSET.y
+  };
+};
+
+const setSceneOffset = (canvas, {x, y}) => {
+  canvas.style.setProperty("--technology-scene-x", `${x.toFixed(2)}px`);
+  canvas.style.setProperty("--technology-scene-y", `${y.toFixed(2)}px`);
+};
+
+export const createTechnologySceneMotion = ({
   canvas,
-  container,
   reducedMotion,
-  onReady
-}) {
+  pointerTarget = window,
+  getViewportRect = () => ({
+    left: 0,
+    top: 0,
+    width: Math.max(window.innerWidth, 1),
+    height: Math.max(window.innerHeight, 1)
+  })
+}) => {
+  const neutral = {x: 0, y: 0};
+  setSceneOffset(canvas, neutral);
+
+  if (reducedMotion) {
+    return () => undefined;
+  }
+
+  const onPointerMove = event => {
+    if (event.pointerType === "touch" || event.isPrimary === false) {
+      return;
+    }
+
+    setSceneOffset(
+      canvas,
+      resolveTechnologyPointerTarget({
+        clientX: event.clientX,
+        clientY: event.clientY,
+        rect: getViewportRect()
+      })
+    );
+  };
+
+  const returnToNeutral = () => setSceneOffset(canvas, neutral);
+  const onWindowMouseOut = event => {
+    if (!event.relatedTarget) {
+      returnToNeutral();
+    }
+  };
+
+  pointerTarget.addEventListener("pointermove", onPointerMove, {passive: true});
+  pointerTarget.addEventListener("blur", returnToNeutral);
+  pointerTarget.addEventListener("mouseout", onWindowMouseOut);
+
+  return () => {
+    pointerTarget.removeEventListener("pointermove", onPointerMove);
+    pointerTarget.removeEventListener("blur", returnToNeutral);
+    pointerTarget.removeEventListener("mouseout", onWindowMouseOut);
+    returnToNeutral();
+  };
+};
+
+export async function createTechnologyScene({canvas, reducedMotion, onReady}) {
   const runtime = await loadSplineRuntime();
   const Application = runtime?.Application;
-
   if (!Application) {
     throw new Error("Spline runtime could not be loaded.");
   }
 
   const app = new Application(canvas);
-  await app.load(SPLINE_SCENE_URL);
 
-  let frame = null;
-  let currentX = 0;
-  let currentY = 0;
-  let targetX = 0;
-  let targetY = 0;
+  try {
+    await app.load(SPLINE_SCENE_URL);
+  } catch (error) {
+    app.dispose?.();
+    throw error;
+  }
 
-  const writeScenePosition = () => {
-    currentX += (targetX - currentX) * 0.085;
-    currentY += (targetY - currentY) * 0.085;
+  const disposeMotion = createTechnologySceneMotion({
+    canvas,
+    reducedMotion
+  });
 
-    container.style.setProperty(
-      "--robot-follow-x",
-      `${(currentX * 16).toFixed(2)}px`
-    );
-    container.style.setProperty(
-      "--robot-follow-y",
-      `${(currentY * 10).toFixed(2)}px`
-    );
-    container.style.setProperty(
-      "--robot-follow-rotate",
-      `${(currentX * 0.7).toFixed(3)}deg`
-    );
-
-    if (
-      !reducedMotion &&
-      (Math.abs(targetX - currentX) > 0.0015 ||
-        Math.abs(targetY - currentY) > 0.0015)
-    ) {
-      frame = window.requestAnimationFrame(writeScenePosition);
-    } else {
-      frame = null;
-    }
-  };
-
-  const requestWrite = () => {
-    if (reducedMotion || frame !== null) return;
-    frame = window.requestAnimationFrame(writeScenePosition);
-  };
-
-  const onPointerMove = event => {
-    if (reducedMotion) return;
-
-    const x = event.clientX / Math.max(window.innerWidth, 1);
-    const y = event.clientY / Math.max(window.innerHeight, 1);
-
-    targetX = Math.max(-1, Math.min(1, (x - 0.5) * 2));
-    targetY = Math.max(-1, Math.min(1, (y - 0.5) * 2));
-    requestWrite();
-  };
-
-  const resetPointer = () => {
-    targetX = 0;
-    targetY = 0;
-    requestWrite();
-  };
-
-  const onWindowMouseOut = event => {
-    if (!event.relatedTarget) {
-      resetPointer();
-    }
-  };
-
-  if (!reducedMotion) {
-    window.addEventListener("pointermove", onPointerMove, {passive: true});
-    window.addEventListener("blur", resetPointer);
-    window.addEventListener("mouseout", onWindowMouseOut);
-  } else {
+  if (reducedMotion) {
     app.stop?.();
   }
 
-  onReady?.();
+  onReady?.({motionEnabled: !reducedMotion});
 
   return {
-    refresh() {},
     dispose() {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("blur", resetPointer);
-      window.removeEventListener("mouseout", onWindowMouseOut);
-      if (frame !== null) {
-        window.cancelAnimationFrame(frame);
-      }
-      container.style.removeProperty("--robot-follow-x");
-      container.style.removeProperty("--robot-follow-y");
-      container.style.removeProperty("--robot-follow-rotate");
+      disposeMotion();
       app.dispose?.();
     }
   };
