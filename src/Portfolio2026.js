@@ -590,6 +590,16 @@ const TechnologyStage = ({
 
   const selectTechnology = technologyId => {
     setActiveTechnologyId(technologyId);
+
+    if (window.matchMedia?.("(max-width: 780px)").matches) {
+      window.requestAnimationFrame(() => {
+        robotRef.current?.scrollIntoView?.({
+          behavior: reducedMotion ? "auto" : "smooth",
+          block: "nearest",
+          inline: "start"
+        });
+      });
+    }
   };
 
   const showGroups = event => {
@@ -610,6 +620,9 @@ const TechnologyStage = ({
           {String(Object.keys(technologies).length).padStart(2, "0")}{" "}
           {copy.toolsLabel}
         </span>
+        <small className="technology-explorer__swipe-hint">
+          {copy.mobileSwipeHint}
+        </small>
       </header>
 
       <div

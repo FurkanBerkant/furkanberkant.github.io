@@ -521,6 +521,9 @@ it("uses one palm hologram for group and technology selection", () => {
   expect(div.querySelector(".technology-guide")).not.toBeNull();
   expect(div.querySelector(".technology-stage__console")).not.toBeNull();
   expect(div.querySelector(".technology-stage__robot")).not.toBeNull();
+  expect(
+    div.querySelector(".technology-explorer__swipe-hint").textContent
+  ).toBe("Swipe → stack · robot · proof");
   expect(div.querySelector(".technology-guide__body h2").textContent).toBe(
     "Trace the stack I shipped"
   );

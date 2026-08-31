@@ -80,6 +80,7 @@ export const uiCopy = {
       explorerLabel: "Interactive technology explorer",
       explorerTitle: "My engineering stack",
       explorerHint: "Choose a layer, then inspect the work behind each tool",
+      mobileSwipeHint: "Swipe → stack · robot · proof",
       chooseGroup: "Technology groups",
       groupsLabel: "groups",
       toolsLabel: "technologies",
@@ -276,6 +277,7 @@ export const uiCopy = {
       explorerTitle: "Mühendislik stack'im",
       explorerHint:
         "Bir katman seç, ardından her aracın arkasındaki işi incele",
+      mobileSwipeHint: "Kaydır → stack · robot · kanıt",
       chooseGroup: "Teknoloji grupları",
       groupsLabel: "grup",
       toolsLabel: "teknoloji",
